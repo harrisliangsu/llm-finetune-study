@@ -6,27 +6,36 @@
   <title>LLM Study Visualizer</title>
   <style>
     :root {
-      --bg:#080a12; --panel:#111620; --panel-2:#171d2a; --panel-3:#0d111a;
-      --ink:#e8edf8; --muted:#8992aa; --faint:#586074; --line:rgba(255,255,255,.08);
+      --bg:#080a12; --panel:#111620; --panel-2:#171d2a; --panel-3:#0d111a; --panel-4:#10131c;
+      --ink:#e8edf8; --muted:#8992aa; --faint:#586074; --line:rgba(255,255,255,.08); --line-strong:rgba(148,163,184,.18);
       --blue:#3b82f6; --cyan:#06b6d4; --green:#22c55e; --gold:#eab308; --orange:#f97316; --purple:#a855f7; --red:#ef4444;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
     body {
       min-height:100vh;
       background:
-        linear-gradient(180deg, rgba(8,10,18,.96), rgba(8,10,18,1)),
-        radial-gradient(circle at 20% 0%, rgba(59,130,246,.14), transparent 34%),
-        radial-gradient(circle at 75% 15%, rgba(34,197,94,.08), transparent 30%);
+        linear-gradient(180deg, rgba(8,10,18,.95), rgba(8,10,18,1)),
+        repeating-linear-gradient(90deg, rgba(148,163,184,.035) 0 1px, transparent 1px 52px),
+        repeating-linear-gradient(180deg, rgba(148,163,184,.028) 0 1px, transparent 1px 52px);
       color:var(--ink);
       font-family:-apple-system,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;
       line-height:1.55;
     }
+    body::before {
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
+      background:
+        linear-gradient(115deg, transparent 0 42%, rgba(6,182,212,.08) 42% 43%, transparent 43% 100%),
+        linear-gradient(160deg, rgba(34,197,94,.05), transparent 34%),
+        linear-gradient(22deg, rgba(59,130,246,.08), transparent 36%);
+      mask-image:linear-gradient(180deg, black, transparent 76%);
+    }
     code, pre, .mono { font-family:"SF Mono",Menlo,Consolas,monospace; }
     .shell { max-width:1440px; margin:0 auto; padding:22px; }
     .topbar {
-      height:64px; display:flex; align-items:center; justify-content:space-between; gap:18px;
-      border:1px solid var(--line); border-radius:12px; background:rgba(17,22,32,.84);
-      backdrop-filter:blur(18px); padding:0 18px; position:sticky; top:12px; z-index:10;
+      min-height:64px; display:flex; align-items:center; justify-content:space-between; gap:18px;
+      border:1px solid var(--line-strong); border-radius:12px; background:rgba(17,22,32,.86);
+      backdrop-filter:blur(18px); padding:12px 18px; position:sticky; top:12px; z-index:10;
+      box-shadow:0 20px 60px rgba(0,0,0,.24);
     }
     .brand { font-size:15px; font-weight:900; letter-spacing:0; white-space:nowrap; }
     .brand span { color:var(--cyan); }
@@ -41,10 +50,11 @@
     .button:hover { border-color:rgba(6,182,212,.45); color:white; }
     .button.active { border-color:rgba(34,197,94,.42); background:rgba(34,197,94,.1); color:#bbf7d0; }
     .layout { display:grid; grid-template-columns:minmax(0,280px) minmax(0,1fr) minmax(0,360px); gap:18px; margin-top:18px; align-items:start; }
-    .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; overflow:hidden; }
+    .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; overflow:hidden; box-shadow:0 18px 56px rgba(0,0,0,.18); }
     .panel-title { font-size:13px; font-weight:900; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:13px; }
     .lesson-title { font-size:27px; line-height:1.15; font-weight:900; margin-bottom:8px; overflow-wrap:anywhere; }
     .subtle { color:var(--muted); font-size:13px; }
+    .section-spacer { height:18px; }
     .stat-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; margin-top:16px; min-width:0; }
     .stat { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:12px; min-width:0; overflow:hidden; }
     .stat-value { font-size:22px; font-weight:900; line-height:1; }
@@ -73,6 +83,24 @@
     .course-meter-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-width:0; }
     .course-meter-name { flex:1 1 auto; min-width:0; max-width:100%; font-size:11px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .course-meter-state { flex:0 0 auto; color:var(--muted); font-size:10px; font-weight:900; white-space:nowrap; }
+    .overview-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:12px; margin-bottom:18px; }
+    .overview-card {
+      min-height:122px; border:1px solid var(--line); border-radius:11px; padding:13px; min-width:0; overflow:hidden;
+      background:
+        linear-gradient(180deg,rgba(23,29,42,.92),rgba(13,17,26,.94)),
+        linear-gradient(90deg,rgba(6,182,212,.12),transparent);
+      position:relative;
+    }
+    .overview-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent,var(--cyan)); opacity:.9; }
+    .overview-kicker { color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+    .overview-value { font-size:18px; line-height:1.2; font-weight:950; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .overview-meta { margin-top:8px; color:var(--muted); font-size:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .overview-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; }
+    .signal { display:inline-flex; align-items:center; gap:6px; min-height:23px; border:1px solid var(--line); border-radius:999px; padding:3px 8px; color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
+    .signal::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent,var(--cyan)); box-shadow:0 0 12px var(--accent,var(--cyan)); }
+    .micro-bars { display:flex; align-items:flex-end; gap:3px; height:22px; min-width:54px; }
+    .micro-bars span { width:5px; height:var(--h,40%); min-height:4px; border-radius:999px; background:linear-gradient(180deg,var(--accent,var(--cyan)),rgba(255,255,255,.12)); opacity:.8; animation:barBreathe 2.2s ease-in-out infinite; animation-delay:var(--delay,0s); }
+    @keyframes barBreathe { 50% { transform:scaleY(.62); opacity:.45; } }
     @keyframes barPulse { 50% { opacity:.35; } }
     .flow-wrap { overflow-x:auto; padding-bottom:6px; }
     .flow { display:flex; gap:10px; min-width:max-content; }
@@ -142,6 +170,16 @@
         linear-gradient(135deg,rgba(6,182,212,.08),transparent 44%),
         linear-gradient(180deg,rgba(13,17,26,.94),rgba(8,10,18,.92));
     }
+    .stage-head {
+      display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start;
+      padding:15px; border-bottom:1px solid var(--line); background:rgba(8,10,18,.34);
+    }
+    .stage-eyebrow { color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.14em; text-transform:uppercase; margin-bottom:5px; }
+    .stage-title { font-size:16px; line-height:1.25; font-weight:950; overflow-wrap:anywhere; }
+    .stage-chips { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; min-width:0; }
+    .stage-chip { border:1px solid var(--line); border-radius:999px; padding:4px 8px; color:var(--muted); background:rgba(23,29,42,.64); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
+    .stage-chip.hot { color:#bae6fd; border-color:rgba(6,182,212,.38); background:rgba(6,182,212,.08); }
+    .stage-progress-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px 15px 0; }
     .stage-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:0; min-height:310px; }
     .stage-cell { padding:15px; border-right:1px solid var(--line); min-width:0; position:relative; overflow:hidden; }
     .stage-cell:last-child { border-right:0; }
@@ -216,9 +254,23 @@
     .metric-row { display:flex; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); padding-bottom:7px; font-size:13px; }
     .metric-row:last-child { border-bottom:0; padding-bottom:0; }
     .metric-row code { color:var(--green); }
+    .side-stack { display:grid; gap:12px; }
+    .side-card { border:1px solid var(--line); border-radius:11px; background:var(--panel-3); padding:12px; min-width:0; overflow:hidden; }
+    .side-card.emphasis { border-color:rgba(6,182,212,.22); background:linear-gradient(180deg,rgba(6,182,212,.06),rgba(13,17,26,.94)); }
+    .kv-list { display:grid; gap:7px; }
+    .kv-row { display:grid; grid-template-columns:minmax(0,.75fr) minmax(0,1fr); gap:10px; align-items:start; padding-bottom:7px; border-bottom:1px solid var(--line); }
+    .kv-row:last-child { border-bottom:0; padding-bottom:0; }
+    .kv-key { color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .kv-value { color:var(--ink); font-size:12px; overflow-wrap:anywhere; }
+    .artifact-list { display:grid; gap:8px; }
+    .artifact-item { border:1px solid var(--line); border-radius:8px; background:rgba(23,29,42,.52); padding:9px; min-width:0; }
+    .artifact-name { color:var(--ink); font-size:12px; font-weight:900; overflow-wrap:anywhere; }
+    .artifact-path { margin-top:4px; color:var(--cyan); font-size:11px; overflow-wrap:anywhere; }
+    .compact-spark { height:60px; margin-top:8px; }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.sim-grid { grid-template-columns:1fr; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid { grid-template-columns:1fr; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
+    @media (max-width:680px) { .overview-grid { grid-template-columns:1fr; } .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
   </style>
 </head>
 <body>
@@ -264,12 +316,14 @@
       </aside>
 
       <section class="panel">
+        <div class="panel-title">Run Overview</div>
+        <div class="overview-grid" id="runOverview"></div>
         <div class="panel-title">Execution Flow</div>
         <div class="flow-wrap"><div class="flow" id="flow"></div></div>
-        <div style="height:18px"></div>
+        <div class="section-spacer"></div>
         <div class="panel-title">Animated Stage</div>
         <div id="visualStage"></div>
-        <div style="height:18px"></div>
+        <div class="section-spacer"></div>
         <div class="panel-title">Selected Event</div>
         <div id="detail"></div>
       </section>
@@ -510,6 +564,127 @@
       return "not run";
     }
 
+    function renderRunOverview(trace, selected, events) {
+      const coursePercent = courseProgressPercent(trace);
+      const kindCounts = eventKindCounts(events);
+      const metric = latestMetricAcross(events, selected);
+      const series = metricSeries(events);
+      const modelSnapshot = findModelSnapshot(events, selected);
+      const ratio = selected ? trainableRatio(selected) : null;
+      const artifacts = selected ? collectArtifacts(selected) : [];
+      const currentIndex = getCurrentEventIndex(trace, events);
+      const stepLabel = selected ? `STEP ${selected.id} · ${selected.name}` : "No active step";
+      $("runOverview").innerHTML = [
+        overviewCard({
+          accent: "var(--cyan)",
+          kicker: "current step",
+          value: stepLabel,
+          meta: selected ? selected.summary || selected.kind || "trace event" : "等待课程事件写入 trace",
+          signal: trace.status === "done" ? "complete" : trace.status || "running",
+          bars: events.map((event, index) => index <= currentIndex ? 70 : 16),
+        }),
+        overviewCard({
+          accent: "var(--green)",
+          kicker: "pipeline",
+          value: `${formatPercent(coursePercent)} course`,
+          meta: kindCounts.length ? kindCounts.map(([kind, count]) => `${kind}:${count}`).join(" · ") : "暂无事件分布",
+          signal: `${events.length}/${expectedEventCount(trace)} events`,
+          bars: kindCounts.map(([, count]) => 18 + count * 9),
+        }),
+        overviewCard({
+          accent: "var(--gold)",
+          kicker: "metric signal",
+          value: metric ? `${metric.key} ${formatNumber(metric.value)}` : "no metric",
+          meta: metricTrendText(series),
+          signal: series.length ? `${series.length} points` : "waiting",
+          bars: normalizeBars(series),
+        }),
+        overviewCard({
+          accent: "var(--orange)",
+          kicker: "model / artifact",
+          value: ratio == null ? modelSnapshot.label : `${formatNumber(ratio)}% trainable`,
+          meta: artifacts.length ? artifacts.slice(0, 2).map((item) => item.path).join(" · ") : modelSnapshot.meta,
+          signal: artifacts.length ? `${artifacts.length} artifacts` : modelSnapshot.signal,
+          bars: [28, 52, hasAdapter(selected || {}) ? 90 : 36, ratio == null ? 24 : Math.max(6, ratio)],
+        }),
+      ].join("");
+    }
+
+    function overviewCard({ accent, kicker, value, meta, signal, bars }) {
+      return `
+        <article class="overview-card" style="--accent:${escapeAttr(accent)}">
+          <div class="overview-kicker">${escapeHtml(kicker)}</div>
+          <div class="overview-value" title="${escapeAttr(value)}">${escapeHtml(value)}</div>
+          <div class="overview-meta">${escapeHtml(meta || "-")}</div>
+          <div class="overview-foot">
+            <span class="signal">${escapeHtml(signal || "-")}</span>
+            <div class="micro-bars">${renderMicroBars(bars)}</div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderMicroBars(values) {
+      const source = values && values.length ? values.slice(-8) : [20, 44, 26, 58, 38, 72];
+      return source.map((value, index) => {
+        const height = clamp(value, 8, 100);
+        return `<span style="--h:${height.toFixed(1)}%;--delay:${(index * 0.07).toFixed(2)}s"></span>`;
+      }).join("");
+    }
+
+    function normalizeBars(values) {
+      if (!values || !values.length) return [12, 12, 12, 12];
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const spread = max - min || 1;
+      return values.slice(-8).map((value) => 18 + ((value - min) / spread) * 76);
+    }
+
+    function eventKindCounts(events) {
+      const counts = new Map();
+      events.forEach((event) => {
+        const key = String(event.kind || "event").toLowerCase();
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+      return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+    }
+
+    function latestMetricAcross(events, selected) {
+      const selectedMetric = selected ? latestMetric(selected) : null;
+      if (selectedMetric) return selectedMetric;
+      const limit = selected ? events.findIndex((event) => event.id === selected.id) : events.length - 1;
+      for (let index = Math.max(0, limit); index >= 0; index -= 1) {
+        const metric = latestMetric(events[index]);
+        if (metric) return metric;
+      }
+      return null;
+    }
+
+    function metricTrendText(values) {
+      if (!values.length) return "等待 Trainer log/eval 写入 loss、grad_norm 或 eval_loss。";
+      if (values.length === 1) return "已有 1 个 metric 点，继续训练后会形成曲线。";
+      const first = values[0];
+      const last = values.at(-1);
+      const direction = last < first ? "下降" : last > first ? "上升" : "持平";
+      return `首值 ${formatNumber(first)}，末值 ${formatNumber(last)}，趋势 ${direction}`;
+    }
+
+    function findModelSnapshot(events, selected) {
+      const limit = selected ? events.findIndex((event) => event.id === selected.id) : events.length - 1;
+      for (let index = Math.max(0, limit); index >= 0; index -= 1) {
+        const model = events[index].model || {};
+        if (Object.keys(model).length) {
+          const adapter = model.adapter || (hasAdapter(events[index]) ? "adapter" : "none");
+          return {
+            label: model.base || model.mode || adapter || "model state",
+            meta: `base ${model.base || model.mode || "not shown"} · adapter ${adapter}`,
+            signal: Array.isArray(model.updated) ? `${model.updated.length} updated` : model.saved ? "saved" : "model",
+          };
+        }
+      }
+      return { label: "model state", meta: "尚未出现模型状态事件", signal: "waiting" };
+    }
+
     function renderCourseDashboard(trace, selected, events) {
       const coursePercent = courseProgressPercent(trace);
       const stepPercent = selected ? stepProgressPercent(selected, trace, events) : 0;
@@ -629,6 +804,7 @@
       $("pulse").style.background = trace.status === "done" ? "var(--cyan)" : "var(--green)";
       updateControls();
       renderCourseControls();
+      renderRunOverview(trace, selected, events);
       renderCourseDashboard(trace, selected, events);
       renderCourseProgressList(trace);
 
@@ -649,15 +825,27 @@
           render(lastTrace, { forceScroll: true });
         });
       });
-      if (options.forceScroll || (followCurrent && previousActiveId !== activeEventId)) {
+      if (options.forceScroll || followCurrent || previousActiveId !== activeEventId) {
         requestAnimationFrame(() => {
-          document.querySelector(".node.active")?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+          scrollActiveNodeIntoView();
+          setTimeout(scrollActiveNodeIntoView, 80);
         });
       }
 
       renderStage(selected, trace, events);
       renderDetail(selected);
       renderSide(selected, trace);
+    }
+
+    function scrollActiveNodeIntoView() {
+      const scroller = document.querySelector(".flow-wrap");
+      const active = document.querySelector(".node.active");
+      if (!scroller || !active) return;
+      const scrollerRect = scroller.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const delta = activeRect.left - scrollerRect.left - ((scroller.clientWidth - activeRect.width) / 2);
+      const target = scroller.scrollLeft + delta;
+      scroller.scrollLeft = Math.max(0, target);
     }
 
     function renderStage(event, trace, events) {
@@ -678,15 +866,34 @@
       const adapterVisible = hasAdapter(event);
       const coursePercent = courseProgressPercent(trace);
       const stepPercent = stepProgressPercent(event, trace, events);
+      const metricForHeader = latestMetricAcross(events, event);
       $("visualStage").innerHTML = `
         <div class="stage">
-          <div style="padding:15px 15px 0;">
+          <div class="stage-head">
+            <div>
+              <div class="stage-eyebrow">course execution graph</div>
+              <div class="stage-title">${escapeHtml(trace.lesson_id || "-")} · STEP ${escapeHtml(event.id)} · ${escapeHtml(event.name)}</div>
+            </div>
+            <div class="stage-chips">
+              <span class="stage-chip hot">${escapeHtml(event.kind || "event")}</span>
+              <span class="stage-chip">${escapeHtml(processLabel(event))}</span>
+              <span class="stage-chip">${escapeHtml(metricForHeader ? `${metricForHeader.key} ${formatNumber(metricForHeader.value)}` : "no metric")}</span>
+            </div>
+          </div>
+          <div class="stage-progress-grid">
             <div class="progress-block">
               <div class="progress-head">
-                <span class="progress-name">Course ${escapeHtml(trace.lesson_id || "-")} · Step ${escapeHtml(event.id)}</span>
-                <span class="progress-percent">${formatPercent(coursePercent)} / ${formatPercent(stepPercent)}</span>
+                <span class="progress-name">Course progress</span>
+                <span class="progress-percent">${formatPercent(coursePercent)}</span>
               </div>
               <div class="progress-track"><div class="progress-fill course" style="--progress:${escapeAttr(formatProgress(coursePercent))}"></div></div>
+            </div>
+            <div class="progress-block">
+              <div class="progress-head">
+                <span class="progress-name">Step status</span>
+                <span class="progress-percent">${formatPercent(stepPercent)}</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="--progress:${escapeAttr(formatProgress(stepPercent))}"></div></div>
             </div>
           </div>
           <div class="stage-grid">
@@ -1122,26 +1329,52 @@
       }
       const model = event.model || {};
       const metrics = event.metrics || {};
+      const events = trace.events || [];
+      const metric = latestMetricAcross(events, event);
+      const artifacts = collectArtifacts(event);
+      const params = collectParameters(event);
+      const kindCounts = eventKindCounts(events);
       $("sideDetail").innerHTML = `
-        <div class="model-grid">
-          <div class="model-chip"><strong>Base</strong><span>${escapeHtml(model.base || model.mode || "not shown")}</span></div>
-          <div class="model-chip"><strong>Adapter</strong><span>${escapeHtml(model.adapter || "not shown")}</span></div>
-          <div class="model-chip"><strong>Updated</strong><span>${escapeHtml(Array.isArray(model.updated) ? model.updated.join(", ") : model.updated || "not shown")}</span></div>
-        </div>
-        <div style="height:16px"></div>
-        <div class="box">
-          <div class="box-title">Model State</div>
-          <pre>${escapeHtml(json(model))}</pre>
-        </div>
-        <div style="height:12px"></div>
-        <div class="box">
-          <div class="box-title">Metrics</div>
-          ${Object.keys(metrics).length ? `<div class="metric-list">${Object.entries(metrics).map(([key, value]) => `<div class="metric-row"><span>${escapeHtml(key)}</span><code>${escapeHtml(String(value))}</code></div>`).join("")}</div>` : `<div class="subtle">当前事件没有 metric。</div>`}
-        </div>
-        <div style="height:12px"></div>
-        <div class="box">
-          <div class="box-title">Run Timeline</div>
-          <pre>${escapeHtml(json({ started_at: trace.started_at, updated_at: trace.updated_at, current_event_id: trace.current_event_id }))}</pre>
+        <div class="side-stack">
+          <div class="side-card emphasis">
+            <div class="box-title">Signal Board</div>
+            <div class="metric-row"><span>active metric</span><code>${escapeHtml(metric ? `${metric.key}: ${formatNumber(metric.value)}` : "none")}</code></div>
+            <div class="compact-spark">${renderSparkline(metricSeries(events))}</div>
+            <p class="subtle">${escapeHtml(metricTrendText(metricSeries(events)))}</p>
+          </div>
+          <div class="model-grid">
+            <div class="model-chip"><strong>Base</strong><span>${escapeHtml(model.base || model.mode || "not shown")}</span></div>
+            <div class="model-chip"><strong>Adapter</strong><span>${escapeHtml(model.adapter || "not shown")}</span></div>
+            <div class="model-chip"><strong>Updated</strong><span>${escapeHtml(Array.isArray(model.updated) ? model.updated.join(", ") : model.updated || "not shown")}</span></div>
+          </div>
+          <div class="side-card">
+            <div class="box-title">Run Context</div>
+            <div class="kv-list">
+              <div class="kv-row"><div class="kv-key">lesson</div><div class="kv-value">${escapeHtml(trace.lesson_id || "-")}</div></div>
+              <div class="kv-row"><div class="kv-key">step</div><div class="kv-value">STEP ${escapeHtml(event.id)} · ${escapeHtml(event.kind || "event")}</div></div>
+              <div class="kv-row"><div class="kv-key">events</div><div class="kv-value">${escapeHtml(String(events.length))} total · ${escapeHtml(kindCounts.map(([kind, count]) => `${kind}:${count}`).join(" · ") || "-")}</div></div>
+              <div class="kv-row"><div class="kv-key">updated</div><div class="kv-value">${escapeHtml(trace.updated_at || "-")}</div></div>
+            </div>
+          </div>
+          <div class="side-card">
+            <div class="box-title">Parameters</div>
+            ${params.length ? `<div class="kv-list">${params.map(([key, value]) => `<div class="kv-row"><div class="kv-key">${escapeHtml(key)}</div><div class="kv-value">${escapeHtml(previewValue(value))}</div></div>`).join("")}</div>` : `<div class="subtle">当前事件没有可扫视的参数。</div>`}
+          </div>
+          <div class="side-card">
+            <div class="box-title">Artifacts</div>
+            ${artifacts.length ? `<div class="artifact-list">${artifacts.map((item) => `<div class="artifact-item"><div class="artifact-name">${escapeHtml(item.name)} · ${escapeHtml(item.type)}</div><div class="artifact-path">${escapeHtml(item.path)}</div></div>`).join("")}</div>` : `<div class="subtle">当前事件没有可识别的仓库 artifact。</div>`}
+          </div>
+          <details class="reveal">
+            <summary>Raw model / metrics JSON</summary>
+            <div class="side-card" style="margin-top:8px;">
+              <div class="box-title">Model State</div>
+              <pre>${escapeHtml(json(model))}</pre>
+            </div>
+            <div class="side-card" style="margin-top:8px;">
+              <div class="box-title">Metrics</div>
+              ${Object.keys(metrics).length ? `<div class="metric-list">${Object.entries(metrics).map(([key, value]) => `<div class="metric-row"><span>${escapeHtml(key)}</span><code>${escapeHtml(String(value))}</code></div>`).join("")}</div>` : `<div class="subtle">当前事件没有 metric。</div>`}
+            </div>
+          </details>
         </div>
       `;
     }
@@ -1206,6 +1439,49 @@
         repoPath,
         isBinary: /\.(bin|pt|pkl|safetensors|model|onnx)$/i.test(repoPath),
       };
+    }
+
+    function collectArtifacts(event) {
+      const items = [];
+      const seen = new Set();
+      const visit = (key, value) => {
+        const pathInfo = repoPathInfo(value);
+        if (pathInfo && !seen.has(pathInfo.repoPath)) {
+          seen.add(pathInfo.repoPath);
+          items.push({ name: key, path: pathInfo.repoPath, type: pathInfo.isBinary ? "binary" : "repo" });
+          return;
+        }
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => visit(`${key}[${index}]`, item));
+        } else if (value && typeof value === "object") {
+          Object.entries(value).forEach(([childKey, childValue]) => visit(`${key}.${childKey}`, childValue));
+        }
+      };
+      Object.entries(event.outputs || {}).forEach(([key, value]) => visit(key, value));
+      Object.entries(event.inputs || {}).forEach(([key, value]) => visit(key, value));
+      const saved = event.model && event.model.saved;
+      if (Array.isArray(saved)) {
+        saved.forEach((name) => {
+          const label = String(name);
+          if (!seen.has(label)) {
+            seen.add(label);
+            items.push({ name: "saved", path: label, type: "model file" });
+          }
+        });
+      }
+      return items.slice(0, 8);
+    }
+
+    function collectParameters(event) {
+      const rows = [];
+      const append = (key, value) => {
+        if (value === undefined || value === null) return;
+        if (typeof value === "object") return;
+        rows.push([key, value]);
+      };
+      Object.entries(event.inputs || {}).forEach(([key, value]) => append(key, value));
+      Object.entries(event.model || {}).forEach(([key, value]) => append(`model.${key}`, value));
+      return rows.slice(0, 8);
     }
 
     function toRepoUrl(repoPath) {
