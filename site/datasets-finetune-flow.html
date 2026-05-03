@@ -306,39 +306,95 @@
       line-height: 1.65;
     }
 
-    .io-grid {
+    .trace-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .trace-card {
       display: grid;
-      grid-template-columns: 88px 1fr 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: 220px 1fr;
+      gap: 18px;
       align-items: stretch;
     }
 
-    .io-cell {
+    .trace-sidebar {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 18px;
       min-width: 0;
     }
 
-    .io-label {
+    .trace-step {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 12px;
     }
 
-    .io-title {
-      font-size: 14px;
+    .trace-api {
+      font-size: 18px;
       font-weight: 800;
-      margin-bottom: 6px;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      word-break: normal;
+      overflow-wrap: anywhere;
     }
 
-    .io-text {
+    .trace-type {
       color: var(--text-secondary);
       font-size: 13px;
-      line-height: 1.65;
+      line-height: 1.6;
+    }
+
+    .trace-content {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .trace-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .trace-block-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .trace-block-text {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .sample-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .sample-wide {
+      margin-bottom: 22px;
+      border-left: 3px solid var(--accent-gold);
+    }
+
+    .label-example {
+      display: grid;
+      grid-template-columns: 0.9fr 0.9fr 1.2fr;
+      gap: 12px;
+      margin-top: 14px;
     }
 
     .kicker-row {
@@ -564,7 +620,10 @@
 
     @media (max-width: 900px) {
       .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-      .io-grid { grid-template-columns: 1fr; }
+      .trace-card { grid-template-columns: 1fr; }
+      .trace-content { grid-template-columns: 1fr; }
+      .sample-grid { grid-template-columns: 1fr; }
+      .label-example { grid-template-columns: 1fr; }
       .nav-links { display: none; }
       .hero { padding-top: 112px; }
       .hero h1 { font-size: 38px; }
@@ -851,157 +910,206 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
         </p>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <div class="card card-rail-blue">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">Step 0</div>
-              <div class="io-title">缓存目录</div>
-              <div class="io-text mono">HF_HOME<br />HF_DATASETS_CACHE</div>
+      <div class="sample-grid" style="margin-bottom: 22px;">
+        <div class="card" style="border-left: 3px solid var(--accent-cyan);">
+          <div class="card-title">实际输入样本：JSONL 一行</div>
+          <p class="card-body" style="margin: 8px 0 14px;">
+            这是 `examples/sample_sft.jsonl` 里的真实样本。`datasets` 读到的是三列：指令、可选输入、标准回答。
+          </p>
+          <div class="code-block mono">{
+  <span class="string">"instruction"</span>: <span class="string">"解释什么是梯度累积"</span>,
+  <span class="string">"input"</span>: <span class="string">""</span>,
+  <span class="string">"output"</span>: <span class="string">"梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。"</span>
+}</div>
+        </div>
+
+        <div class="card" style="border-left: 3px solid var(--accent-cyan);">
+          <div class="card-title">经过 prompt 拼接后的训练文本</div>
+          <p class="card-body" style="margin: 8px 0 14px;">
+            SFT 不直接训练三列字段，而是先拼成模型能读的文本模板，再决定哪些 token 参与 loss。
+          </p>
+          <div class="code-block mono">### Instruction:
+解释什么是梯度累积
+
+### Response:
+梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。&lt;eos&gt;</div>
+        </div>
+      </div>
+
+      <div class="card sample-wide">
+        <div class="card-title">实际输出样本：SFT labels 检查</div>
+        <p class="card-body" style="margin: 8px 0 0;">
+          这是 `lesson01_datasets_pipeline.py` 真实执行后的检查结果。关键判断是：prompt token 全部变成 `-100`，不会参与 loss；answer token 保留原 token id，才会参与训练。
+        </p>
+        <div class="label-example">
+          <div class="surface">
+            <div class="surface-title">prompt 区域</div>
+            <div class="surface-body mono">42 tokens<br />labels = -100</div>
+          </div>
+          <div class="surface">
+            <div class="surface-title">answer 区域</div>
+            <div class="surface-body mono">49 tokens<br />labels = token ids</div>
+          </div>
+          <div class="surface">
+            <div class="surface-title">decode(labels != -100)</div>
+            <div class="surface-body">梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。&lt;eos&gt;</div>
+          </div>
+        </div>
+        <div class="code-block mono" style="margin-top: 14px;">labels 概念视图:
+[-100, -100, ... 42 个 prompt token ..., 23, 45, 88, ... 49 个 answer token ...]</div>
+      </div>
+
+      <div class="trace-list">
+        <div class="card card-rail-blue trace-card">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-blue);">Step 0</div>
+            <div class="trace-api mono">缓存目录</div>
+            <div class="trace-type mono">HF_HOME<br />HF_DATASETS_CACHE</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-blue);">作用</div>
+              <div class="trace-block-text">把 `datasets` 解析后的 Arrow 缓存写到仓库内 `.cache/`，避免写系统用户目录时因为权限失败。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">作用</div>
-              <div class="io-text">把 datasets 下载、解析、Arrow 缓存写到仓库内 `.cache/`，避免写系统用户目录失败。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-blue);">输入</div>
+              <div class="trace-block-text mono">项目根目录<br />/Users/liangsu/dev/repo/llm-finetune-study</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">输入</div>
-              <div class="io-text">项目根目录路径。</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">输出</div>
-              <div class="io-text mono">.cache/huggingface/datasets</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-blue);">输出</div>
+              <div class="trace-block-text mono">.cache/huggingface/datasets</div>
             </div>
           </div>
         </div>
 
-        <div class="card card-rail-green">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">Step 1</div>
-              <div class="io-title">load_dataset</div>
-              <div class="io-text mono">json -> Dataset</div>
+        <div class="card card-rail-green trace-card">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-green);">Step 1</div>
+            <div class="trace-api mono">load_dataset</div>
+            <div class="trace-type mono">json -> Dataset</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-green);">作用</div>
+              <div class="trace-block-text">读取本地 JSONL，把普通文件变成 Hugging Face 的 `Dataset` 表对象。之后才能用 `select/filter/map` 等数据算子。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">作用</div>
-              <div class="io-text">读取本地 JSONL，把普通文件变成 Hugging Face 的 `Dataset` 表对象。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-green);">输入</div>
+              <div class="trace-block-text mono">examples/sample_sft.jsonl<br />columns: instruction, input, output</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">输入</div>
-              <div class="io-text mono">examples/sample_sft.jsonl<br />instruction/input/output</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">输出</div>
-              <div class="io-text mono">Dataset<br />features: 3 columns<br />num_rows: 5</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-green);">输出</div>
+              <div class="trace-block-text mono">Dataset<br />features: 3 columns<br />num_rows: 5</div>
             </div>
           </div>
         </div>
 
-        <div class="card card-rail-green">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">Step 2</div>
-              <div class="io-title">train_test_split</div>
-              <div class="io-text mono">Dataset -> DatasetDict</div>
+        <div class="card card-rail-green trace-card">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-green);">Step 2</div>
+            <div class="trace-api mono">train_test_split</div>
+            <div class="trace-type mono">Dataset -> DatasetDict</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-green);">作用</div>
+              <div class="trace-block-text">把单表切成训练集和验证集。训练集用于更新参数，验证集用于观察泛化，避免只看训练集 loss。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">作用</div>
-              <div class="io-text">把单表切成训练集和验证集。训练集用于更新参数，验证集用于观察泛化。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-green);">输入</div>
+              <div class="trace-block-text mono">raw Dataset<br />test_size=0.2<br />seed=42</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">输入</div>
-              <div class="io-text mono">raw Dataset<br />test_size=0.2<br />seed=42</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-green);">输出</div>
-              <div class="io-text mono">DatasetDict<br />train: 4 rows<br />validation: 1 row</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-green);">输出</div>
+              <div class="trace-block-text mono">DatasetDict<br />train: 4 rows<br />validation: 1 row</div>
             </div>
           </div>
         </div>
 
-        <div class="card card-rail-orange">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-orange);">Step 3</div>
-              <div class="io-title">filter</div>
-              <div class="io-text mono">remove bad rows</div>
+        <div class="card card-rail-orange trace-card">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-orange);">Step 3</div>
+            <div class="trace-api mono">filter</div>
+            <div class="trace-type mono">remove bad rows</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-orange);">作用</div>
+              <div class="trace-block-text">删除不合格样本。本课只过滤空回答；真实项目还会过滤过长、乱码、重复、低质量回答。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-orange);">作用</div>
-              <div class="io-text">删除不合格样本。本课只过滤空回答；真实项目还会过滤过长、乱码、重复、低质量回答。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-orange);">输入</div>
+              <div class="trace-block-text mono">DatasetDict<br />lambda item: bool(item["output"])</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-orange);">输入</div>
-              <div class="io-text mono">DatasetDict<br />lambda item: output not empty</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-orange);">输出</div>
-              <div class="io-text">仍然是 `DatasetDict`。本例没有空回答，所以 train/validation 数量不变。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-orange);">输出</div>
+              <div class="trace-block-text">仍然是 `DatasetDict`。本例没有空回答，所以 train/validation 数量不变。</div>
             </div>
           </div>
         </div>
 
-        <div class="card card-rail-purple">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-purple);">Step 4</div>
-              <div class="io-title">map</div>
-              <div class="io-text mono">raw text -> tensors</div>
+        <div class="card card-rail-purple trace-card">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-purple);">Step 4</div>
+            <div class="trace-api mono">map</div>
+            <div class="trace-type mono">raw text -> training columns</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-purple);">作用</div>
+              <div class="trace-block-text">批量执行 prompt 拼接、tokenization、padding、truncation 和 SFT labels 构造，是微调数据处理的核心步骤。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-purple);">作用</div>
-              <div class="io-text">批量执行 tokenization 和 SFT labels 构造，是微调数据处理的核心步骤。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-purple);">输入</div>
+              <div class="trace-block-text mono">instruction/input/output<br />batched=True<br />max_length=192</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-purple);">输入</div>
-              <div class="io-text mono">instruction/input/output<br />batched=True<br />max_length=192</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-purple);">输出</div>
-              <div class="io-text mono">input_ids<br />attention_mask<br />labels<br />prompt_length<br />answer_length</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-purple);">输出</div>
+              <div class="trace-block-text mono">input_ids<br />attention_mask<br />labels<br />prompt_length<br />answer_length</div>
             </div>
           </div>
         </div>
 
-        <div class="card" style="border-left: 3px solid var(--accent-gold);">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-gold);">Step 5</div>
-              <div class="io-title">检查 labels</div>
-              <div class="io-text mono">labels != -100</div>
+        <div class="card trace-card" style="border-left: 3px solid var(--accent-gold);">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-gold);">Step 5</div>
+            <div class="trace-api mono">检查 labels</div>
+            <div class="trace-type mono">labels != -100</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-gold);">作用</div>
+              <div class="trace-block-text">验证 prompt 区域没有参与 loss，answer 区域才参与 loss。这一步能抓出大多数 SFT 数据错误。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-gold);">作用</div>
-              <div class="io-text">验证 prompt 区域没有参与 loss，answer 区域才参与 loss。这一步能抓出大多数 SFT 数据错误。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-gold);">输入</div>
+              <div class="trace-block-text mono">tokenized["train"][0]["labels"]</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-gold);">输入</div>
-              <div class="io-text mono">tokenized["train"][0]["labels"]</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-gold);">输出</div>
-              <div class="io-text">decode 后只看到回答：`梯度累积...&lt;eos&gt;`。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-gold);">输出</div>
+              <div class="trace-block-text">decode 后只看到回答：`梯度累积...&lt;eos&gt;`，不应该看到 `### Instruction`。</div>
             </div>
           </div>
         </div>
 
-        <div class="card card-rail-blue">
-          <div class="io-grid">
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">Step 6</div>
-              <div class="io-title">with_format</div>
-              <div class="io-text mono">Dataset -> numpy</div>
+        <div class="card card-rail-blue trace-card">
+          <div class="trace-sidebar">
+            <div class="trace-step" style="color: var(--accent-blue);">Step 6</div>
+            <div class="trace-api mono">with_format</div>
+            <div class="trace-type mono">Dataset -> numpy</div>
+          </div>
+          <div class="trace-content">
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-blue);">作用</div>
+              <div class="trace-block-text">指定取样时返回的数组格式。真实训练中常用 `torch`，本课用 `numpy` 避免额外训练依赖。</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">作用</div>
-              <div class="io-text">指定取样时返回的数组格式。真实训练中常用 `torch`，本课用 `numpy` 避免额外训练依赖。</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-blue);">输入</div>
+              <div class="trace-block-text mono">input_ids<br />attention_mask<br />labels</div>
             </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">输入</div>
-              <div class="io-text mono">input_ids<br />attention_mask<br />labels</div>
-            </div>
-            <div class="io-cell">
-              <div class="io-label" style="color: var(--accent-blue);">输出</div>
-              <div class="io-text mono">input_ids.shape = (192,)<br />labels.shape = (192,)</div>
+            <div class="trace-block">
+              <div class="trace-block-label" style="color: var(--accent-blue);">输出</div>
+              <div class="trace-block-text mono">input_ids.shape = (192,)<br />labels.shape = (192,)</div>
             </div>
           </div>
         </div>
