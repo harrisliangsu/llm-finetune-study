@@ -55,6 +55,7 @@
 - [lessons/03-batching/index.html](lessons/03-batching/index.html)
 - [lessons/04-trainer/index.html](lessons/04-trainer/index.html)
 - [lessons/05-lora/index.html](lessons/05-lora/index.html)
+- [lessons/06-peft-lora/index.html](lessons/06-peft-lora/index.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
@@ -68,6 +69,7 @@
 - [lessons/03-batching/report.md](lessons/03-batching/report.md): batch、collator、padding 和 effective batch size
 - [lessons/04-trainer/report.md](lessons/04-trainer/report.md): `transformers.Trainer` 最小训练闭环和过拟合观察
 - [lessons/05-lora/report.md](lessons/05-lora/report.md): 冻结 base、训练 LoRA adapter、保存并重新加载 adapter
+- [lessons/06-peft-lora/report.md](lessons/06-peft-lora/report.md): 使用 `Qwen/Qwen2.5-0.5B-Instruct` 跑真实 PEFT LoRA
 
 ## 参考仓库
 

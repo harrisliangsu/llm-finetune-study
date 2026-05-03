@@ -16,6 +16,7 @@
 | 03 | Batch / Collator | [03-batching](03-batching) | list[dict] -> dict[tensor] |
 | 04 | Trainer 闭环 | [04-trainer](04-trainer) | model + dataset + loss + optimizer |
 | 05 | LoRA Adapter | [05-lora](05-lora) | frozen base + trainable adapter |
+| 06 | PEFT LoRA | [06-peft-lora](06-peft-lora) | real HF model + PEFT adapter |
 
 ## 运行顺序
 
@@ -25,6 +26,7 @@
 .venv/bin/python lessons/03-batching/run.py
 .venv/bin/python lessons/04-trainer/run.py
 .venv/bin/python lessons/05-lora/run.py
+.venv/bin/python lessons/06-peft-lora/run.py
 ```
 
 如果你只想学习页面，直接打开每课目录里的 `index.html`。
