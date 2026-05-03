@@ -1,0 +1,5 @@
+{"instruction":"解释什么是 LoRA","input":"","output":"LoRA 是一种参数高效微调方法，通过训练低秩矩阵来改变模型行为，同时冻结大部分基座模型参数。"}
+{"instruction":"把下面句子翻译成英文","input":"我正在学习大模型微调。","output":"I am learning LLM fine-tuning."}
+{"instruction":"解释什么是梯度累积","input":"","output":"梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。"}
+{"instruction":"列出微调前应该检查的三个数据问题","input":"","output":"第一，字段是否完整；第二，训练集和验证集是否泄漏；第三，labels 中参与 loss 的 token 是否正确。"}
+{"instruction":"为什么 SFT 里 prompt 部分常常要 mask 掉 loss？","input":"","output":"因为 SFT 的目标是让模型学习如何回答，而不是让模型背诵用户指令和模板文本。通常只让 assistant 回答部分参与 loss。"}

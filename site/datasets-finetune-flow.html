@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datasets 微调数据管线 | LLM Finetune Study</title>
+  <style>
+    :root {
+      --bg-deepest: #0a0c14;
+      --bg-surface: #10121c;
+      --bg-card: #161924;
+      --bg-card-hover: #1c1f2e;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-hover: rgba(255, 255, 255, 0.12);
+      --text-primary: #e2e5ef;
+      --text-secondary: #7a7f96;
+      --text-tertiary: #4a4e63;
+      --accent-orange: #f97316; --accent-orange-dim: rgba(249,115,22,0.15);
+      --accent-blue: #3b82f6; --accent-blue-dim: rgba(59,130,246,0.15);
+      --accent-green: #22c55e; --accent-green-dim: rgba(34,197,94,0.15);
+      --accent-gold: #eab308; --accent-gold-dim: rgba(234,179,8,0.15);
+      --accent-purple: #a855f7; --accent-purple-dim: rgba(168,85,247,0.15);
+      --accent-red: #ef4444; --accent-red-dim: rgba(239,68,68,0.15);
+      --accent-cyan: #06b6d4; --accent-cyan-dim: rgba(6,182,212,0.15);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--text-tertiary) transparent;
+    }
+    html::-webkit-scrollbar { width: 4px; }
+    html::-webkit-scrollbar-track { background: transparent; }
+    html::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 2px; }
+
+    body {
+      font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', 'PingFang SC',
+                   'Microsoft YaHei', sans-serif;
+      background: var(--bg-deepest);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code, pre, .mono {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+    }
+
+    a { color: inherit; }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(10, 12, 20, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .nav-logo span { color: var(--accent-orange); }
+
+    .nav-links {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover { color: var(--text-primary); }
+
+    .hero {
+      padding: 132px 24px 76px;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 390px;
+      background: radial-gradient(ellipse,
+        rgba(249,115,22,0.08) 0%,
+        rgba(59,130,246,0.04) 50%,
+        transparent 80%);
+      pointer-events: none;
+    }
+
+    .hero > * { position: relative; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: 0;
+      line-height: 1.12;
+      margin-bottom: 20px;
+    }
+
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 720px;
+      margin: 0 auto 44px;
+      line-height: 1.7;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 42px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat-val {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .grad-orange {
+      background: linear-gradient(135deg, var(--accent-orange), #fb923c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .grad-blue {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .grad-green {
+      background: linear-gradient(135deg, var(--accent-green), #4ade80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .grad-purple {
+      background: linear-gradient(135deg, var(--accent-purple), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section {
+      padding: 78px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header-center {
+      text-align: center;
+      margin-bottom: 46px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 0;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      max-width: 680px;
+      line-height: 1.7;
+    }
+
+    .section-subtitle.center {
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-card-hover);
+    }
+
+    .card-rail-orange { border-left: 3px solid var(--accent-orange); }
+    .card-rail-blue { border-left: 3px solid var(--accent-blue); }
+    .card-rail-green { border-left: 3px solid var(--accent-green); }
+    .card-rail-purple { border-left: 3px solid var(--accent-purple); }
+
+    .pillar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .surface {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .surface-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .surface-body {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .kicker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .card-body {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .flow-container {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .flow-phase { flex: 1; min-width: 168px; }
+
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+      font-size: 18px;
+      padding: 0 5px;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--bg-surface);
+      border-radius: 10px;
+      padding: 4px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .code-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    .code-block .comment { color: var(--text-tertiary); }
+    .code-block .keyword { color: var(--accent-purple); }
+    .code-block .string { color: var(--accent-green); }
+    .code-block .call { color: var(--accent-blue); }
+    .code-block .warn { color: var(--accent-gold); }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      position: relative;
+      padding-bottom: 32px;
+    }
+
+    .timeline-item:last-child { padding-bottom: 0; }
+
+    .timeline-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 18px;
+      top: 40px;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .progress-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg-surface);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s ease-out;
+    }
+
+    .terminal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-header::before,
+    .terminal-header::after,
+    .terminal-header > .dot-yellow {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-header::before { background: var(--accent-red); }
+    .terminal-header > .dot-yellow { background: var(--accent-gold); }
+    .terminal-header::after { background: var(--accent-green); }
+
+    .terminal-body {
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+      font-size: 13px;
+      color: var(--accent-green);
+      overflow-x: auto;
+    }
+
+    .terminal-prompt::before {
+      content: '$';
+      color: var(--text-tertiary);
+      margin-right: 8px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
+
+    .source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 22px;
+    }
+
+    .source-list a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .source-list a:hover {
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-up { animation: fadeUp 0.6s ease-out both; }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hero { padding-top: 112px; }
+      .hero h1 { font-size: 38px; }
+      .hero-desc { font-size: 16px; }
+      .section-title { font-size: 28px; }
+      .hero-stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-logo"><span>LLM</span> Finetune Study</div>
+    <div class="nav-links">
+      <a href="#why">为什么先学</a>
+      <a href="#object">对象模型</a>
+      <a href="#pipeline">流程</a>
+      <a href="#sft">SFT</a>
+      <a href="#practice">练习</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        HUGGINGFACE DATASETS · LOCAL-FIRST FINETUNING
+      </div>
+      <h1>
+        <span class="grad-orange">微调不是先调模型</span><br />
+        而是先把数据管线做对
+      </h1>
+      <p class="hero-desc">
+        这页把 `huggingface/datasets` 讲成一条本地可练的微调数据流水线：
+        从原始 JSON/CSV 到 DatasetDict、split、map、tokenization、labels、SFT mask，
+        最后交给 `transformers.Trainer`。
+      </p>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-val grad-orange">1st</div>
+          <div class="hero-stat-label">第一个学习仓库</div>
+        </div>
+        <div>
+          <div class="hero-stat-val grad-blue">6</div>
+          <div class="hero-stat-label">核心数据动作</div>
+        </div>
+        <div>
+          <div class="hero-stat-val grad-green">3</div>
+          <div class="hero-stat-label">微调数据形态</div>
+        </div>
+        <div>
+          <div class="hero-stat-val grad-purple">20</div>
+          <div class="hero-stat-label">样本过拟合测试</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="why">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-orange);">WHY DATASETS FIRST</div>
+        <h2 class="section-title">先学 `datasets`，是为了避免微调时盲目炼丹</h2>
+        <p class="section-subtitle center">
+          微调效果差，经常不是模型小、显卡弱，而是样本字段、切分、tokenization、labels 或模板错了。
+          `datasets` 是你进入训练前的控制台。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-rail-orange fade-up">
+          <div class="kicker-row">
+            <div class="pillar-dot" style="background: var(--accent-orange);"></div>
+            <div class="card-title">你真正要学的是数据如何变成 loss</div>
+          </div>
+          <p class="card-body">
+            原始样本不会直接进入模型。它要经过字段选择、格式拼接、tokenizer 编码、padding/truncation、
+            labels 对齐。最后，只有 labels 中没有被 mask 的位置才会影响训练。
+          </p>
+        </div>
+
+        <div class="card card-rail-blue fade-up">
+          <div class="kicker-row">
+            <div class="pillar-dot" style="background: var(--accent-blue);"></div>
+            <div class="card-title">`map()` 是微调数据管线的主干</div>
+          </div>
+          <p class="card-body">
+            `map()` 把原始列变成训练列。分类任务里它负责 tokenize 文本；SFT 里它负责拼 prompt、
+            构造 answer labels；大数据场景里它还负责缓存、批处理和可复现。
+          </p>
+        </div>
+
+        <div class="card card-rail-green fade-up">
+          <div class="kicker-row">
+            <div class="pillar-dot" style="background: var(--accent-green);"></div>
+            <div class="card-title">本地电脑要先学“小而完整”</div>
+          </div>
+          <p class="card-body">
+            不要第一天就训练 7B。先用几十条样本、本地小模型，把 `load_dataset -> train_test_split -> map -> Trainer`
+            跑通。能让 20 条样本过拟合，说明管线大概率是通的。
+          </p>
+        </div>
+
+        <div class="card card-rail-purple fade-up">
+          <div class="kicker-row">
+            <div class="pillar-dot" style="background: var(--accent-purple);"></div>
+            <div class="card-title">源码不用先啃，先掌握 API 心智模型</div>
+          </div>
+          <p class="card-body">
+            第一阶段不需要读完 `arrow_dataset.py`。你要先知道 Dataset 是表、DatasetDict 是 split 容器、
+            Features 是 schema、IterableDataset 是流式数据入口。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="object">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-blue);">OBJECT MODEL</div>
+        <h2 class="section-title">四个对象先记住：Dataset、DatasetDict、Features、IterableDataset</h2>
+        <p class="section-subtitle center">
+          把它们想成训练前的数据仓库结构。你不是在处理一堆 Python list，而是在操作一张可缓存、可切分、可映射的表。
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="card card-rail-blue">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span class="badge" style="background: var(--accent-blue-dim); color: var(--accent-blue);">Dataset</span>
+            <span class="card-title">单个 split 的表</span>
+          </div>
+          <div class="grid-3">
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-blue);">dataset[0]</div>
+              <div class="surface-body">取一行样本，通常是 dict。用于抽查原始字段和处理后字段。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-blue);">dataset["text"]</div>
+              <div class="surface-body">取一列。适合快速检查文本、label 分布或长度。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-blue);">dataset.map(fn)</div>
+              <div class="surface-body">生成新 Dataset。注意很多处理方法不是原地修改。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-green">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">DatasetDict</span>
+            <span class="card-title">多个 split 的容器</span>
+          </div>
+          <div class="grid-3">
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-green);">raw["train"]</div>
+              <div class="surface-body">训练集。训练参数更新来自这里。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-green);">raw["validation"]</div>
+              <div class="surface-body">验证集。不要和训练集重复，否则指标失真。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-green);">train_test_split</div>
+              <div class="surface-body">没有验证集时自己切分。学习阶段固定 seed。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-purple">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span class="badge" style="background: var(--accent-purple-dim); color: var(--accent-purple);">Features</span>
+            <span class="card-title">字段 schema 和类型系统</span>
+          </div>
+          <div class="grid-3">
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-purple);">Value("string")</div>
+              <div class="surface-body">文本字段。SFT 的 instruction/input/output 常见类型。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-purple);">ClassLabel</div>
+              <div class="surface-body">分类标签。可保留类别名和 id 的映射。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-purple);">cast</div>
+              <div class="surface-body">把字段转换成训练期需要的类型。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-orange">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <span class="badge" style="background: var(--accent-orange-dim); color: var(--accent-orange);">IterableDataset</span>
+            <span class="card-title">流式读取大数据</span>
+          </div>
+          <div class="grid-3">
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-orange);">streaming=True</div>
+              <div class="surface-body">不完整下载到磁盘，边读边处理。适合大数据。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-orange);">shuffle(buffer_size)</div>
+              <div class="surface-body">流式数据用近似 shuffle，不是普通随机访问。</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title mono" style="color: var(--accent-orange);">DataLoader</div>
+              <div class="surface-body">可直接交给 PyTorch，但学习初期先用普通 Dataset。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pipeline">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-green);">DATA PIPELINE</div>
+        <h2 class="section-title">一条标准微调数据流水线</h2>
+        <p class="section-subtitle center">
+          你要把这 6 步练到熟：加载、检查、切分、清洗、tokenize、交给训练器。
+          后面所有分类微调、生成式微调、SFT、LoRA 都是它的变体。
+        </p>
+      </div>
+
+      <div class="flow-container">
+        <div class="flow-phase card card-rail-green">
+          <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">01</span>
+          <div class="card-title" style="margin-top: 12px;">Load</div>
+          <p class="card-body">从 Hub、本地 JSON、CSV、Parquet 或 text 加载。</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-phase card card-rail-green">
+          <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">02</span>
+          <div class="card-title" style="margin-top: 12px;">Inspect</div>
+          <p class="card-body">打印样本、字段、长度、label 分布。</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-phase card card-rail-green">
+          <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">03</span>
+          <div class="card-title" style="margin-top: 12px;">Split</div>
+          <p class="card-body">构造 train/validation，固定 seed。</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-phase card card-rail-green">
+          <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">04</span>
+          <div class="card-title" style="margin-top: 12px;">Clean</div>
+          <p class="card-body">filter 空回答、过长样本、异常标签。</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-phase card card-rail-green">
+          <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">05</span>
+          <div class="card-title" style="margin-top: 12px;">Map</div>
+          <p class="card-body">批量 tokenization，生成训练字段。</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-phase card card-rail-green">
+          <span class="badge" style="background: var(--accent-green-dim); color: var(--accent-green);">06</span>
+          <div class="card-title" style="margin-top: 12px;">Train</div>
+          <p class="card-body">with_format 或 Trainer 直接消费。</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 22px;">
+        <div class="code-block mono"><span class="keyword">from</span> datasets <span class="keyword">import</span> load_dataset
+<span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer
+
+raw = <span class="call">load_dataset</span>(<span class="string">"json"</span>, data_files=<span class="string">"data/sft.jsonl"</span>)
+raw = raw[<span class="string">"train"</span>].<span class="call">train_test_split</span>(test_size=0.1, seed=42)
+
+tokenizer = AutoTokenizer.<span class="call">from_pretrained</span>(<span class="string">"sshleifer/tiny-gpt2"</span>)
+tokenizer.pad_token = tokenizer.eos_token
+
+<span class="keyword">def</span> tokenize_batch(batch):
+    texts = [x + <span class="string">"\n"</span> + y for x, y <span class="keyword">in</span> zip(batch[<span class="string">"instruction"</span>], batch[<span class="string">"output"</span>])]
+    return tokenizer(texts, padding=<span class="string">"max_length"</span>, truncation=True, max_length=256)
+
+tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remove_columns=raw[<span class="string">"train"</span>].column_names)</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-purple);">TASK FORMS</div>
+        <h2 class="section-title">三类微调数据，不要混成一团</h2>
+        <p class="section-subtitle center">
+          分类、生成、SFT 的数据看起来都像文本，但训练目标不同。目标不同，labels 构造就不同。
+        </p>
+      </div>
+
+      <div class="tab-bar" role="tablist" aria-label="微调数据类型">
+        <button class="tab-btn active" data-tab="classification" type="button">分类微调</button>
+        <button class="tab-btn" data-tab="causal" type="button">生成式微调</button>
+        <button class="tab-btn" data-tab="instruction" type="button">指令微调 SFT</button>
+      </div>
+
+      <div class="tab-panel active" id="classification">
+        <div class="grid-2">
+          <div class="card card-rail-purple">
+            <div class="card-title">输入是文本，目标是类别</div>
+            <p class="card-body" style="margin-top: 10px;">
+              分类微调通常用 encoder 模型，例如 BERT。数据里要有文本列和 label 列，模型输出 logits，
+              loss 来自分类头，不需要自己构造每个 token 的 labels。
+            </p>
+          </div>
+          <div class="code-block mono">{
+  <span class="string">"text"</span>: <span class="string">"这家店的服务很好"</span>,
+  <span class="string">"label"</span>: 1
+}</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="causal">
+        <div class="grid-2">
+          <div class="card card-rail-purple">
+            <div class="card-title">输入也是目标，下一个 token 预测</div>
+            <p class="card-body" style="margin-top: 10px;">
+              causal LM 微调里，模型读前面的 token 预测下一个 token。`labels` 通常和 `input_ids`
+              同长度，只是在你不想训练的位置设置 `-100`。
+            </p>
+          </div>
+          <div class="code-block mono">{
+  <span class="string">"prompt"</span>: <span class="string">"写一句关于春天的诗"</span>,
+  <span class="string">"completion"</span>: <span class="string">"春风入旧巷，花影落新茶。"</span>
+}</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="instruction">
+        <div class="grid-2">
+          <div class="card card-rail-purple">
+            <div class="card-title">训练模型按指令回答</div>
+            <p class="card-body" style="margin-top: 10px;">
+              SFT 的关键不是把三列拼起来，而是只让回答部分贡献 loss。这样模型学习“看完指令后如何回答”，
+              而不是平均地背模板和用户问题。
+            </p>
+          </div>
+          <div class="code-block mono">{
+  <span class="string">"instruction"</span>: <span class="string">"解释什么是 LoRA"</span>,
+  <span class="string">"input"</span>: <span class="string">""</span>,
+  <span class="string">"output"</span>: <span class="string">"LoRA 是一种参数高效微调方法..."</span>
+}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sft">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-gold);">SFT LABELS</div>
+        <h2 class="section-title">SFT 最关键的问题：哪些 token 参与 loss</h2>
+        <p class="section-subtitle center">
+          如果你只记住一个微调细节，就记住这个：`input_ids` 是模型看到的，`labels` 是模型被要求学会的。
+          `-100` 位置不参与 loss。
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-rail-orange">
+          <div class="card-title">训练文本</div>
+          <div class="code-block mono" style="margin-top: 14px;">### Instruction:
+解释什么是梯度累积
+
+### Response:
+梯度累积是在显存不足时，把多个 mini-batch 的梯度累加后再更新参数的方法。</div>
+        </div>
+
+        <div class="card card-rail-orange">
+          <div class="card-title">labels 心智模型</div>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+            <div class="surface">
+              <div class="surface-title" style="color: var(--accent-red);">Prompt 区域</div>
+              <div class="surface-body mono">labels = -100</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title" style="color: var(--accent-green);">Answer 区域</div>
+              <div class="surface-body mono">labels = token_id</div>
+            </div>
+            <div class="surface">
+              <div class="surface-title" style="color: var(--accent-gold);">检查方法</div>
+              <div class="surface-body">decode labels 中非 `-100` 的部分，应该只看到 assistant 回答。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <div class="code-block mono"><span class="keyword">def</span> build_sft_features(example):
+    prompt = <span class="string">f"### Instruction:\n{example['instruction']}\n\n### Response:\n"</span>
+    answer = example[<span class="string">"output"</span>] + tokenizer.eos_token
+
+    prompt_ids = tokenizer(prompt, add_special_tokens=False).input_ids
+    answer_ids = tokenizer(answer, add_special_tokens=False).input_ids
+
+    input_ids = prompt_ids + answer_ids
+    labels = [<span class="warn">-100</span>] * len(prompt_ids) + answer_ids
+
+    return {
+        <span class="string">"input_ids"</span>: input_ids[:256],
+        <span class="string">"labels"</span>: labels[:256],
+        <span class="string">"attention_mask"</span>: [1] * min(len(input_ids), 256),
+    }</div>
+      </div>
+    </section>
+
+    <section class="section" id="practice">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-cyan);">LOCAL PRACTICE</div>
+        <h2 class="section-title">你接下来只做 5 个小练习</h2>
+        <p class="section-subtitle center">
+          不读大段源码，先完成这些可验证动作。每一步都能在本地小数据上做，不依赖大显卡。
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div class="timeline-item">
+          <div style="position: relative;">
+            <div class="timeline-num" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">1</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div style="flex: 1; padding-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span class="card-title">加载 50 条本地 JSONL</span>
+              <span class="badge" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">load_dataset</span>
+            </div>
+            <div class="surface">打印第 0 条、字段名、样本数量。不要进入训练，先确保数据真的长对。</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div style="position: relative;">
+            <div class="timeline-num" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">2</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div style="flex: 1; padding-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span class="card-title">切 train/validation</span>
+              <span class="badge" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">train_test_split</span>
+            </div>
+            <div class="surface">固定 `seed=42`，确认两个 split 没有重复样本。</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div style="position: relative;">
+            <div class="timeline-num" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">3</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div style="flex: 1; padding-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span class="card-title">写 `map()` 做 tokenization</span>
+              <span class="badge" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">batched=True</span>
+            </div>
+            <div class="surface">打印 `decode(input_ids)`，确认 max length 没截断关键回答。</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div style="position: relative;">
+            <div class="timeline-num" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">4</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div style="flex: 1; padding-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span class="card-title">检查 SFT labels</span>
+              <span class="badge" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">-100 mask</span>
+            </div>
+            <div class="surface">decode 非 `-100` 的 labels，应该只剩回答，不应该包含 instruction。</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div style="position: relative;">
+            <div class="timeline-num" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">5</div>
+          </div>
+          <div style="flex: 1; padding-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <span class="card-title">20 条样本过拟合</span>
+              <span class="badge" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">sanity check</span>
+            </div>
+            <div class="surface">如果 20 条样本 loss 都降不下来，不要扩大数据，先查字段、labels、tokenizer 和 trainable params。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-red);">FAILURE MODES</div>
+        <h2 class="section-title">数据管线常见失败模式</h2>
+        <p class="section-subtitle center">
+          出现这些问题时，先回到 `datasets` 层排查，不要先改模型。
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card card-rail-orange">
+          <div class="card-title">labels 全是 `-100`</div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 92%; background: var(--accent-red);"></div></div>
+          <p class="card-body" style="margin-top: 14px;">模型没有任何回答 token 可学。检查 prompt/answer 边界。</p>
+        </div>
+        <div class="card card-rail-orange">
+          <div class="card-title">训练和推理模板不一致</div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 84%; background: var(--accent-red);"></div></div>
+          <p class="card-body" style="margin-top: 14px;">训练用 `### Response`，推理却用 chat template，会让输出不稳定。</p>
+        </div>
+        <div class="card card-rail-orange">
+          <div class="card-title">验证集泄漏</div>
+          <div class="progress-bar"><div class="progress-fill" style="width: 76%; background: var(--accent-red);"></div></div>
+          <p class="card-body" style="margin-top: 14px;">eval loss 很好看，但真实泛化没有提升。检查重复样本。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-green);">QUICK START</div>
+        <h2 class="section-title">本地开始命令</h2>
+        <p class="section-subtitle center">
+          先安装最小依赖，跑数据处理脚本；等你能解释每个字段，再进入 `transformers` 训练。
+        </p>
+      </div>
+
+      <div class="terminal" style="max-width: 760px; margin: 0 auto;">
+        <div class="terminal-header">
+          <span class="dot-yellow"></span>
+          <span style="margin-left: 8px; font-size: 12px; color: var(--text-tertiary); font-weight: 600;">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-prompt">python -m venv .venv</div>
+          <div class="terminal-prompt" style="margin-top: 8px;">source .venv/bin/activate</div>
+          <div class="terminal-prompt" style="margin-top: 8px;">pip install datasets transformers torch</div>
+          <div class="terminal-prompt" style="margin-top: 8px;">python scripts/inspect_dataset.py examples/sample_sft.jsonl</div>
+        </div>
+      </div>
+
+      <div class="source-list">
+        <a href="https://github.com/huggingface/datasets">huggingface/datasets</a>
+        <a href="https://huggingface.co/docs/datasets/quickstart">Datasets Quickstart</a>
+        <a href="https://huggingface.co/docs/datasets/process">Process datasets</a>
+        <a href="https://huggingface.co/docs/datasets/use_with_pytorch">Use with PyTorch</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div style="margin-bottom: 8px;">
+      <span style="font-weight: 700; color: var(--text-secondary);">LLM Finetune Study</span>
+      <span style="margin: 0 8px; color: var(--text-tertiary);">·</span>
+      <span>Datasets first, finetune second.</span>
+    </div>
+    <div>harrisliangsu · 2026</div>
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.tab;
+
+        buttons.forEach((item) => item.classList.remove('active'));
+        panels.forEach((panel) => panel.classList.remove('active'));
+
+        button.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -49,6 +49,7 @@
 先读：
 
 - [ROADMAP.md](ROADMAP.md)
+- [site/datasets-finetune-flow.html](site/datasets-finetune-flow.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
