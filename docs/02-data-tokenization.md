@@ -132,7 +132,7 @@ eval loss 看起来好，但泛化无意义。
 脚本：
 
 ```bash
-.venv/bin/python scripts/lesson02_tokenizer_pipeline.py
+.venv/bin/python lessons/02-tokenizer/run.py
 ```
 
 本课把 Lesson 01 的 toy tokenizer 换成了真实 Hugging Face 加载路径：
@@ -163,4 +163,4 @@ decode(labels != -100)
 
 这说明 prompt 区域已经被 mask，模型只会因为回答 token 产生 loss。
 
-完整报告见 [reports/lesson02-tokenizer.md](../reports/lesson02-tokenizer.md)。
+完整报告见 [lessons/02-tokenizer/report.md](../lessons/02-tokenizer/report.md)。

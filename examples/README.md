@@ -26,13 +26,13 @@
 先执行 datasets 数据管线课：
 
 ```bash
-.venv/bin/python scripts/lesson01_datasets_pipeline.py
+.venv/bin/python lessons/01-datasets/run.py
 ```
 
 它会生成：
 
 ```text
-reports/lesson01-datasets.md
+lessons/01-datasets/report.md
 ```
 
 这一步的目标不是训练模型，而是确认你已经理解 `load_dataset`、`train_test_split`、`filter`、`map(batched=True)` 和 SFT `labels=-100`。

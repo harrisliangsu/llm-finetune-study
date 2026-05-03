@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 03 | Batch、Collator 和 Padding</title>
+  <style>
+    :root {
+      --bg:#080a12; --panel:#121620; --panel-2:#171b27; --ink:#e7eaf3; --muted:#8a91a8;
+      --line:rgba(255,255,255,.08); --green:#22c55e; --cyan:#06b6d4; --orange:#f97316;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--ink); font-family:-apple-system,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif; line-height:1.7; }
+    code, pre, .mono { font-family:"SF Mono",Menlo,Consolas,monospace; }
+    .nav { position:sticky; top:0; height:56px; padding:0 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); background:rgba(8,10,18,.82); backdrop-filter:blur(20px); }
+    .brand { font-weight:800; font-size:15px; } .brand span { color:var(--orange); }
+    .nav a { color:var(--muted); text-decoration:none; margin-left:18px; font-size:13px; font-weight:700; }
+    .wrap { max-width:1120px; margin:0 auto; padding:72px 24px; }
+    .badge { display:inline-flex; gap:8px; align-items:center; padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--muted); font-size:12px; font-weight:900; margin-bottom:24px; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+    h1 { font-size:52px; line-height:1.1; letter-spacing:0; margin-bottom:16px; } h1 span,.kicker { color:var(--green); }
+    .lead { color:var(--muted); font-size:17px; max-width:790px; }
+    .section { padding:46px 0; } .kicker { font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:900; margin-bottom:8px; }
+    h2 { font-size:30px; line-height:1.22; margin-bottom:10px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .card,.code { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; }
+    .card-title { font-size:17px; font-weight:900; margin-bottom:8px; } .card-body { color:var(--muted); font-size:14px; }
+    .metric strong { display:block; color:var(--green); font-size:30px; line-height:1; margin-bottom:8px; }
+    .metric span { color:var(--muted); font-size:12px; font-weight:800; }
+    .code { color:var(--muted); white-space:pre; overflow-x:auto; font-size:13px; }
+    .trace { display:grid; grid-template-columns:190px 1fr; gap:14px; margin-bottom:14px; }
+    .side,.block { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:15px; }
+    .side-num { color:var(--green); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:10px; }
+    .api { font-weight:900; overflow-wrap:anywhere; } .blocks { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .label { color:var(--cyan); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
+    .text { color:var(--muted); font-size:13px; }
+    @media (max-width:900px){ h1{font-size:36px}.grid-3,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none} }
+  </style>
+</head>
+<body>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#shape">形状</a><a href="#trace">步骤</a></div></nav>
+  <main class="wrap">
+    <div class="badge"><span class="dot"></span> LESSON 03 · BATCHING</div>
+    <h1><span>Collator</span><br />把样本列表变成训练 batch</h1>
+    <p class="lead">这一课回答：dataset 里的一条条样本，如何堆叠成模型训练时真正消费的 `[batch_size, sequence_length]` 张量。</p>
+
+    <section class="section" id="shape">
+      <div class="kicker">BATCH SHAPES</div>
+      <h2>本课 batch 的三个核心张量</h2>
+      <div class="grid-3">
+        <div class="card metric"><strong>(2, 96)</strong><span>input_ids：模型看到的 token id</span></div>
+        <div class="card metric"><strong>(2, 96)</strong><span>attention_mask：真实 token 是 1，padding 是 0</span></div>
+        <div class="card metric"><strong>(2, 96)</strong><span>labels：非 -100 的位置才参与 loss</span></div>
+      </div>
+      <div class="code" style="margin-top:16px;">labels[0][:32]
+[-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 244, 112, 248, 111, 62, 134, 97, 107, 86, 69, 54, 51, 250, 115, 249, 168, 98, 230, 223]</div>
+    </section>
+
+    <section class="section" id="trace">
+      <div class="kicker">STEP TRACE</div>
+      <h2>每一步的作用、输入、输出</h2>
+      <div class="trace">
+        <div class="side"><div class="side-num">Step 1</div><div class="api mono">map(tokenize_fn)</div></div>
+        <div class="blocks">
+          <div class="block"><div class="label">作用</div><div class="text">把每条 JSONL 样本转换成定长训练字段。</div></div>
+          <div class="block"><div class="label">输入</div><div class="text mono">instruction/input/output</div></div>
+          <div class="block"><div class="label">输出</div><div class="text mono">input_ids<br />attention_mask<br />labels</div></div>
+        </div>
+      </div>
+      <div class="trace">
+        <div class="side"><div class="side-num">Step 2</div><div class="api mono">sft_numpy_collator</div></div>
+        <div class="blocks">
+          <div class="block"><div class="label">作用</div><div class="text">把 `list[dict]` 变成 `dict[array]`，增加 batch 维度。</div></div>
+          <div class="block"><div class="label">输入</div><div class="text mono">2 条 tokenized samples</div></div>
+          <div class="block"><div class="label">输出</div><div class="text mono">dict[str, np.ndarray]</div></div>
+        </div>
+      </div>
+      <div class="trace">
+        <div class="side"><div class="side-num">Step 3</div><div class="api mono">effective batch</div></div>
+        <div class="blocks">
+          <div class="block"><div class="label">作用</div><div class="text">理解实际更新批量，不只看单次 forward 的 micro batch。</div></div>
+          <div class="block"><div class="label">输入</div><div class="text mono">micro=2<br />accumulation=4</div></div>
+          <div class="block"><div class="label">输出</div><div class="text mono">effective batch = 8</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -123,7 +123,7 @@ per_device_train_batch_size * gradient_accumulation_steps * num_devices
 脚本：
 
 ```bash
-.venv/bin/python scripts/lesson03_batch_collator.py
+.venv/bin/python lessons/03-batching/run.py
 ```
 
 本课关注 Trainer 之前的最后一步：把多条 tokenized 样本合成 batch。
@@ -143,14 +143,14 @@ effective batch size = 8
 - `gradient_accumulation_steps=4`: 累积 4 次梯度后再更新参数。
 - `effective batch size=8`: 等效更新批量是 `2 * 4`。
 
-完整报告见 [reports/lesson03-batching.md](../reports/lesson03-batching.md)。
+完整报告见 [lessons/03-batching/report.md](../lessons/03-batching/report.md)。
 
 ## 已执行：Lesson 04
 
 脚本：
 
 ```bash
-.venv/bin/python scripts/lesson04_trainer_minimal.py
+.venv/bin/python lessons/04-trainer/run.py
 ```
 
 本课用本地 tiny causal LM 跑了 `transformers.Trainer` 最小训练闭环。这个 tiny model 不是可用 LLM，只用于验证数据、loss 和 Trainer 流程。
@@ -171,4 +171,4 @@ effective batch size = 8
 - eval loss 上升，说明 4 条训练样本太少，已经出现小样本过拟合。
 - 固定 prompt 生成混杂英文，不是流程失败，而是 tiny model + 5 条样本没有真实语言能力。
 
-完整报告见 [reports/lesson04-trainer.md](../reports/lesson04-trainer.md)。
+完整报告见 [lessons/04-trainer/report.md](../lessons/04-trainer/report.md)。

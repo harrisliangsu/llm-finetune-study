@@ -9,9 +9,9 @@
 - tokenizer vocab size: 256
 - tiny model trainable params: 87872
 - tiny model total params: 87872
-- eval loss before training: 5.551877021789551
-- train loss: 3.7273007074991864
-- eval loss after training: 5.935160160064697
+- eval loss before training: 5.551877498626709
+- train loss: 3.7272937456766764
+- eval loss after training: 5.935162544250488
 - 观察: train loss 下降但 eval loss 上升，这是 4 条训练样本上开始过拟合的信号。
 
 ## 第 1 条训练样本的 label 检查

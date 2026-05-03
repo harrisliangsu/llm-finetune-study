@@ -4,12 +4,16 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from textwrap import dedent
 
 import numpy as np
 
-from lesson_common import (
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from lessons.common.lesson_common import (
     IGNORE_INDEX,
     decode_learned_labels,
     ensure_local_auto_tokenizer,
@@ -118,7 +122,7 @@ def write_report(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
-    parser.add_argument("--report", default="reports/lesson03-batching.md")
+    parser.add_argument("--report", default="lessons/03-batching/report.md")
     parser.add_argument("--tokenizer-dir", default=".cache/local-sft-tokenizer")
     parser.add_argument("--max-length", type=int, default=96)
     parser.add_argument("--micro-batch-size", type=int, default=2)

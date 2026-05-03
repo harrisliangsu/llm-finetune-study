@@ -905,7 +905,7 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
         <div class="section-label" style="color: var(--accent-cyan);">EXECUTION TRACE</div>
         <h2 class="section-title">Lesson 01 每一步的作用、输入和输出</h2>
         <p class="section-subtitle center">
-          下面对应 `scripts/lesson01_datasets_pipeline.py` 的真实执行顺序。你要把每一步看成一个数据变换：
+          下面对应 `lessons/01-datasets/run.py` 的真实执行顺序。你要把每一步看成一个数据变换：
           输入是什么，输出是什么，输出为什么能喂给下一步。
         </p>
       </div>
@@ -939,7 +939,7 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
       <div class="card sample-wide">
         <div class="card-title">实际输出样本：SFT labels 检查</div>
         <p class="card-body" style="margin: 8px 0 0;">
-          这是 `lesson01_datasets_pipeline.py` 真实执行后的检查结果。关键判断是：prompt token 全部变成 `-100`，不会参与 loss；answer token 保留原 token id，才会参与训练。
+          这是 `lessons/01-datasets/run.py` 真实执行后的检查结果。关键判断是：prompt token 全部变成 `-100`，不会参与 loss；answer token 保留原 token id，才会参与训练。
         </p>
         <div class="label-example">
           <div class="surface">
@@ -1435,7 +1435,7 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
           <div class="terminal-prompt">python -m venv .venv</div>
           <div class="terminal-prompt" style="margin-top: 8px;">source .venv/bin/activate</div>
           <div class="terminal-prompt" style="margin-top: 8px;">pip install datasets transformers torch</div>
-          <div class="terminal-prompt" style="margin-top: 8px;">python scripts/inspect_dataset.py examples/sample_sft.jsonl</div>
+          <div class="terminal-prompt" style="margin-top: 8px;">python lessons/01-datasets/inspect_dataset.py examples/sample_sft.jsonl</div>
         </div>
       </div>
 

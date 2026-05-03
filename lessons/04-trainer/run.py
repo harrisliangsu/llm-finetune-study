@@ -5,10 +5,14 @@ from __future__ import annotations
 
 import argparse
 import inspect
+import sys
 from pathlib import Path
 from textwrap import dedent
 
-from lesson_common import (
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from lessons.common.lesson_common import (
     count_trainable_parameters,
     decode_learned_labels,
     ensure_local_auto_tokenizer,
@@ -68,18 +72,19 @@ def build_tiny_causal_lm(torch, nn, vocab_size: int, pad_token_id: int):
 
 def greedy_generate(torch, model, tokenizer, prompt: str, max_new_tokens: int = 48) -> str:
     model.eval()
+    device = next(model.parameters()).device
     input_ids = tokenizer.encode(prompt, add_special_tokens=False)
-    ids = torch.tensor([input_ids], dtype=torch.long)
+    ids = torch.tensor([input_ids], dtype=torch.long, device=device)
 
     with torch.no_grad():
         for _ in range(max_new_tokens):
             logits = model(input_ids=ids)["logits"]
             next_id = int(torch.argmax(logits[:, -1, :], dim=-1).item())
-            ids = torch.cat([ids, torch.tensor([[next_id]], dtype=torch.long)], dim=1)
+            ids = torch.cat([ids, torch.tensor([[next_id]], dtype=torch.long, device=device)], dim=1)
             if next_id == tokenizer.eos_token_id:
                 break
 
-    return tokenizer.decode(ids[0].tolist(), skip_special_tokens=False)
+    return tokenizer.decode(ids[0].detach().cpu().tolist(), skip_special_tokens=False)
 
 
 def write_report(
@@ -162,7 +167,7 @@ def write_report(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
-    parser.add_argument("--report", default="reports/lesson04-trainer.md")
+    parser.add_argument("--report", default="lessons/04-trainer/report.md")
     parser.add_argument("--tokenizer-dir", default=".cache/local-sft-tokenizer")
     parser.add_argument("--output-dir", default="outputs/lesson04-trainer")
     parser.add_argument("--max-length", type=int, default=96)

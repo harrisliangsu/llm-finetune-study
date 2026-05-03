@@ -5,10 +5,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from textwrap import dedent
 
-from lesson_common import (
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from lessons.common.lesson_common import (
     IGNORE_INDEX,
     build_prompt,
     decode_learned_labels,
@@ -118,7 +122,7 @@ def write_report(report_path: Path, tokenizer, sample: dict, tokenized: dict, ma
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
-    parser.add_argument("--report", default="reports/lesson02-tokenizer.md")
+    parser.add_argument("--report", default="lessons/02-tokenizer/report.md")
     parser.add_argument("--tokenizer-dir", default=".cache/local-sft-tokenizer")
     parser.add_argument("--max-length", type=int, default=96)
     args = parser.parse_args()

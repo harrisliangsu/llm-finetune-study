@@ -49,8 +49,11 @@
 先读：
 
 - [ROADMAP.md](ROADMAP.md)
-- [site/datasets-finetune-flow.html](site/datasets-finetune-flow.html)
-- [site/tokenizer-to-trainer-flow.html](site/tokenizer-to-trainer-flow.html)
+- [lessons/README.md](lessons/README.md)
+- [lessons/01-datasets/index.html](lessons/01-datasets/index.html)
+- [lessons/02-tokenizer/index.html](lessons/02-tokenizer/index.html)
+- [lessons/03-batching/index.html](lessons/03-batching/index.html)
+- [lessons/04-trainer/index.html](lessons/04-trainer/index.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
@@ -59,10 +62,10 @@
 
 ## 已执行课程
 
-- [reports/lesson01-datasets.md](reports/lesson01-datasets.md): Hugging Face Datasets 微调数据管线执行结果
-- [reports/lesson02-tokenizer.md](reports/lesson02-tokenizer.md): 本地 `AutoTokenizer`、`input_ids`、`attention_mask`、SFT `labels` 检查
-- [reports/lesson03-batching.md](reports/lesson03-batching.md): batch、collator、padding 和 effective batch size
-- [reports/lesson04-trainer.md](reports/lesson04-trainer.md): `transformers.Trainer` 最小训练闭环和过拟合观察
+- [lessons/01-datasets/report.md](lessons/01-datasets/report.md): Hugging Face Datasets 微调数据管线执行结果
+- [lessons/02-tokenizer/report.md](lessons/02-tokenizer/report.md): 本地 `AutoTokenizer`、`input_ids`、`attention_mask`、SFT `labels` 检查
+- [lessons/03-batching/report.md](lessons/03-batching/report.md): batch、collator、padding 和 effective batch size
+- [lessons/04-trainer/report.md](lessons/04-trainer/report.md): `transformers.Trainer` 最小训练闭环和过拟合观察
 
 ## 参考仓库
 

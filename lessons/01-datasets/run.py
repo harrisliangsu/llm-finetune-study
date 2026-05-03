@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 from textwrap import dedent
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 os.environ.setdefault("HF_HOME", str(PROJECT_ROOT / ".cache" / "huggingface"))
 os.environ.setdefault(
     "HF_DATASETS_CACHE",
@@ -167,7 +167,7 @@ def write_report(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
-    parser.add_argument("--report", default="reports/lesson01-datasets.md")
+    parser.add_argument("--report", default="lessons/01-datasets/report.md")
     parser.add_argument("--max-length", type=int, default=192)
     args = parser.parse_args()
 

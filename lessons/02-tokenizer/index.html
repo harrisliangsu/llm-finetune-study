@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 02 | AutoTokenizer 和 SFT Labels</title>
+  <style>
+    :root {
+      --bg: #080a12; --panel: #121620; --panel-2: #171b27;
+      --ink: #e7eaf3; --muted: #8a91a8; --line: rgba(255,255,255,.08);
+      --cyan: #06b6d4; --orange: #f97316; --green: #22c55e; --purple: #a855f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font-family: -apple-system, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.7; -webkit-font-smoothing: antialiased;
+    }
+    code, pre, .mono { font-family: "SF Mono", Menlo, Consolas, monospace; }
+    .nav {
+      height: 56px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--line); background: rgba(8,10,18,.82); position: sticky; top: 0;
+      backdrop-filter: blur(20px);
+    }
+    .brand { font-size: 15px; font-weight: 800; }
+    .brand span { color: var(--orange); }
+    .nav a { color: var(--muted); text-decoration: none; margin-left: 18px; font-size: 13px; font-weight: 700; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 72px 24px; }
+    .badge {
+      display: inline-flex; gap: 8px; align-items: center; padding: 7px 14px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+      font-size: 12px; font-weight: 900; margin-bottom: 24px;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    h1 { font-size: 52px; line-height: 1.1; letter-spacing: 0; margin-bottom: 16px; }
+    h1 span, .kicker { color: var(--cyan); }
+    .lead { color: var(--muted); font-size: 17px; max-width: 780px; }
+    .section { padding: 46px 0; }
+    .kicker { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 900; margin-bottom: 8px; }
+    h2 { font-size: 30px; line-height: 1.22; margin-bottom: 10px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card, .code {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+    }
+    .card-title { font-size: 17px; font-weight: 900; margin-bottom: 8px; }
+    .card-body { color: var(--muted); font-size: 14px; }
+    .code { color: var(--muted); overflow-x: auto; white-space: pre; font-size: 13px; }
+    .metric strong { display: block; color: var(--orange); font-size: 30px; line-height: 1; margin-bottom: 8px; }
+    .metric span { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .trace { display: grid; grid-template-columns: 190px 1fr; gap: 14px; margin-bottom: 14px; }
+    .side, .block { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 15px; }
+    .side-num { color: var(--green); font-size: 11px; letter-spacing: .12em; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; }
+    .api { font-weight: 900; overflow-wrap: anywhere; }
+    .blocks { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .label { color: var(--cyan); font-size: 11px; letter-spacing: .12em; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+    .text { color: var(--muted); font-size: 13px; }
+    @media (max-width: 900px) {
+      h1 { font-size: 36px; }
+      .grid-2, .grid-3, .trace, .blocks { grid-template-columns: 1fr; }
+      .nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand"><span>LLM</span> Finetune Study</div>
+    <div><a href="#data">样本</a><a href="#tokens">字段</a><a href="#trace">步骤</a></div>
+  </nav>
+  <main class="wrap">
+    <div class="badge"><span class="dot"></span> LESSON 02 · TOKENIZER</div>
+    <h1><span>AutoTokenizer</span><br />把文本变成模型可训练的 token</h1>
+    <p class="lead">这一课不训练模型，只回答一个问题：原始 `instruction/input/output` 如何变成 `input_ids`、`attention_mask` 和 SFT 的 `labels`。</p>
+
+    <section class="section" id="data">
+      <div class="kicker">ACTUAL SAMPLE</div>
+      <h2>真实输入和 prompt 拼接</h2>
+      <div class="grid-2">
+        <div class="code">{
+  "instruction": "解释什么是梯度累积",
+  "input": "",
+  "output": "梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。"
+}</div>
+        <div class="code">### Instruction:
+解释什么是梯度累积
+
+### Response:</div>
+      </div>
+    </section>
+
+    <section class="section" id="tokens">
+      <div class="kicker">OUTPUT FIELDS</div>
+      <h2>本课生成的核心字段</h2>
+      <div class="grid-3">
+        <div class="card metric"><strong>256</strong><span>本地 tokenizer vocab size</span></div>
+        <div class="card metric"><strong>13</strong><span>prompt token 数，全部 mask</span></div>
+        <div class="card metric"><strong>58</strong><span>answer token 数，参与 loss</span></div>
+      </div>
+      <div class="code" style="margin-top:16px;">labels 前 40 个:
+[-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 244, 112, 248, 111, 62, 134, 97, 107, 86, 69, 54, 51, 250, 115, 249, 168, 98, 230, 223, 150, 24, 4, 18, 17, 33, 19, 23] ...</div>
+    </section>
+
+    <section class="section" id="trace">
+      <div class="kicker">STEP TRACE</div>
+      <h2>每一步的作用、输入、输出</h2>
+      <div class="trace">
+        <div class="side"><div class="side-num">Step 1</div><div class="api mono">AutoTokenizer</div></div>
+        <div class="blocks">
+          <div class="block"><div class="label">作用</div><div class="text">从本地 tokenizer 文件加载真实 Hugging Face fast tokenizer。</div></div>
+          <div class="block"><div class="label">输入</div><div class="text mono">.cache/local-sft-tokenizer</div></div>
+          <div class="block"><div class="label">输出</div><div class="text mono">pad=0 eos=1 unk=2</div></div>
+        </div>
+      </div>
+      <div class="trace">
+        <div class="side"><div class="side-num">Step 2</div><div class="api mono">tokenize_sft_row</div></div>
+        <div class="blocks">
+          <div class="block"><div class="label">作用</div><div class="text">分别 encode prompt 和 answer，再拼成同长度字段。</div></div>
+          <div class="block"><div class="label">输入</div><div class="text mono">instruction/input/output<br />max_length=96</div></div>
+          <div class="block"><div class="label">输出</div><div class="text mono">input_ids<br />attention_mask<br />labels</div></div>
+        </div>
+      </div>
+      <div class="trace">
+        <div class="side"><div class="side-num">Step 3</div><div class="api mono">decode check</div></div>
+        <div class="blocks">
+          <div class="block"><div class="label">作用</div><div class="text">确认只有回答区域参与 loss，prompt 不参与。</div></div>
+          <div class="block"><div class="label">输入</div><div class="text mono">labels != -100</div></div>
+          <div class="block"><div class="label">输出</div><div class="text">梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。&lt;eos&gt;</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
