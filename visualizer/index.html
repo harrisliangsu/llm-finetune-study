@@ -51,25 +51,29 @@
     .stat-label { margin-top:6px; color:var(--muted); font-size:11px; font-weight:800; }
     .run-card { margin-top:14px; padding:13px; border-radius:10px; background:var(--panel-3); border:1px solid var(--line); }
     .run-card .mono { color:var(--cyan); font-size:12px; overflow-wrap:anywhere; }
-    .course-list { display:grid; gap:9px; margin-top:14px; max-height:430px; overflow:auto; padding-right:3px; }
-    .course-card {
-      width:100%; text-align:left; font:inherit; color:var(--ink); border:1px solid var(--line); border-radius:10px;
-      background:rgba(13,17,26,.82); padding:11px; cursor:pointer; transition:.16s ease; position:relative; overflow:hidden;
+    .course-picker { display:grid; gap:10px; margin-top:14px; }
+    .course-select {
+      width:100%; min-height:42px; color:var(--ink); border:1px solid rgba(6,182,212,.22); border-radius:10px;
+      background:rgba(13,17,26,.96); padding:0 12px; font:inherit; font-size:13px; font-weight:850;
     }
-    .course-card::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--faint); opacity:.9; }
-    .course-card:hover { border-color:rgba(6,182,212,.42); background:rgba(6,182,212,.06); }
-    .course-card.active { border-color:rgba(6,182,212,.72); box-shadow:0 0 0 1px rgba(6,182,212,.18); }
-    .course-card.executed::before { background:var(--green); }
-    .course-card.live::before { background:var(--cyan); animation:barPulse 1.8s ease-in-out infinite; }
-    .course-card.missing::before { background:var(--gold); }
+    .course-select:focus { outline:0; border-color:rgba(6,182,212,.72); box-shadow:0 0 0 2px rgba(6,182,212,.14); }
+    .course-dashboard { border:1px solid var(--line); border-radius:10px; background:var(--panel-3); padding:12px; display:grid; gap:11px; }
+    .progress-block { display:grid; gap:6px; }
+    .progress-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .progress-name { font-size:12px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .progress-percent { color:var(--cyan); font-size:12px; font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .progress-track { height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; position:relative; }
+    .progress-track::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent); animation:trackSweep 2.8s linear infinite; }
+    @keyframes trackSweep { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
+    .progress-fill { height:100%; width:var(--progress,0%); min-width:3px; max-width:100%; border-radius:inherit; background:linear-gradient(90deg,var(--green),var(--cyan)); transition:width .45s ease; }
+    .progress-fill.course { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+    .course-meter-list { display:grid; gap:8px; margin-top:12px; }
+    .course-meter-row { border:1px solid var(--line); border-radius:9px; background:rgba(13,17,26,.72); padding:9px; }
+    .course-meter-row.active { border-color:rgba(6,182,212,.5); background:rgba(6,182,212,.07); }
+    .course-meter-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+    .course-meter-name { font-size:11px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .course-meter-state { color:var(--muted); font-size:10px; font-weight:900; white-space:nowrap; }
     @keyframes barPulse { 50% { opacity:.35; } }
-    .course-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
-    .course-id { color:var(--cyan); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
-    .course-status { color:var(--muted); font-size:10px; font-weight:900; border:1px solid var(--line); border-radius:999px; padding:2px 7px; white-space:nowrap; }
-    .course-card.executed .course-status { color:#bbf7d0; border-color:rgba(34,197,94,.28); background:rgba(34,197,94,.08); }
-    .course-card.missing .course-status { color:#fde68a; border-color:rgba(234,179,8,.28); background:rgba(234,179,8,.08); }
-    .course-name { margin-top:5px; font-size:13px; line-height:1.25; font-weight:900; overflow-wrap:anywhere; }
-    .course-meta { margin-top:6px; color:var(--muted); font-size:11px; overflow-wrap:anywhere; }
     .flow-wrap { overflow-x:auto; padding-bottom:6px; }
     .flow { display:flex; gap:10px; min-width:max-content; }
     .node {
@@ -88,6 +92,9 @@
     .node.current .node-id { color:var(--gold); }
     .node-name { font-size:14px; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
     .node-summary { color:var(--muted); font-size:12px; margin-top:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .node-progress { margin-top:10px; }
+    .node-progress .progress-track { height:6px; }
+    .node-percent { margin-top:5px; color:var(--faint); font-size:10px; font-weight:900; font-variant-numeric:tabular-nums; }
     .kind { display:inline-flex; align-items:center; min-height:23px; margin-top:10px; border-radius:999px; padding:3px 8px; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; border:1px solid var(--line); color:var(--muted); }
     .kind-data { color:#93c5fd; border-color:rgba(59,130,246,.35); background:rgba(59,130,246,.1); }
     .kind-transform,.kind-tokenizer,.kind-batch { color:#67e8f9; border-color:rgba(6,182,212,.35); background:rgba(6,182,212,.1); }
@@ -97,7 +104,10 @@
     .kind-checkpoint,.kind-complete { color:#fdba74; border-color:rgba(249,115,22,.35); background:rgba(249,115,22,.1); }
     .detail-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:14px; }
     .detail-title { font-size:21px; line-height:1.2; font-weight:900; overflow-wrap:anywhere; }
-    .detail-summary { color:var(--muted); font-size:14px; margin-bottom:16px; }
+    .detail-summary { color:var(--muted); font-size:14px; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .reveal { margin-top:10px; border:1px solid var(--line); border-radius:9px; background:rgba(8,10,18,.45); padding:9px; }
+    .reveal summary { cursor:pointer; color:var(--cyan); font-size:12px; font-weight:900; }
+    .reveal[open] summary { margin-bottom:8px; }
     .section-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .box { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:13px; min-width:0; }
     .box-title { color:var(--muted); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
@@ -146,6 +156,7 @@
     .data-node.input { border-color:rgba(59,130,246,.3); }
     .data-node.process { border-color:rgba(6,182,212,.36); animation:nodePulse 2.1s ease-in-out infinite; }
     .data-node.output { border-color:rgba(34,197,94,.3); }
+    .data-node span { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     @keyframes nodePulse { 50% { box-shadow:0 0 0 1px rgba(6,182,212,.22), 0 0 28px rgba(6,182,212,.12); } }
     .particle { position:absolute; top:calc(50% - 4px); left:13%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 18px rgba(6,182,212,.9); z-index:2; animation:particleMove 2.7s linear infinite; }
     .particle.p2 { animation-delay:.65s; background:var(--green); box-shadow:0 0 18px rgba(34,197,94,.8); }
@@ -153,9 +164,25 @@
     @keyframes particleMove { from { transform:translateX(0) scale(.75); opacity:0; } 12% { opacity:1; } 88% { opacity:1; } to { transform:translateX(620px) scale(1.15); opacity:0; } }
     .tensor-strip { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
     .tensor-pill { border:1px solid rgba(6,182,212,.25); background:rgba(6,182,212,.07); color:#bae6fd; border-radius:999px; padding:4px 8px; font-size:11px; font-weight:900; }
+    .sim-grid { display:grid; grid-template-columns:1.1fr .9fr .8fr; gap:10px; margin-top:13px; }
+    .sim-card { border:1px solid var(--line); border-radius:10px; background:rgba(8,10,18,.58); padding:10px; min-width:0; overflow:hidden; }
+    .token-stream { display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start; min-height:62px; }
+    .token-chip { border:1px solid rgba(59,130,246,.24); background:rgba(59,130,246,.08); color:#bfdbfe; border-radius:7px; padding:3px 6px; font-size:10px; font-weight:900; animation:tokenRise 2.4s ease-in-out infinite; animation-delay:var(--delay,0s); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    @keyframes tokenRise { 50% { transform:translateY(-2px); border-color:rgba(59,130,246,.5); } }
+    .batch-matrix { display:grid; grid-template-columns:repeat(6,1fr); gap:4px; min-height:62px; align-content:center; }
+    .matrix-cell { aspect-ratio:1; border-radius:4px; background:rgba(255,255,255,.08); animation:matrixPulse 1.9s ease-in-out infinite; animation-delay:var(--delay,0s); }
+    .matrix-cell.hot { background:rgba(34,197,94,.52); box-shadow:0 0 13px rgba(34,197,94,.25); }
+    @keyframes matrixPulse { 50% { opacity:.45; transform:scale(.92); } }
+    .gradient-loop { min-height:62px; display:grid; place-items:center; position:relative; }
+    .gradient-loop::before { content:""; width:56px; height:56px; border-radius:50%; border:2px solid rgba(6,182,212,.16); border-top-color:var(--cyan); border-right-color:var(--green); animation:spin 2.6s linear infinite; }
+    .gradient-loop span { position:absolute; color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; }
+    @keyframes spin { to { transform:rotate(360deg); } }
     .model-viz { display:grid; gap:10px; }
     .model-core { position:relative; min-height:146px; border:1px solid rgba(168,85,247,.22); border-radius:12px; background:rgba(8,10,18,.72); padding:12px; overflow:hidden; }
     .model-core::before { content:""; position:absolute; inset:10px; border:1px dashed rgba(255,255,255,.08); border-radius:10px; }
+    .update-beam { position:absolute; left:8%; right:8%; top:52%; height:2px; background:linear-gradient(90deg,transparent,rgba(34,197,94,.8),transparent); opacity:.2; z-index:1; animation:beamMove 2.2s linear infinite; }
+    .update-beam.active { opacity:1; }
+    @keyframes beamMove { from { transform:translateX(-24%); } to { transform:translateX(24%); } }
     .layer-stack { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; position:relative; z-index:1; }
     .layer { min-height:76px; border:1px solid rgba(255,255,255,.1); border-radius:8px; background:linear-gradient(180deg,rgba(23,29,42,.92),rgba(13,17,26,.92)); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; font-weight:900; }
     .layer.trainable { border-color:rgba(34,197,94,.45); color:#bbf7d0; animation:trainGlow 2.4s ease-in-out infinite; }
@@ -164,6 +191,10 @@
     .adapter-rail { margin-top:12px; display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
     .adapter-chip { flex:1; border:1px solid rgba(249,115,22,.28); background:rgba(249,115,22,.08); color:#fed7aa; border-radius:8px; padding:7px; text-align:center; font-size:11px; font-weight:900; animation:adapterFlow 2.6s ease-in-out infinite; }
     @keyframes adapterFlow { 50% { border-color:rgba(249,115,22,.65); box-shadow:0 0 24px rgba(249,115,22,.14); } }
+    .param-cloud { position:absolute; inset:16px; pointer-events:none; z-index:0; }
+    .param-dot { position:absolute; width:5px; height:5px; border-radius:50%; background:rgba(6,182,212,.55); box-shadow:0 0 12px rgba(6,182,212,.45); animation:paramFloat 3.4s ease-in-out infinite; animation-delay:var(--delay,0s); left:var(--x); top:var(--y); }
+    .param-dot.hot { background:rgba(34,197,94,.72); box-shadow:0 0 16px rgba(34,197,94,.5); }
+    @keyframes paramFloat { 50% { transform:translateY(-8px) scale(1.25); opacity:.55; } }
     .ratio-bar { height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:10px; }
     .ratio-fill { height:100%; width:var(--ratio,0%); min-width:3px; max-width:100%; background:linear-gradient(90deg,var(--green),var(--cyan)); animation:ratioEnter .9s ease both; }
     @keyframes ratioEnter { from { width:0; } }
@@ -186,7 +217,7 @@
     .metric-row:last-child { border-bottom:0; padding-bottom:0; }
     .metric-row code { color:var(--green); }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid { grid-template-columns:1fr; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.sim-grid { grid-template-columns:1fr; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
   </style>
 </head>
@@ -196,6 +227,7 @@
       <div class="brand"><span>LLM</span> Training Visualizer</div>
       <div class="status"><span class="pulse" id="pulse"></span><span id="statusText">等待 trace...</span></div>
       <div class="toolbar">
+        <button class="button active" id="followLatestCourse">跟随最新课程</button>
         <button class="button active" id="followCurrent">跟随当前步骤</button>
         <button class="button" id="toggleLive">暂停刷新</button>
         <button class="button" id="openLive">打开 live trace</button>
@@ -219,8 +251,16 @@
           <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
         </div>
         <div style="height:18px"></div>
-        <div class="panel-title">Course Archive</div>
-        <div class="course-list" id="courseList"></div>
+        <div class="panel-title">Course Switch</div>
+        <div class="course-picker">
+          <select class="course-select" id="courseSelect" aria-label="选择课程">
+            <option value="live">LIVE · latest course</option>
+          </select>
+          <div class="course-dashboard" id="courseDashboard"></div>
+        </div>
+        <div style="height:18px"></div>
+        <div class="panel-title">Course Progress</div>
+        <div class="course-meter-list" id="courseProgressList"></div>
       </aside>
 
       <section class="panel">
@@ -252,18 +292,19 @@
     const repoPathPrefixes = ["examples/", "lessons/", "docs/", "visualizer/", "checklists/"];
     const repoPathFiles = ["README.md", "ROADMAP.md", "LICENSE"];
     const fallbackCatalog = [
-      { lesson_id: "01-datasets", title: "Lesson 01 · Datasets Pipeline", trace: "traces/01-datasets.json", outputs: "lessons/01-datasets/outputs", topic: "JSONL -> Dataset -> split -> map" },
-      { lesson_id: "02-tokenizer", title: "Lesson 02 · AutoTokenizer and SFT Labels", trace: "traces/02-tokenizer.json", outputs: "lessons/02-tokenizer/outputs", topic: "text -> token ids -> labels" },
-      { lesson_id: "03-batching", title: "Lesson 03 · Batch and Collator", trace: "traces/03-batching.json", outputs: "lessons/03-batching/outputs", topic: "samples -> padded tensor batch" },
-      { lesson_id: "04-trainer", title: "Lesson 04 · Trainer Loop", trace: "traces/04-trainer.json", outputs: "lessons/04-trainer/outputs", topic: "forward -> loss -> backward -> update" },
-      { lesson_id: "05-lora", title: "Lesson 05 · Handwritten LoRA", trace: "traces/05-lora.json", outputs: "lessons/05-lora/outputs", topic: "frozen base + adapter delta" },
-      { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter" }
+      { lesson_id: "01-datasets", title: "Lesson 01 · Datasets Pipeline", trace: "traces/01-datasets.json", outputs: "lessons/01-datasets/outputs", topic: "JSONL -> Dataset -> split -> map", expected_events: 7 },
+      { lesson_id: "02-tokenizer", title: "Lesson 02 · AutoTokenizer and SFT Labels", trace: "traces/02-tokenizer.json", outputs: "lessons/02-tokenizer/outputs", topic: "text -> token ids -> labels", expected_events: 4 },
+      { lesson_id: "03-batching", title: "Lesson 03 · Batch and Collator", trace: "traces/03-batching.json", outputs: "lessons/03-batching/outputs", topic: "samples -> padded tensor batch", expected_events: 4 },
+      { lesson_id: "04-trainer", title: "Lesson 04 · Trainer Loop", trace: "traces/04-trainer.json", outputs: "lessons/04-trainer/outputs", topic: "forward -> loss -> backward -> update", expected_events: 24 },
+      { lesson_id: "05-lora", title: "Lesson 05 · Handwritten LoRA", trace: "traces/05-lora.json", outputs: "lessons/05-lora/outputs", topic: "frozen base + adapter delta", expected_events: 30 },
+      { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter", expected_events: 26 }
     ];
     let selectedCourseId = "live";
     let selectedTracePath = liveTracePath;
     let catalog = fallbackCatalog;
     let courseStates = [];
     let liveSummary = null;
+    let followLatestCourse = true;
     let activeEventId = null;
     let followCurrent = true;
     let live = true;
@@ -279,6 +320,17 @@
     };
     const kindClass = (kind) => `kind kind-${String(kind || "event").replace(/[^a-z0-9_-]/gi, "-").toLowerCase()}`;
 
+    $("followLatestCourse").addEventListener("click", () => {
+      followLatestCourse = true;
+      selectedCourseId = "live";
+      selectedTracePath = liveTracePath;
+      followCurrent = true;
+      activeEventId = null;
+      selectedField = null;
+      updateControls();
+      renderCourseControls();
+      if (lastTrace) void selectCourse("live", liveTracePath, { keepFollowLatest: true });
+    });
     $("followCurrent").addEventListener("click", () => {
       followCurrent = true;
       const currentId = getCurrentEventId(lastTrace);
@@ -293,6 +345,10 @@
     });
     $("openLive").textContent = "打开当前 trace";
     $("openLive").addEventListener("click", () => window.open(selectedTracePath, "_blank"));
+    $("courseSelect").addEventListener("change", (event) => {
+      const option = event.target.selectedOptions[0];
+      void selectCourse(event.target.value, option ? option.dataset.trace : liveTracePath);
+    });
 
     async function fetchJson(path) {
       const response = await fetch(`${path}?ts=${Date.now()}`, { cache: "no-store" });
@@ -324,9 +380,18 @@
           updated_at: traceSummary.updated_at,
           missingTrace: !traceSummary.available && outputsDetected,
           title: traceSummary.title || course.title,
+          expected_events: course.expected_events || traceSummary.events || 1,
         };
       }));
-      renderCourseList();
+      if (liveSummary && liveSummary.status === "running") {
+        followLatestCourse = true;
+        followCurrent = true;
+      }
+      if (followLatestCourse) {
+        selectedCourseId = "live";
+        selectedTracePath = liveTracePath;
+      }
+      renderCourseControls();
     }
 
     async function fetchTraceSummary(path, fallbackTitle) {
@@ -356,7 +421,7 @@
     }
 
     async function loadTrace() {
-      if (selectedCourseId === "live") {
+      if (followLatestCourse || selectedCourseId === "live") {
         try {
           usingDemo = false;
           return await fetchJson(liveTracePath);
@@ -393,10 +458,10 @@
       };
     }
 
-    function renderCourseList() {
+    function renderCourseControls() {
       const liveCard = {
         lesson_id: "live",
-        title: liveSummary && liveSummary.available ? liveSummary.title : "Live Trace",
+        title: liveSummary && liveSummary.available ? `LIVE · ${liveSummary.lesson_id} · ${liveSummary.title}` : "LIVE · latest course",
         trace: liveTracePath,
         topic: "正在运行或最后一次运行的课程",
         status: liveSummary && liveSummary.available ? liveSummary.status : "demo",
@@ -406,31 +471,25 @@
         executed: Boolean(liveSummary && liveSummary.available),
         isLive: true,
       };
-      const cards = [liveCard, ...courseStates];
-      $("courseList").innerHTML = cards.map((course) => `
-        <button type="button" class="${courseCardClass(course)}" data-course-id="${escapeAttr(course.lesson_id)}" data-trace="${escapeAttr(course.trace)}">
-          <div class="course-top">
-            <span class="course-id">${escapeHtml(course.lesson_id === "live" ? "LIVE" : course.lesson_id)}</span>
-            <span class="course-status">${escapeHtml(courseStatusLabel(course))}</span>
-          </div>
-          <div class="course-name">${escapeHtml(course.title)}</div>
-          <div class="course-meta">${escapeHtml(course.events ? `${course.events} events · ${course.updated_at}` : course.topic || "waiting for trace")}</div>
-        </button>
+      const options = [liveCard, ...courseStates];
+      $("courseSelect").innerHTML = options.map((course) => `
+        <option value="${escapeAttr(course.lesson_id)}" data-trace="${escapeAttr(course.trace)}">
+          ${escapeHtml(courseOptionLabel(course))}
+        </option>
       `).join("");
-      document.querySelectorAll(".course-card").forEach((card) => {
-        card.addEventListener("click", () => {
-          void selectCourse(card.dataset.courseId, card.dataset.trace);
-        });
-      });
+      $("courseSelect").value = selectedCourseId;
+      if (!$("courseSelect").value) $("courseSelect").value = "live";
+      updateControls();
     }
 
-    async function selectCourse(courseId, tracePath) {
+    async function selectCourse(courseId, tracePath, options = {}) {
       selectedCourseId = courseId;
       selectedTracePath = tracePath;
+      followLatestCourse = options.keepFollowLatest || courseId === "live";
       followCurrent = true;
       activeEventId = null;
       selectedField = null;
-      renderCourseList();
+      renderCourseControls();
       try {
         render(await loadTrace(), { forceScroll: true });
       } catch (error) {
@@ -438,13 +497,10 @@
       }
     }
 
-    function courseCardClass(course) {
-      const classes = ["course-card"];
-      if (course.lesson_id === selectedCourseId) classes.push("active");
-      if (course.isLive) classes.push("live");
-      else if (course.traceAvailable) classes.push("executed");
-      else if (course.outputsDetected || course.missingTrace) classes.push("missing");
-      return classes.join(" ");
+    function courseOptionLabel(course) {
+      const id = course.lesson_id === "live" ? "LIVE" : course.lesson_id;
+      const events = course.events ? `${course.events} events` : "no trace";
+      return `${id} · ${courseStatusLabel(course)} · ${events}`;
     }
 
     function courseStatusLabel(course) {
@@ -452,6 +508,97 @@
       if (course.traceAvailable) return course.status === "done" ? "executed" : course.status;
       if (course.outputsDetected || course.missingTrace) return "need rerun trace";
       return "not run";
+    }
+
+    function renderCourseDashboard(trace, selected, events) {
+      const coursePercent = courseProgressPercent(trace);
+      const stepPercent = selected ? stepProgressPercent(selected, trace, events) : 0;
+      const courseLabel = selectedCourseId === "live" ? `LIVE · ${trace.lesson_id || "-"}` : selectedCourseId;
+      $("courseDashboard").innerHTML = `
+        <div class="progress-block">
+          <div class="progress-head">
+            <span class="progress-name">${escapeHtml(courseLabel)}</span>
+            <span class="progress-percent">${formatPercent(coursePercent)}</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill course" style="--progress:${escapeAttr(formatProgress(coursePercent))}"></div></div>
+        </div>
+        <div class="progress-block">
+          <div class="progress-head">
+            <span class="progress-name">${escapeHtml(selected ? `STEP ${selected.id} · ${selected.name}` : "No step")}</span>
+            <span class="progress-percent">${formatPercent(stepPercent)}</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="--progress:${escapeAttr(formatProgress(stepPercent))}"></div></div>
+        </div>
+        <p class="subtle">课程和步骤进度都按本课 expected events 估算；课程完成后固定为 100%。</p>
+      `;
+    }
+
+    function renderCourseProgressList(activeTrace) {
+      $("courseProgressList").innerHTML = courseStates.map((course, index) => {
+        const isActive = activeTrace && activeTrace.lesson_id === course.lesson_id;
+        const percent = courseRowPercent(course, activeTrace);
+        return `
+          <div class="course-meter-row ${isActive ? "active" : ""}">
+            <div class="course-meter-top">
+              <span class="course-meter-name">${String(index + 1).padStart(2, "0")} · ${escapeHtml(course.title)}</span>
+              <span class="course-meter-state">${escapeHtml(formatPercent(percent))}</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill ${isActive ? "course" : ""}" style="--progress:${escapeAttr(formatProgress(percent))}"></div></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderNodeProgress(event, trace, events) {
+      const percent = stepProgressPercent(event, trace, events);
+      return `
+        <div class="node-progress">
+          <div class="progress-track"><div class="progress-fill" style="--progress:${escapeAttr(formatProgress(percent))}"></div></div>
+          <div class="node-percent">${formatPercent(percent)}</div>
+        </div>
+      `;
+    }
+
+    function courseProgressPercent(trace) {
+      if (!trace || !trace.lesson_id) return 0;
+      const events = trace.events || [];
+      const expected = expectedEventCount(trace);
+      const currentIndex = Math.max(0, getCurrentEventIndex(trace, events));
+      return trace.status === "done" ? 100 : clamp(((currentIndex + 1) / expected) * 100, 0, 100);
+    }
+
+    function stepProgressPercent(event, trace, events = trace.events || []) {
+      if (!event) return 0;
+      const index = events.findIndex((item) => item.id === event.id);
+      const currentIndex = index >= 0 ? index : getCurrentEventIndex(trace, events);
+      const expected = expectedEventCount(trace);
+      return clamp(((currentIndex + 1) / expected) * 100, 0, 100);
+    }
+
+    function courseRowPercent(course, activeTrace) {
+      if (activeTrace && activeTrace.lesson_id === course.lesson_id) {
+        const events = activeTrace.events || [];
+        const expected = Math.max(course.expected_events || 1, events.length || 1);
+        const currentIndex = getCurrentEventIndex(activeTrace, events);
+        return activeTrace.status === "done" ? 100 : clamp(((currentIndex + 1) / expected) * 100, 0, 100);
+      }
+      if (course.status === "done") return 100;
+      if (!course.traceAvailable) return 0;
+      const expected = Math.max(course.expected_events || 1, course.events || 1);
+      return clamp((course.events / expected) * 100, 0, 100);
+    }
+
+    function expectedEventCount(trace) {
+      const course = catalog.find((item) => item.lesson_id === trace.lesson_id)
+        || courseStates.find((item) => item.lesson_id === trace.lesson_id);
+      const eventCount = (trace.events || []).length;
+      return Math.max(1, course && course.expected_events ? course.expected_events : eventCount || 1, eventCount);
+    }
+
+    function getCurrentEventIndex(trace, events) {
+      const currentId = getCurrentEventId(trace);
+      const index = events.findIndex((event) => event.id === currentId);
+      return index >= 0 ? index : Math.max(0, events.length - 1);
     }
 
     function render(trace, options = {}) {
@@ -480,13 +627,16 @@
         : `${selectedCourseId === "live" ? "Live" : selectedCourseId} · ${trace.status === "done" ? "已完成" : trace.status || "读取中"} · ${trace.updated_at || ""}`;
       $("pulse").style.background = trace.status === "done" ? "var(--cyan)" : "var(--green)";
       updateControls();
-      renderCourseList();
+      renderCourseControls();
+      renderCourseDashboard(trace, selected, events);
+      renderCourseProgressList(trace);
 
       $("flow").innerHTML = events.length ? events.map((event) => `
         <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}">
           <div class="node-id">STEP ${event.id}</div>
           <div class="node-name">${escapeHtml(event.name)}</div>
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>
+          ${renderNodeProgress(event, trace, events)}
           <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
         </article>
       `).join("") : `<div class="empty" style="min-width:100%">${escapeHtml(trace.missing_trace ? "这个课程检测到了 outputs，但还没有归档 trace。重新运行课程后会自动生成。" : "暂无事件。")}</div>`;
@@ -525,8 +675,19 @@
       const metric = latestMetric(event);
       const series = metricSeries(events);
       const adapterVisible = hasAdapter(event);
+      const coursePercent = courseProgressPercent(trace);
+      const stepPercent = stepProgressPercent(event, trace, events);
       $("visualStage").innerHTML = `
         <div class="stage">
+          <div style="padding:15px 15px 0;">
+            <div class="progress-block">
+              <div class="progress-head">
+                <span class="progress-name">Course ${escapeHtml(trace.lesson_id || "-")} · Step ${escapeHtml(event.id)}</span>
+                <span class="progress-percent">${formatPercent(coursePercent)} / ${formatPercent(stepPercent)}</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill course" style="--progress:${escapeAttr(formatProgress(coursePercent))}"></div></div>
+            </div>
+          </div>
           <div class="stage-grid">
             <div class="stage-cell">
               <div class="stage-label">Data Movement</div>
@@ -549,12 +710,28 @@
               <div class="tensor-strip">
                 ${tensors.length ? tensors.map((tensor) => `<span class="tensor-pill">${escapeHtml(tensor.name || "tensor")} ${escapeHtml(JSON.stringify(tensor.shape || ""))}</span>`).join("") : `<span class="tensor-pill">no tensor emitted</span>`}
               </div>
+              <div class="sim-grid">
+                <div class="sim-card">
+                  <div class="stage-label">Token Stream</div>
+                  <div class="token-stream">${renderTokenStream(event)}</div>
+                </div>
+                <div class="sim-card">
+                  <div class="stage-label">Batch Matrix</div>
+                  <div class="batch-matrix">${renderBatchMatrix(event)}</div>
+                </div>
+                <div class="sim-card">
+                  <div class="stage-label">Gradient Loop</div>
+                  <div class="gradient-loop"><span>${escapeHtml(gradientLoopLabel(event))}</span></div>
+                </div>
+              </div>
               <p class="stage-note">${escapeHtml(event.summary || "")}</p>
             </div>
             <div class="stage-cell">
               <div class="stage-label">Model Change</div>
               <div class="model-viz">
                 <div class="model-core">
+                  <div class="param-cloud">${renderParamDots(event)}</div>
+                  <div class="update-beam ${event.kind === "train" ? "active" : ""}"></div>
                   <div class="layer-stack">
                     ${renderLayers(event)}
                   </div>
@@ -597,8 +774,8 @@
     function dataSummary(fields) {
       const entries = Object.entries(fields);
       if (!entries.length) return "empty";
-      const first = entries.slice(0, 3).map(([key, value]) => `${key}: ${previewValue(value)}`);
-      return first.join(" · ");
+      const first = entries.slice(0, 3).map(([key, value]) => `${key}: ${compactText(previewValue(value), 54)}`);
+      return compactText(first.join(" · "), 150);
     }
 
     function processLabel(event) {
@@ -678,6 +855,55 @@
       return `<svg class="sparkline" viewBox="0 0 240 86" role="img" aria-label="Metric sparkline"><path d="${path}"></path><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="5"></circle></svg>`;
     }
 
+    function renderTokenStream(event) {
+      const fields = { ...(event.inputs || {}), ...(event.outputs || {}) };
+      const seedText = Object.entries(fields).slice(0, 4).map(([key, value]) => `${key}:${previewValue(value)}`).join(" ");
+      const tokens = (seedText || event.name || event.kind || "trace")
+        .replace(/[{}[\]",]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 12);
+      return tokens.map((token, index) => `
+        <span class="token-chip" style="--delay:${(index * 0.08).toFixed(2)}s">${escapeHtml(compactText(token, 14))}</span>
+      `).join("");
+    }
+
+    function renderBatchMatrix(event) {
+      const hotEvery = event.kind === "train" ? 2 : event.kind === "eval" ? 3 : 4;
+      return Array.from({ length: 24 }, (_, index) => {
+        const hot = index % hotEvery === 0 || (event.kind === "data" && index < 8);
+        return `<span class="matrix-cell ${hot ? "hot" : ""}" style="--delay:${(index * 0.035).toFixed(3)}s"></span>`;
+      }).join("");
+    }
+
+    function gradientLoopLabel(event) {
+      const kind = String(event.kind || "").toLowerCase();
+      if (kind.includes("train")) return "loss -> grad -> update";
+      if (kind.includes("eval")) return "forward -> loss";
+      if (kind.includes("data") || kind.includes("token") || kind.includes("batch")) return "shape -> tensor";
+      if (kind.includes("checkpoint")) return "state -> disk";
+      return "flow";
+    }
+
+    function renderParamDots(event) {
+      const trainHot = event.kind === "train" || hasAdapter(event);
+      return Array.from({ length: 24 }, (_, index) => {
+        const x = 8 + ((index * 37) % 84);
+        const y = 12 + ((index * 23) % 70);
+        const hot = trainHot && index % 3 === 0;
+        return `<span class="param-dot ${hot ? "hot" : ""}" style="--x:${x}%;--y:${y}%;--delay:${(index * 0.07).toFixed(2)}s"></span>`;
+      }).join("");
+    }
+
+    function renderSummaryBlock(text) {
+      if (!text) return `<div class="detail-summary">No summary.</div>`;
+      const compact = compactText(text, 140);
+      return `
+        <div class="detail-summary">${escapeHtml(compact)}</div>
+        ${text.length > 140 ? `<details class="reveal"><summary>展开完整说明</summary><p class="subtle">${escapeHtml(text)}</p></details>` : ""}
+      `;
+    }
+
     function renderDetail(event) {
       if (!event) {
         const trace = lastTrace || {};
@@ -690,7 +916,7 @@
         <div class="detail-head">
           <div>
             <div class="detail-title">${escapeHtml(event.name)}</div>
-            <div class="detail-summary">${escapeHtml(event.summary || "")}</div>
+            ${renderSummaryBlock(event.summary || "")}
           </div>
           <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
         </div>
@@ -835,8 +1061,10 @@
           <div class="meta-item"><div class="meta-label">type</div><div class="meta-value">${escapeHtml(valueType(field.value))}</div></div>
           <div class="meta-item"><div class="meta-label">path</div><div class="meta-value">${escapeHtml(pathInfo ? pathInfo.repoPath : "-")}</div></div>
         </div>
-        <div class="box-title">Field Value</div>
-        <pre>${escapeHtml(json(field.value))}</pre>
+        <details class="reveal" open>
+          <summary>Field Value</summary>
+          <pre>${escapeHtml(json(field.value))}</pre>
+        </details>
         ${pathInfo ? renderFilePanel(field, pathInfo) : ""}
       `;
     }
@@ -854,7 +1082,10 @@
           </div>
           <a class="file-link" href="${escapeAttr(toRepoUrl(pathInfo.repoPath))}" target="_blank" rel="noreferrer">打开原始路径</a>
         </div>
-        <pre class="file-content">${escapeHtml(content)}</pre>
+        <details class="reveal" open>
+          <summary>File Content</summary>
+          <pre class="file-content">${escapeHtml(content)}</pre>
+        </details>
       `;
     }
 
@@ -928,9 +1159,11 @@
     }
 
     function updateControls() {
+      $("followLatestCourse").classList.toggle("active", followLatestCourse);
+      $("followLatestCourse").textContent = followLatestCourse ? "正在跟随最新课程" : "回到最新课程";
       $("followCurrent").classList.toggle("active", followCurrent);
       $("followCurrent").textContent = followCurrent ? "正在跟随当前步骤" : "回到当前步骤";
-      $("followState").textContent = followCurrent ? "auto" : "manual";
+      $("followState").textContent = followLatestCourse ? "latest" : (followCurrent ? "course" : "manual");
     }
 
     function valueType(value) {
@@ -1000,11 +1233,29 @@
       return ms >= 1000 ? `${Math.round(ms / 100) / 10}s` : `${ms}ms`;
     }
 
+    function formatProgress(value) {
+      return `${clamp(value, 0, 100).toFixed(1)}%`;
+    }
+
+    function formatPercent(value) {
+      return `${Math.round(clamp(value, 0, 100))}%`;
+    }
+
     function formatNumber(value) {
       if (!Number.isFinite(value)) return String(value);
       if (Math.abs(value) >= 100) return value.toFixed(1);
       if (Math.abs(value) >= 1) return value.toFixed(3);
       return value.toPrecision(3);
+    }
+
+    function clamp(value, min, max) {
+      if (!Number.isFinite(value)) return min;
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function compactText(value, limit) {
+      const text = String(value || "").replace(/\s+/g, " ").trim();
+      return text.length > limit ? `${text.slice(0, Math.max(0, limit - 3))}...` : text;
     }
 
     function escapeHtml(value) {
@@ -1034,7 +1285,7 @@
 
     async function init() {
       await loadCatalog();
-      renderCourseList();
+      renderCourseControls();
       tick();
     }
     init();

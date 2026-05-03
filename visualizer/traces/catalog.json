@@ -6,42 +6,48 @@
       "title": "Lesson 01 · Datasets Pipeline",
       "trace": "traces/01-datasets.json",
       "outputs": "lessons/01-datasets/outputs",
-      "topic": "JSONL -> Dataset -> split -> filter -> map"
+      "topic": "JSONL -> Dataset -> split -> filter -> map",
+      "expected_events": 7
     },
     {
       "lesson_id": "02-tokenizer",
       "title": "Lesson 02 · AutoTokenizer and SFT Labels",
       "trace": "traces/02-tokenizer.json",
       "outputs": "lessons/02-tokenizer/outputs",
-      "topic": "text -> input_ids / attention_mask / labels"
+      "topic": "text -> input_ids / attention_mask / labels",
+      "expected_events": 4
     },
     {
       "lesson_id": "03-batching",
       "title": "Lesson 03 · Batch and Collator",
       "trace": "traces/03-batching.json",
       "outputs": "lessons/03-batching/outputs",
-      "topic": "list[dict] -> padded tensor batch"
+      "topic": "list[dict] -> padded tensor batch",
+      "expected_events": 4
     },
     {
       "lesson_id": "04-trainer",
       "title": "Lesson 04 · Trainer Loop",
       "trace": "traces/04-trainer.json",
       "outputs": "lessons/04-trainer/outputs",
-      "topic": "forward -> loss -> backward -> optimizer step"
+      "topic": "forward -> loss -> backward -> optimizer step",
+      "expected_events": 24
     },
     {
       "lesson_id": "05-lora",
       "title": "Lesson 05 · Handwritten LoRA",
       "trace": "traces/05-lora.json",
       "outputs": "lessons/05-lora/outputs",
-      "topic": "frozen base + trainable LoRA adapter"
+      "topic": "frozen base + trainable LoRA adapter",
+      "expected_events": 30
     },
     {
       "lesson_id": "06-peft-lora",
       "title": "Lesson 06 · PEFT Qwen LoRA",
       "trace": "traces/06-peft-lora.json",
       "outputs": "lessons/06-peft-lora/outputs",
-      "topic": "real Hugging Face model + PEFT adapter"
+      "topic": "real Hugging Face model + PEFT adapter",
+      "expected_events": 26
     }
   ]
 }
