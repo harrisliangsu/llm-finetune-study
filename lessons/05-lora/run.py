@@ -31,6 +31,7 @@ from lessons.common.lesson_common import (
     make_sft_tokenize_fn,
     resolve_project_path,
 )
+from lessons.common.visual_trace import VisualTrace, make_trainer_trace_callback
 
 
 def require_torch_and_trainer():
@@ -282,6 +283,8 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=4)
     parser.add_argument("--alpha", type=int, default=8)
     parser.add_argument("--dropout", type=float, default=0.0)
+    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
     torch, nn, Trainer, TrainingArguments, default_data_collator, set_seed = require_torch_and_trainer()
@@ -292,6 +295,7 @@ def main() -> None:
     adapter_path = resolve_project_path(args.adapter_path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
+    trace = VisualTrace("05-lora", "Lesson 05 · Handwritten LoRA", args.trace, args.trace_delay)
 
     tokenizer = ensure_local_auto_tokenizer(args.data, args.tokenizer_dir)
     splits = load_sft_splits(args.data)
@@ -302,6 +306,17 @@ def main() -> None:
     )
     trainer_dataset = tokenized.remove_columns(["prompt_length", "answer_length"]).with_format(
         "torch", columns=["input_ids", "attention_mask", "labels"]
+    )
+    trace.event(
+        "prepare SFT tensors",
+        "data",
+        "复用前面课程的 SFT 数据字段，LoRA 只改变模型训练方式，不改变数据格式。",
+        inputs={"data": args.data, "max_length": args.max_length},
+        outputs={"train_rows": len(tokenized["train"]), "validation_rows": len(tokenized["validation"])},
+        tensors=[
+            {"name": "input_ids", "shape": [args.max_length]},
+            {"name": "labels", "shape": [args.max_length]},
+        ],
     )
 
     prompt = "### Instruction:\n解释什么是梯度累积\n\n### Response:\n"
@@ -320,6 +335,20 @@ def main() -> None:
     )
     trainable_params, total_params = count_trainable_parameters(model)
     trainable_ratio = trainable_params / total_params
+    trace.event(
+        "freeze base and attach LoRA",
+        "model",
+        "冻结 tiny base，在 lm_head 旁边挂 LoRA A/B。后续 optimizer 只更新 adapter。",
+        inputs={"target_module": target_module, "rank": args.rank, "alpha": args.alpha},
+        outputs={"trainable_params": trainable_params, "total_params": total_params},
+        model={
+            "base": "frozen",
+            "adapter": "trainable",
+            "target_module": target_module,
+            "trainable_ratio": f"{trainable_ratio:.4%}",
+            "delta_formula": "base_logits + lora_B(lora_A(x)) * alpha/r",
+        },
+    )
 
     training_args = make_training_arguments(
         TrainingArguments,
@@ -346,6 +375,7 @@ def main() -> None:
         train_dataset=trainer_dataset["train"],
         eval_dataset=trainer_dataset["validation"],
         data_collator=default_data_collator,
+        callbacks=[make_trainer_trace_callback(trace, "LoRA Trainer")],
     )
 
     print("Step 1: freeze base and attach LoRA")
@@ -357,20 +387,51 @@ def main() -> None:
     print("\nStep 2: evaluate before LoRA training")
     eval_before = trainer.evaluate()
     print(eval_before)
+    trace.event(
+        "evaluate before LoRA training",
+        "eval",
+        "训练 adapter 前先测 validation loss，作为 LoRA delta 还没学习时的基线。",
+        outputs={"eval_loss": eval_before.get("eval_loss")},
+        metrics=eval_before,
+    )
 
     print("\nStep 3: train LoRA adapter with Trainer")
     train_output = trainer.train()
     print(train_output.metrics)
+    trace.event(
+        "train LoRA adapter",
+        "train",
+        "Trainer 反向传播时梯度只写入 lora_A/lora_B，base 权重保持不变。",
+        inputs={"max_steps": args.max_steps, "learning_rate": args.learning_rate},
+        outputs={"train_loss": train_output.metrics.get("train_loss")},
+        metrics=train_output.metrics,
+        model={"base": "frozen", "updated": ["lora_A", "lora_B"]},
+    )
 
     print("\nStep 4: evaluate after LoRA training")
     eval_after = trainer.evaluate()
     print(eval_after)
+    trace.event(
+        "evaluate after LoRA training",
+        "eval",
+        "训练后观察 adapter 对 validation loss 的影响。",
+        outputs={"eval_loss": eval_after.get("eval_loss")},
+        metrics=eval_after,
+    )
 
     print("\nStep 5: save adapter-only checkpoint")
     save_lora_adapter(torch, model, adapter_path, target_module, args.rank, args.alpha)
     delta_norm = adapter_delta_norm(model)
     print("adapter path:", adapter_path)
     print("LoRA B norm:", delta_norm)
+    trace.event(
+        "save adapter-only checkpoint",
+        "checkpoint",
+        "只保存 LoRA adapter 参数，不保存完整 tiny base model。",
+        inputs={"target_module": target_module},
+        outputs={"adapter_path": adapter_path, "lora_B_norm": delta_norm},
+        model={"saved": ["lora_A", "lora_B"], "base_saved": False},
+    )
 
     generated_after = greedy_generate(torch, model, tokenizer, prompt)
 
@@ -387,11 +448,30 @@ def main() -> None:
     )
     load_lora_adapter(torch, loaded_model, adapter_path)
     generated_loaded = greedy_generate(torch, loaded_model, tokenizer, prompt)
+    trace.event(
+        "reload adapter into fresh base",
+        "checkpoint",
+        "重新创建 fresh base，再加载 adapter，验证 adapter 可以单独复用。",
+        inputs={"adapter_path": adapter_path},
+        outputs={"loaded_generation_matches_training_path": generated_loaded == generated_after},
+        model={"base": "fresh", "adapter": "loaded"},
+    )
 
     print("\nStep 7: fixed prompt generation")
     print("base:", generated_before)
     print("trained LoRA:", generated_after)
     print("loaded adapter:", generated_loaded)
+    trace.event(
+        "generation comparison",
+        "generation",
+        "对比 base、训练后 LoRA、重新加载 adapter 后的固定 prompt 输出。",
+        inputs={"prompt": prompt},
+        outputs={
+            "base": generated_before,
+            "trained_lora": generated_after,
+            "loaded_adapter": generated_loaded,
+        },
+    )
 
     write_report(
         report_path,
@@ -414,6 +494,7 @@ def main() -> None:
         args.max_steps,
         args.max_length,
     )
+    trace.finish("Lesson 05 完成：手写 LoRA 的数据流、模型变化和 adapter 保存加载已可视化。", metrics={"trainable_ratio": trainable_ratio})
     print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
 
 

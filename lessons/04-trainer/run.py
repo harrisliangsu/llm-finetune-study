@@ -25,6 +25,7 @@ from lessons.common.lesson_common import (
     make_sft_tokenize_fn,
     resolve_project_path,
 )
+from lessons.common.visual_trace import VisualTrace, make_trainer_trace_callback
 
 
 def require_torch_and_trainer():
@@ -178,6 +179,8 @@ def main() -> None:
     parser.add_argument("--max-length", type=int, default=96)
     parser.add_argument("--max-steps", type=int, default=30)
     parser.add_argument("--learning-rate", type=float, default=5e-3)
+    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
     torch, nn, Trainer, TrainingArguments, default_data_collator, set_seed = require_torch_and_trainer()
@@ -187,6 +190,7 @@ def main() -> None:
     output_dir = resolve_project_path(args.output_dir)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
+    trace = VisualTrace("04-trainer", "Lesson 04 · Trainer Loop", args.trace, args.trace_delay)
 
     tokenizer = ensure_local_auto_tokenizer(args.data, args.tokenizer_dir)
     splits = load_sft_splits(args.data)
@@ -198,9 +202,34 @@ def main() -> None:
     trainer_dataset = tokenized.remove_columns(["prompt_length", "answer_length"]).with_format(
         "torch", columns=["input_ids", "attention_mask", "labels"]
     )
+    trace.event(
+        "prepare tokenized dataset",
+        "data",
+        "Trainer 需要的 train/eval Dataset 已准备好，每条样本都有 input_ids、attention_mask、labels。",
+        inputs={"data": args.data, "tokenizer_dir": args.tokenizer_dir, "max_length": args.max_length},
+        outputs={"train_rows": len(tokenized["train"]), "validation_rows": len(tokenized["validation"])},
+        tensors=[
+            {"name": "input_ids", "shape": [args.max_length]},
+            {"name": "attention_mask", "shape": [args.max_length]},
+            {"name": "labels", "shape": [args.max_length]},
+        ],
+    )
 
     model = build_tiny_causal_lm(torch, nn, len(tokenizer), tokenizer.pad_token_id)
     trainable_params, total_params = count_trainable_parameters(model)
+    trace.event(
+        "build tiny causal LM",
+        "model",
+        "创建一个本地 tiny causal LM。Lesson 04 是全参数训练，所有可训练参数都会被 optimizer 更新。",
+        inputs={"vocab_size": len(tokenizer), "pad_token_id": tokenizer.pad_token_id},
+        outputs={"trainable_params": trainable_params, "total_params": total_params},
+        model={
+            "mode": "full tiny training",
+            "base": "trainable",
+            "adapter": "none",
+            "trainable_ratio": f"{trainable_params / total_params:.4%}",
+        },
+    )
 
     training_args = make_training_arguments(
         TrainingArguments,
@@ -227,24 +256,57 @@ def main() -> None:
         train_dataset=trainer_dataset["train"],
         eval_dataset=trainer_dataset["validation"],
         data_collator=default_data_collator,
+        callbacks=[make_trainer_trace_callback(trace, "Tiny Trainer")],
     )
 
     print("Step 1: evaluate before training")
     eval_before = trainer.evaluate()
     print(eval_before)
+    trace.event(
+        "evaluate before training",
+        "eval",
+        "训练前先在 validation 上测一次，作为参数更新前的基线。",
+        inputs={"eval_rows": len(tokenized["validation"])},
+        outputs={"eval_loss": eval_before.get("eval_loss")},
+        metrics=eval_before,
+    )
 
     print("\nStep 2: train tiny causal LM with Trainer")
     train_output = trainer.train()
     print(train_output.metrics)
+    trace.event(
+        "train tiny causal LM",
+        "train",
+        "Trainer 完成 forward、loss、backward 和 optimizer step，tiny model 本体权重已经更新。",
+        inputs={"max_steps": args.max_steps, "learning_rate": args.learning_rate},
+        outputs={"train_loss": train_output.metrics.get("train_loss")},
+        metrics=train_output.metrics,
+        model={"updated": "embedding/rnn/lm_head", "adapter": "none"},
+    )
 
     print("\nStep 3: evaluate after training")
     eval_after = trainer.evaluate()
     print(eval_after)
+    trace.event(
+        "evaluate after training",
+        "eval",
+        "训练后再次评估，观察 validation loss 是否改善或过拟合。",
+        inputs={"eval_rows": len(tokenized["validation"])},
+        outputs={"eval_loss": eval_after.get("eval_loss")},
+        metrics=eval_after,
+    )
 
     prompt = "### Instruction:\n解释什么是梯度累积\n\n### Response:\n"
     generated_text = greedy_generate(torch, model, tokenizer, prompt)
     print("\nStep 4: fixed prompt generation")
     print(generated_text)
+    trace.event(
+        "fixed prompt generation",
+        "generation",
+        "用固定 prompt 看训练后的 tiny model 生成效果。这里重在验证流程，不追求回答质量。",
+        inputs={"prompt": prompt},
+        outputs={"generated_text": generated_text},
+    )
 
     write_report(
         report_path,
@@ -259,6 +321,7 @@ def main() -> None:
         args.max_steps,
         args.max_length,
     )
+    trace.finish("Lesson 04 完成：全参数 tiny model 训练闭环已经可视化。", metrics={"eval_loss_after": eval_after.get("eval_loss")})
     print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
 
 

@@ -11,16 +11,19 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from pathlib import Path
 from textwrap import dedent
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
 LESSON_OUTPUTS = Path(__file__).resolve().parent / "outputs"
 os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
 os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
 os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
 from datasets import DatasetDict, load_dataset
+from lessons.common.visual_trace import VisualTrace
 
 
 PAD_ID = 0
@@ -168,35 +171,83 @@ def main() -> None:
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/01-datasets/report.md")
     parser.add_argument("--max-length", type=int, default=192)
+    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
     data_path = Path(args.data)
     report_path = Path(args.report)
     report_path.parent.mkdir(parents=True, exist_ok=True)
+    trace = VisualTrace("01-datasets", "Lesson 01 · Datasets Pipeline", args.trace, args.trace_delay)
 
     raw = load_dataset("json", data_files=str(data_path), split="train")
     print("Step 1: load_dataset")
     print(raw)
     print("first sample:", raw[0])
+    trace.event(
+        "load_dataset",
+        "data",
+        "把本地 JSONL 文件读成 Hugging Face Dataset，普通文本数据开始进入可处理的数据对象。",
+        inputs={"data_file": data_path, "format": "jsonl"},
+        outputs={"rows": len(raw), "columns": raw.column_names},
+        sample=dict(raw[0]),
+    )
 
     print("\nStep 2: train_test_split")
     splits = raw.train_test_split(test_size=0.2, seed=42)
     splits = DatasetDict({"train": splits["train"], "validation": splits["test"]})
     print(splits)
+    trace.event(
+        "train_test_split",
+        "data",
+        "固定 seed 后切出 train/validation，训练和观察泛化开始分离。",
+        inputs={"rows": len(raw), "test_size": 0.2, "seed": 42},
+        outputs={"train_rows": len(splits["train"]), "validation_rows": len(splits["validation"])},
+    )
 
     print("\nStep 3: filter empty outputs")
+    train_rows_before_filter = len(splits["train"])
+    validation_rows_before_filter = len(splits["validation"])
     splits = splits.filter(lambda item: bool(str(item["output"]).strip()))
     print(splits)
+    trace.event(
+        "filter empty outputs",
+        "data_quality",
+        "删除没有标准回答的样本，避免模型学习空答案。",
+        inputs={
+            "train_rows_before": train_rows_before_filter,
+            "validation_rows_before": validation_rows_before_filter,
+        },
+        outputs={"train_rows": len(splits["train"]), "validation_rows": len(splits["validation"])},
+    )
 
     print("\nStep 4: batched map to input_ids/attention_mask/labels")
     tokenizer = ToyCharTokenizer()
     tokenized = splits.map(
         make_tokenize_fn(tokenizer, args.max_length),
         batched=True,
+        load_from_cache_file=False,
         remove_columns=splits["train"].column_names,
     )
     print(tokenized)
     print("tokenized train columns:", tokenized["train"].column_names)
+    first_tokenized = tokenized["train"][0]
+    trace.event(
+        "map tokenize_batch",
+        "transform",
+        "把 instruction/input/output 转成训练需要的 input_ids、attention_mask、labels。",
+        inputs={"columns": splits["train"].column_names, "max_length": args.max_length},
+        outputs={"columns": tokenized["train"].column_names, "toy_vocab_size": len(tokenizer.char_to_id) + 3},
+        tensors=[
+            {"name": "input_ids", "shape": [args.max_length], "meaning": "模型输入 token id"},
+            {"name": "attention_mask", "shape": [args.max_length], "meaning": "真实 token 和 padding 标记"},
+            {"name": "labels", "shape": [args.max_length], "meaning": "prompt 为 -100，answer 参与 loss"},
+        ],
+        sample={
+            "prompt_length": first_tokenized["prompt_length"],
+            "answer_length": first_tokenized["answer_length"],
+        },
+    )
 
     print("\nStep 5: inspect labels != -100")
     sample = tokenized["train"][0]
@@ -204,14 +255,36 @@ def main() -> None:
     print("prompt_length:", sample["prompt_length"])
     print("answer_length:", sample["answer_length"])
     print("decoded learned labels:", tokenizer.decode(learned_label_ids))
+    trace.event(
+        "inspect labels",
+        "loss_mask",
+        "检查 labels 中非 -100 的区域，确认 loss 只学习回答，不学习 prompt。",
+        inputs={"labels": "tokenized['train'][0]['labels']"},
+        outputs={"decoded_learned_labels": tokenizer.decode(learned_label_ids)},
+        tensors=[
+            {"name": "labels", "shape": [args.max_length], "masked_prompt_tokens": sample["prompt_length"], "learned_answer_tokens": len(learned_label_ids)}
+        ],
+    )
 
     print("\nStep 6: with_format('numpy')")
     formatted = tokenized.with_format("numpy", columns=["input_ids", "attention_mask", "labels"])
     formatted_sample = formatted["train"][0]
     print("input_ids shape:", formatted_sample["input_ids"].shape)
     print("labels shape:", formatted_sample["labels"].shape)
+    trace.event(
+        "with_format numpy",
+        "tensor",
+        "Dataset 取样时返回 numpy array，后续课程会继续换成 torch tensor。",
+        inputs={"columns": ["input_ids", "attention_mask", "labels"]},
+        outputs={"format": "numpy"},
+        tensors=[
+            {"name": "input_ids", "shape": list(formatted_sample["input_ids"].shape)},
+            {"name": "labels", "shape": list(formatted_sample["labels"].shape)},
+        ],
+    )
 
     write_report(report_path, raw, splits, tokenized, tokenizer, args.max_length)
+    trace.finish("Lesson 01 完成：数据已经从 JSONL 变成 SFT 训练字段。")
     print(f"\nReport written: {report_path}")
 
 

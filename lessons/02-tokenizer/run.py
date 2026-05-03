@@ -26,6 +26,7 @@ from lessons.common.lesson_common import (
     resolve_project_path,
     tokenize_sft_row,
 )
+from lessons.common.visual_trace import VisualTrace
 
 
 def preview_ids(values: list[int], limit: int = 40) -> str:
@@ -130,20 +131,53 @@ def main() -> None:
     parser.add_argument("--report", default="lessons/02-tokenizer/report.md")
     parser.add_argument("--tokenizer-dir", default="lessons/02-tokenizer/outputs/local-sft-tokenizer")
     parser.add_argument("--max-length", type=int, default=96)
+    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
     report_path = resolve_project_path(args.report)
     report_path.parent.mkdir(parents=True, exist_ok=True)
+    trace = VisualTrace("02-tokenizer", "Lesson 02 · AutoTokenizer and SFT Labels", args.trace, args.trace_delay)
 
     tokenizer = ensure_local_auto_tokenizer(args.data, args.tokenizer_dir)
     splits = load_sft_splits(args.data)
     sample = splits["train"][0]
+    trace.event(
+        "load local AutoTokenizer",
+        "tokenizer",
+        "从课程输出目录加载真实 Hugging Face fast tokenizer，文本即将变成 token id。",
+        inputs={"tokenizer_dir": args.tokenizer_dir, "data": args.data},
+        outputs={
+            "tokenizer_class": tokenizer.__class__.__name__,
+            "vocab_size": len(tokenizer),
+            "pad_token_id": tokenizer.pad_token_id,
+            "eos_token_id": tokenizer.eos_token_id,
+        },
+        sample=dict(sample),
+    )
     tokenized = tokenize_sft_row(
         tokenizer,
         sample["instruction"],
         sample["input"],
         sample["output"],
         args.max_length,
+    )
+    trace.event(
+        "build prompt and tokenize",
+        "transform",
+        "把 instruction/input/output 拼成 prompt + answer，再编码成 input_ids、attention_mask、labels。",
+        inputs={"instruction": sample["instruction"], "input": sample["input"], "max_length": args.max_length},
+        outputs={
+            "prompt_tokens": len(tokenized["prompt_ids"]),
+            "answer_tokens": len(tokenized["answer_ids"]),
+            "input_ids_length": len(tokenized["input_ids"]),
+        },
+        tensors=[
+            {"name": "input_ids", "shape": [len(tokenized["input_ids"])], "preview": tokenized["input_ids"][:16]},
+            {"name": "attention_mask", "shape": [len(tokenized["attention_mask"])], "preview": tokenized["attention_mask"][:16]},
+            {"name": "labels", "shape": [len(tokenized["labels"])], "preview": tokenized["labels"][:16]},
+        ],
+        sample={"prompt": tokenized["prompt"], "answer": tokenized["answer"]},
     )
 
     print("Step 1: load local AutoTokenizer")
@@ -158,8 +192,25 @@ def main() -> None:
 
     print("\nStep 3: inspect labels != -100")
     print("decoded learned labels:", decode_learned_labels(tokenizer, tokenized["labels"]))
+    learned_label_ids = [token_id for token_id in tokenized["labels"] if token_id != IGNORE_INDEX]
+    trace.event(
+        "inspect labels != -100",
+        "loss_mask",
+        "验证 SFT labels 只让 response 区域参与 loss，prompt 和 padding 都被忽略。",
+        inputs={"labels": "prompt positions are -100"},
+        outputs={"decoded_learned_labels": decode_learned_labels(tokenizer, tokenized["labels"])},
+        tensors=[
+            {
+                "name": "labels",
+                "shape": [len(tokenized["labels"])],
+                "ignored_tokens": sum(1 for token_id in tokenized["labels"] if token_id == IGNORE_INDEX),
+                "learned_tokens": len(learned_label_ids),
+            }
+        ],
+    )
 
     write_report(report_path, tokenizer, sample, tokenized, args.max_length)
+    trace.finish("Lesson 02 完成：一条 SFT 样本已经变成模型可训练的 token/label 张量。")
     print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
 
 

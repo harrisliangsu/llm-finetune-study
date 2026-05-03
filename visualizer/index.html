@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Study Visualizer</title>
+  <style>
+    :root {
+      --bg:#080a12; --panel:#111620; --panel-2:#171d2a; --panel-3:#0d111a;
+      --ink:#e8edf8; --muted:#8992aa; --faint:#586074; --line:rgba(255,255,255,.08);
+      --blue:#3b82f6; --cyan:#06b6d4; --green:#22c55e; --gold:#eab308; --orange:#f97316; --purple:#a855f7; --red:#ef4444;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      min-height:100vh;
+      background:
+        linear-gradient(180deg, rgba(8,10,18,.96), rgba(8,10,18,1)),
+        radial-gradient(circle at 20% 0%, rgba(59,130,246,.14), transparent 34%),
+        radial-gradient(circle at 75% 15%, rgba(34,197,94,.08), transparent 30%);
+      color:var(--ink);
+      font-family:-apple-system,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;
+      line-height:1.55;
+    }
+    code, pre, .mono { font-family:"SF Mono",Menlo,Consolas,monospace; }
+    .shell { max-width:1440px; margin:0 auto; padding:22px; }
+    .topbar {
+      height:64px; display:flex; align-items:center; justify-content:space-between; gap:18px;
+      border:1px solid var(--line); border-radius:12px; background:rgba(17,22,32,.84);
+      backdrop-filter:blur(18px); padding:0 18px; position:sticky; top:12px; z-index:10;
+    }
+    .brand { font-size:15px; font-weight:900; letter-spacing:0; white-space:nowrap; }
+    .brand span { color:var(--cyan); }
+    .status { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; overflow:hidden; }
+    .pulse { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(34,197,94,.45); animation:pulse 1.5s infinite; flex:0 0 auto; }
+    @keyframes pulse { 70% { box-shadow:0 0 0 10px rgba(34,197,94,0); } 100% { box-shadow:0 0 0 0 rgba(34,197,94,0); } }
+    .toolbar { display:flex; align-items:center; gap:10px; }
+    .button {
+      border:1px solid var(--line); background:var(--panel-2); color:var(--ink); border-radius:8px;
+      padding:8px 11px; font-size:12px; font-weight:800; cursor:pointer;
+    }
+    .button:hover { border-color:rgba(6,182,212,.45); color:white; }
+    .layout { display:grid; grid-template-columns:280px minmax(0,1fr) 360px; gap:18px; margin-top:18px; align-items:start; }
+    .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; }
+    .panel-title { font-size:13px; font-weight:900; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:13px; }
+    .lesson-title { font-size:27px; line-height:1.15; font-weight:900; margin-bottom:8px; overflow-wrap:anywhere; }
+    .subtle { color:var(--muted); font-size:13px; }
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+    .stat { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:12px; }
+    .stat-value { font-size:22px; font-weight:900; line-height:1; }
+    .stat-label { margin-top:6px; color:var(--muted); font-size:11px; font-weight:800; }
+    .run-card { margin-top:14px; padding:13px; border-radius:10px; background:var(--panel-3); border:1px solid var(--line); }
+    .run-card .mono { color:var(--cyan); font-size:12px; overflow-wrap:anywhere; }
+    .flow-wrap { overflow-x:auto; padding-bottom:6px; }
+    .flow { display:flex; gap:10px; min-width:max-content; }
+    .node {
+      width:184px; min-height:132px; border:1px solid var(--line); background:var(--panel-2);
+      border-radius:11px; padding:13px; cursor:pointer; position:relative; transition:.18s ease;
+    }
+    .node::after {
+      content:""; position:absolute; top:50%; right:-10px; width:10px; height:1px;
+      background:linear-gradient(90deg,var(--cyan),transparent);
+    }
+    .node:last-child::after { display:none; }
+    .node.active { border-color:rgba(6,182,212,.7); box-shadow:0 0 0 1px rgba(6,182,212,.22), 0 18px 42px rgba(0,0,0,.28); transform:translateY(-2px); }
+    .node.done { border-color:rgba(34,197,94,.24); }
+    .node-id { color:var(--faint); font-size:11px; font-weight:900; margin-bottom:7px; }
+    .node-name { font-size:14px; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
+    .node-summary { color:var(--muted); font-size:12px; margin-top:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .kind { display:inline-flex; align-items:center; min-height:23px; margin-top:10px; border-radius:999px; padding:3px 8px; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; border:1px solid var(--line); color:var(--muted); }
+    .kind-data { color:#93c5fd; border-color:rgba(59,130,246,.35); background:rgba(59,130,246,.1); }
+    .kind-transform,.kind-tokenizer,.kind-batch { color:#67e8f9; border-color:rgba(6,182,212,.35); background:rgba(6,182,212,.1); }
+    .kind-model { color:#c4b5fd; border-color:rgba(168,85,247,.35); background:rgba(168,85,247,.1); }
+    .kind-train { color:#86efac; border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.1); }
+    .kind-eval { color:#fde68a; border-color:rgba(234,179,8,.35); background:rgba(234,179,8,.1); }
+    .kind-checkpoint,.kind-complete { color:#fdba74; border-color:rgba(249,115,22,.35); background:rgba(249,115,22,.1); }
+    .detail-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:14px; }
+    .detail-title { font-size:21px; line-height:1.2; font-weight:900; overflow-wrap:anywhere; }
+    .detail-summary { color:var(--muted); font-size:14px; margin-bottom:16px; }
+    .section-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .box { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:13px; min-width:0; }
+    .box-title { color:var(--muted); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
+    pre { color:#b9c2d8; white-space:pre-wrap; word-break:break-word; font-size:12px; max-height:260px; overflow:auto; }
+    .tensor-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; }
+    .tensor { border:1px solid rgba(6,182,212,.18); background:rgba(6,182,212,.06); border-radius:10px; padding:12px; min-width:0; }
+    .tensor-name { font-weight:900; overflow-wrap:anywhere; }
+    .tensor-shape { margin-top:6px; color:var(--cyan); font-size:13px; }
+    .model-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; }
+    .model-chip { padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--panel-3); }
+    .model-chip strong { display:block; font-size:13px; margin-bottom:4px; }
+    .model-chip span { color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+    .metric-list { display:grid; gap:8px; }
+    .metric-row { display:flex; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); padding-bottom:7px; font-size:13px; }
+    .metric-row:last-child { border-bottom:0; padding-bottom:0; }
+    .metric-row code { color:var(--green); }
+    .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid { grid-template-columns:1fr; } }
+    @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span>LLM</span> Training Visualizer</div>
+      <div class="status"><span class="pulse" id="pulse"></span><span id="statusText">等待 trace...</span></div>
+      <div class="toolbar">
+        <button class="button" id="toggleLive">暂停刷新</button>
+        <button class="button" id="openLive">打开 live trace</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel">
+        <div class="panel-title">Current Run</div>
+        <h1 class="lesson-title" id="lessonTitle">读取中</h1>
+        <p class="subtle" id="lessonMeta">页面会自动读取 visualizer/traces/live.json。</p>
+        <div class="stat-grid">
+          <div class="stat"><div class="stat-value" id="eventCount">0</div><div class="stat-label">events</div></div>
+          <div class="stat"><div class="stat-value" id="runStatus">-</div><div class="stat-label">status</div></div>
+        </div>
+        <div class="run-card">
+          <div class="panel-title">Trace Source</div>
+          <div class="mono" id="traceSource">visualizer/traces/live.json</div>
+          <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="panel-title">Execution Flow</div>
+        <div class="flow-wrap"><div class="flow" id="flow"></div></div>
+        <div style="height:18px"></div>
+        <div class="panel-title">Selected Event</div>
+        <div id="detail"></div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-title">Metrics / Model State</div>
+        <div id="sideDetail"></div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const liveTracePath = params.get("trace") || "traces/live.json";
+    const demoTracePath = "demo-trace.json";
+    let activeEventId = null;
+    let live = true;
+    let lastTrace = null;
+    let usingDemo = false;
+
+    const $ = (id) => document.getElementById(id);
+    const json = (value) => JSON.stringify(value ?? {}, null, 2);
+    const kindClass = (kind) => `kind kind-${String(kind || "event").replace(/[^a-z0-9_-]/gi, "-").toLowerCase()}`;
+
+    $("toggleLive").addEventListener("click", () => {
+      live = !live;
+      $("toggleLive").textContent = live ? "暂停刷新" : "继续刷新";
+    });
+    $("openLive").addEventListener("click", () => window.open(liveTracePath, "_blank"));
+
+    async function fetchJson(path) {
+      const response = await fetch(`${path}?ts=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`${path} ${response.status}`);
+      return response.json();
+    }
+
+    async function loadTrace() {
+      try {
+        usingDemo = false;
+        return await fetchJson(liveTracePath);
+      } catch (error) {
+        usingDemo = true;
+        return await fetchJson(demoTracePath);
+      }
+    }
+
+    function render(trace) {
+      lastTrace = trace;
+      const events = trace.events || [];
+      const currentId = trace.current_event_id || (events.at(-1) && events.at(-1).id);
+      if (!activeEventId || !events.some((event) => event.id === activeEventId)) activeEventId = currentId;
+      const selected = events.find((event) => event.id === activeEventId) || events.at(-1);
+
+      $("lessonTitle").textContent = trace.title || "No trace";
+      $("lessonMeta").textContent = `${trace.lesson_id || "-"} · updated ${trace.updated_at || "-"}`;
+      $("eventCount").textContent = events.length;
+      $("runStatus").textContent = trace.status || "-";
+      $("traceSource").textContent = usingDemo ? `${demoTracePath} (demo)` : liveTracePath;
+      $("statusText").textContent = usingDemo
+        ? "未检测到 live trace，正在显示 demo。运行课程脚本后会自动切换。"
+        : `${trace.status === "done" ? "已完成" : "运行中"} · ${trace.updated_at || ""}`;
+      $("pulse").style.background = trace.status === "done" ? "var(--cyan)" : "var(--green)";
+
+      $("flow").innerHTML = events.map((event) => `
+        <article class="node ${event.id === activeEventId ? "active" : "done"}" data-event-id="${event.id}">
+          <div class="node-id">STEP ${event.id}</div>
+          <div class="node-name">${escapeHtml(event.name)}</div>
+          <div class="node-summary">${escapeHtml(event.summary || "")}</div>
+          <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
+        </article>
+      `).join("");
+      document.querySelectorAll(".node").forEach((node) => {
+        node.addEventListener("click", () => {
+          activeEventId = node.dataset.eventId;
+          render(lastTrace);
+        });
+      });
+
+      renderDetail(selected);
+      renderSide(selected, trace);
+    }
+
+    function renderDetail(event) {
+      if (!event) {
+        $("detail").innerHTML = `<div class="empty">暂无事件。运行任意课程脚本后会出现数据流。</div>`;
+        return;
+      }
+      $("detail").innerHTML = `
+        <div class="detail-head">
+          <div>
+            <div class="detail-title">${escapeHtml(event.name)}</div>
+            <div class="detail-summary">${escapeHtml(event.summary || "")}</div>
+          </div>
+          <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
+        </div>
+        <div class="section-grid">
+          <div class="box"><div class="box-title">Input</div><pre>${escapeHtml(json(event.inputs))}</pre></div>
+          <div class="box"><div class="box-title">Output</div><pre>${escapeHtml(json(event.outputs))}</pre></div>
+        </div>
+        ${renderTensors(event.tensors || [])}
+        ${event.sample && Object.keys(event.sample).length ? `<div style="height:12px"></div><div class="box"><div class="box-title">Sample</div><pre>${escapeHtml(json(event.sample))}</pre></div>` : ""}
+      `;
+    }
+
+    function renderTensors(tensors) {
+      if (!tensors.length) return "";
+      return `
+        <div class="tensor-list">
+          ${tensors.map((tensor) => `
+            <div class="tensor">
+              <div class="tensor-name">${escapeHtml(tensor.name || "tensor")}</div>
+              <div class="tensor-shape mono">${escapeHtml(JSON.stringify(tensor.shape || "-"))}</div>
+              <pre style="margin-top:8px; max-height:120px;">${escapeHtml(json(Object.fromEntries(Object.entries(tensor).filter(([key]) => key !== "name" && key !== "shape"))))}</pre>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderSide(event, trace) {
+      if (!event) {
+        $("sideDetail").innerHTML = `<div class="empty">等待事件。</div>`;
+        return;
+      }
+      const model = event.model || {};
+      const metrics = event.metrics || {};
+      $("sideDetail").innerHTML = `
+        <div class="model-grid">
+          <div class="model-chip"><strong>Base</strong><span>${escapeHtml(model.base || model.mode || "not shown")}</span></div>
+          <div class="model-chip"><strong>Adapter</strong><span>${escapeHtml(model.adapter || "not shown")}</span></div>
+          <div class="model-chip"><strong>Updated</strong><span>${escapeHtml(Array.isArray(model.updated) ? model.updated.join(", ") : model.updated || "not shown")}</span></div>
+        </div>
+        <div style="height:16px"></div>
+        <div class="box">
+          <div class="box-title">Model State</div>
+          <pre>${escapeHtml(json(model))}</pre>
+        </div>
+        <div style="height:12px"></div>
+        <div class="box">
+          <div class="box-title">Metrics</div>
+          ${Object.keys(metrics).length ? `<div class="metric-list">${Object.entries(metrics).map(([key, value]) => `<div class="metric-row"><span>${escapeHtml(key)}</span><code>${escapeHtml(String(value))}</code></div>`).join("")}</div>` : `<div class="subtle">当前事件没有 metric。</div>`}
+        </div>
+        <div style="height:12px"></div>
+        <div class="box">
+          <div class="box-title">Run Timeline</div>
+          <pre>${escapeHtml(json({ started_at: trace.started_at, updated_at: trace.updated_at, current_event_id: trace.current_event_id }))}</pre>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function tick() {
+      if (live) {
+        try {
+          render(await loadTrace());
+        } catch (error) {
+          $("statusText").textContent = `读取 trace 失败: ${error.message}`;
+        }
+      }
+      setTimeout(tick, 700);
+    }
+    tick();
+  </script>
+</body>
+</html>

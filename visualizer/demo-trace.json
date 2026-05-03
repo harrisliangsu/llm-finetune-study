@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "lesson_id": "demo",
+  "title": "Demo · Training Data Flow",
+  "status": "demo",
+  "started_at": "2026-05-03T00:00:00+00:00",
+  "updated_at": "2026-05-03T00:00:08+00:00",
+  "current_event_id": "05",
+  "events": [
+    {
+      "id": "01",
+      "name": "load_dataset",
+      "kind": "data",
+      "summary": "JSONL 被读取成 Dataset，训练样本开始进入结构化数据管线。",
+      "time": "2026-05-03T00:00:01+00:00",
+      "inputs": {"data_file": "examples/sample_sft.jsonl"},
+      "outputs": {"rows": 5, "columns": ["instruction", "input", "output"]},
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {
+        "instruction": "解释什么是 LoRA",
+        "input": "",
+        "output": "LoRA 是一种参数高效微调方法。"
+      }
+    },
+    {
+      "id": "02",
+      "name": "tokenize SFT sample",
+      "kind": "transform",
+      "summary": "prompt 和 response 被编码成 input_ids、attention_mask、labels。",
+      "time": "2026-05-03T00:00:02+00:00",
+      "inputs": {"max_length": 96},
+      "outputs": {"prompt_tokens": 13, "answer_tokens": 58},
+      "tensors": [
+        {"name": "input_ids", "shape": [96], "meaning": "模型输入 token id"},
+        {"name": "labels", "shape": [96], "meaning": "prompt 为 -100，response 参与 loss"}
+      ],
+      "model": {},
+      "metrics": {},
+      "sample": {"decoded_labels": "梯度累积是在显存不足时...<eos>"}
+    },
+    {
+      "id": "03",
+      "name": "collate micro batch",
+      "kind": "batch",
+      "summary": "多条 tokenized 样本被 collator 堆叠成 batch。",
+      "time": "2026-05-03T00:00:03+00:00",
+      "inputs": {"feature_count": 2},
+      "outputs": {"batch_keys": ["input_ids", "attention_mask", "labels"]},
+      "tensors": [
+        {"name": "input_ids", "shape": [2, 96], "dtype": "int64"},
+        {"name": "attention_mask", "shape": [2, 96], "dtype": "int64"},
+        {"name": "labels", "shape": [2, 96], "dtype": "int64"}
+      ],
+      "model": {},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "04",
+      "name": "attach LoRA adapter",
+      "kind": "model",
+      "summary": "base model 冻结，LoRA A/B 作为可训练 adapter 挂到目标模块。",
+      "time": "2026-05-03T00:00:04+00:00",
+      "inputs": {"target_modules": ["q_proj", "v_proj"], "rank": 8, "alpha": 16},
+      "outputs": {"trainable_params": 540672, "total_params": 494573440},
+      "tensors": [],
+      "model": {"base": "frozen", "adapter": "trainable", "trainable_ratio": "0.1093%"},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "05",
+      "name": "Trainer log step 6",
+      "kind": "train",
+      "summary": "Trainer 写出训练日志，页面用它观察 loss、learning rate 和梯度变化。",
+      "time": "2026-05-03T00:00:08+00:00",
+      "inputs": {"global_step": 6, "epoch": 1.5},
+      "outputs": {"log_keys": ["loss", "learning_rate", "grad_norm"]},
+      "tensors": [],
+      "model": {"base": "frozen", "adapter": "trainable", "updated": ["LoRA A", "LoRA B"]},
+      "metrics": {"loss": 3.52, "learning_rate": 0.0000333, "grad_norm": 4.486},
+      "sample": {}
+    }
+  ]
+}

@@ -11,6 +11,8 @@ env/
 outputs/
 output/
 lessons/**/outputs/
+visualizer/traces/live.json
+visualizer/traces/*.tmp
 checkpoints/
 checkpoint-*/
 runs/

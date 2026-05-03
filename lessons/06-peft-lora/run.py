@@ -31,6 +31,7 @@ from lessons.common.lesson_common import (
     make_sft_tokenize_fn,
     resolve_project_path,
 )
+from lessons.common.visual_trace import VisualTrace, make_trainer_trace_callback
 
 
 def require_training_stack():
@@ -273,6 +274,8 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=8)
     parser.add_argument("--alpha", type=int, default=16)
     parser.add_argument("--dropout", type=float, default=0.05)
+    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
     (
@@ -296,15 +299,31 @@ def main() -> None:
     report_path.parent.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     adapter_dir.mkdir(parents=True, exist_ok=True)
+    trace = VisualTrace("06-peft-lora", "Lesson 06 · PEFT Qwen LoRA", args.trace, args.trace_delay)
 
     machine = detect_machine(torch)
     print("Step 0: selected model")
     print("machine:", machine)
     print("model:", args.model_name)
+    trace.event(
+        "select model",
+        "setup",
+        "根据本机配置选择真实 Hugging Face causal LM，并把缓存写入课程 outputs。",
+        inputs={"machine": machine},
+        outputs={"model_name": args.model_name, "hf_cache": os.environ["HF_HOME"]},
+    )
 
     print("\nStep 1: load tokenizer and base model")
     tokenizer = load_tokenizer(AutoTokenizer, args.model_name)
     base_model = load_base_model(torch, AutoModelForCausalLM, args.model_name)
+    trace.event(
+        "load tokenizer and base model",
+        "model",
+        "加载真实 Qwen tokenizer 和 base model。此时模型仍是原始权重，尚未注入 LoRA。",
+        inputs={"model_name": args.model_name},
+        outputs={"tokenizer_vocab_size": len(tokenizer), "pad_token_id": tokenizer.pad_token_id},
+        model={"base": "loaded", "adapter": "none", "cache": os.environ["HF_HOME"]},
+    )
     generated_before = greedy_generate(
         torch,
         base_model,
@@ -315,6 +334,18 @@ def main() -> None:
     print("\nStep 2: build SFT dataset")
     tokenized, trainer_dataset = prepare_dataset(tokenizer, args.data, args.max_length)
     print(tokenized)
+    trace.event(
+        "build SFT dataset",
+        "data",
+        "用真实 Qwen tokenizer 构造 SFT 训练张量，数据字段仍然是 input_ids、attention_mask、labels。",
+        inputs={"data": args.data, "max_length": args.max_length},
+        outputs={"train_rows": len(tokenized["train"]), "validation_rows": len(tokenized["validation"])},
+        tensors=[
+            {"name": "input_ids", "shape": [args.max_length]},
+            {"name": "attention_mask", "shape": [args.max_length]},
+            {"name": "labels", "shape": [args.max_length]},
+        ],
+    )
 
     target_modules = ["q_proj", "v_proj"]
     lora_config = LoraConfig(
@@ -334,6 +365,19 @@ def main() -> None:
     print("trainable params:", trainable_params)
     print("total params:", total_params)
     print("trainable ratio:", f"{trainable_params / total_params:.4%}")
+    trace.event(
+        "attach PEFT LoRA",
+        "model",
+        "PEFT 在 q_proj/v_proj 上挂 LoRA adapter。base model 冻结，只训练少量 adapter 参数。",
+        inputs={"target_modules": target_modules, "rank": args.rank, "alpha": args.alpha, "dropout": args.dropout},
+        outputs={"trainable_params": trainable_params, "total_params": total_params},
+        model={
+            "base": "frozen",
+            "adapter": "trainable",
+            "target_modules": target_modules,
+            "trainable_ratio": f"{trainable_params / total_params:.4%}",
+        },
+    )
 
     training_args = make_training_arguments(
         TrainingArguments,
@@ -360,24 +404,56 @@ def main() -> None:
         train_dataset=trainer_dataset["train"],
         eval_dataset=trainer_dataset["validation"],
         data_collator=default_data_collator,
+        callbacks=[make_trainer_trace_callback(trace, "PEFT Trainer")],
     )
 
     print("\nStep 4: evaluate before PEFT LoRA training")
     eval_before = trainer.evaluate()
     print(eval_before)
+    trace.event(
+        "evaluate before PEFT LoRA training",
+        "eval",
+        "训练前测一次 validation loss，作为 Qwen + 未训练 adapter 的基线。",
+        outputs={"eval_loss": eval_before.get("eval_loss")},
+        metrics=eval_before,
+    )
 
     print("\nStep 5: train PEFT LoRA adapter")
     train_output = trainer.train()
     print(train_output.metrics)
+    trace.event(
+        "train PEFT LoRA adapter",
+        "train",
+        "Trainer 只更新 q_proj/v_proj 上的 LoRA adapter，Qwen base 权重不更新。",
+        inputs={"max_steps": args.max_steps, "learning_rate": args.learning_rate},
+        outputs={"train_loss": train_output.metrics.get("train_loss")},
+        metrics=train_output.metrics,
+        model={"base": "frozen", "updated": ["q_proj LoRA", "v_proj LoRA"]},
+    )
 
     print("\nStep 6: evaluate after PEFT LoRA training")
     eval_after = trainer.evaluate()
     print(eval_after)
+    trace.event(
+        "evaluate after PEFT LoRA training",
+        "eval",
+        "训练后再次评估，观察 adapter 对 validation loss 的影响。",
+        outputs={"eval_loss": eval_after.get("eval_loss")},
+        metrics=eval_after,
+    )
 
     print("\nStep 7: save adapter")
     peft_model.save_pretrained(str(adapter_dir))
     tokenizer.save_pretrained(str(adapter_dir))
     print("adapter dir:", adapter_dir)
+    trace.event(
+        "save PEFT adapter",
+        "checkpoint",
+        "保存 adapter_config 和 adapter 权重，不保存完整 Qwen base model。",
+        inputs={"peft_model": "trained"},
+        outputs={"adapter_dir": adapter_dir},
+        model={"saved": ["adapter_config.json", "adapter_model.safetensors"], "base_saved": False},
+    )
 
     generated_after = greedy_generate(
         torch,
@@ -395,11 +471,29 @@ def main() -> None:
         tokenizer,
         "### Instruction:\n解释什么是梯度累积\n\n### Response:\n",
     )
+    trace.event(
+        "reload adapter into fresh Qwen",
+        "checkpoint",
+        "重新加载 fresh base，再用 PeftModel.from_pretrained 挂回 adapter，模拟真实推理部署。",
+        inputs={"model_name": args.model_name, "adapter_dir": adapter_dir},
+        outputs={"loaded_generation_matches_training_path": generated_loaded == generated_after},
+        model={"base": "fresh Qwen", "adapter": "loaded"},
+    )
 
     print("\nStep 9: fixed prompt generation")
     print("base:", generated_before)
     print("trained LoRA:", generated_after)
     print("loaded adapter:", generated_loaded)
+    trace.event(
+        "generation comparison",
+        "generation",
+        "对比 base、训练后 PEFT LoRA、重新加载 adapter 后的固定 prompt 输出。",
+        outputs={
+            "base": generated_before,
+            "trained_lora": generated_after,
+            "loaded_adapter": generated_loaded,
+        },
+    )
 
     write_report(
         report_path,
@@ -422,6 +516,7 @@ def main() -> None:
         args.max_steps,
         args.max_length,
     )
+    trace.finish("Lesson 06 完成：真实 Qwen + PEFT LoRA 的训练、保存、加载流程已可视化。", metrics={"trainable_ratio": trainable_params / total_params})
     print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
 
 

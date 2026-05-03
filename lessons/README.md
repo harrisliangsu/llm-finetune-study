@@ -34,4 +34,26 @@
 
 每课脚本会把 Hugging Face cache、Trainer checkpoint、adapter 等生成内容写到自己目录下的 `outputs/`。这些内容已被 `.gitignore` 忽略，不会提交到 GitHub。
 
+## 实时可视化
+
+启动本地页面：
+
+```bash
+.venv/bin/python visualizer/serve.py
+```
+
+打开：
+
+```text
+http://127.0.0.1:8765/visualizer/
+```
+
+运行任意课程时，脚本会写入 `visualizer/traces/live.json`，页面会自动刷新。演示时建议加 `--trace-delay 0.5`，让每一步停顿一下：
+
+```bash
+.venv/bin/python lessons/04-trainer/run.py --trace-delay 0.5
+.venv/bin/python lessons/05-lora/run.py --trace-delay 0.5
+.venv/bin/python lessons/06-peft-lora/run.py --trace-delay 0.5
+```
+
 如果你只想学习页面，直接打开每课目录里的 `index.html`。

@@ -62,6 +62,28 @@
 
 然后照着 [examples/README.md](examples/README.md) 里的练习顺序做小实验。
 
+## 实时训练可视化
+
+启动本地可视化页面：
+
+```bash
+.venv/bin/python visualizer/serve.py
+```
+
+打开：
+
+```text
+http://127.0.0.1:8765/visualizer/
+```
+
+另开一个终端运行课程脚本，页面会自动读取 `visualizer/traces/live.json` 并展示数据流、张量形状、模型状态、训练指标和 checkpoint 变化：
+
+```bash
+.venv/bin/python lessons/06-peft-lora/run.py --trace-delay 0.5
+```
+
+`--trace-delay` 只用于演示时放慢步骤，方便观察页面变化；正常跑课可以不加。
+
 ## 已执行课程
 
 - [lessons/01-datasets/report.md](lessons/01-datasets/report.md): Hugging Face Datasets 微调数据管线执行结果

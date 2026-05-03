@@ -26,6 +26,7 @@ from lessons.common.lesson_common import (
     make_sft_tokenize_fn,
     resolve_project_path,
 )
+from lessons.common.visual_trace import VisualTrace
 
 
 def sft_numpy_collator(features: list[dict]) -> dict[str, np.ndarray]:
@@ -132,10 +133,13 @@ def main() -> None:
     parser.add_argument("--max-length", type=int, default=96)
     parser.add_argument("--micro-batch-size", type=int, default=2)
     parser.add_argument("--gradient-accumulation-steps", type=int, default=4)
+    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
     report_path = resolve_project_path(args.report)
     report_path.parent.mkdir(parents=True, exist_ok=True)
+    trace = VisualTrace("03-batching", "Lesson 03 · Batch and Collator", args.trace, args.trace_delay)
 
     tokenizer = ensure_local_auto_tokenizer(args.data, args.tokenizer_dir)
     splits = load_sft_splits(args.data)
@@ -147,6 +151,41 @@ def main() -> None:
 
     features = [tokenized["train"][i] for i in range(args.micro_batch_size)]
     batch = sft_numpy_collator(features)
+    trace.event(
+        "tokenize train/validation splits",
+        "transform",
+        "把 train/validation 两个 split 都转成定长 tokenized 样本。",
+        inputs={"data": args.data, "max_length": args.max_length},
+        outputs={"train_rows": len(tokenized["train"]), "validation_rows": len(tokenized["validation"])},
+        tensors=[
+            {"name": "sample input_ids", "shape": [args.max_length]},
+            {"name": "sample labels", "shape": [args.max_length]},
+        ],
+    )
+    trace.event(
+        "collate micro batch",
+        "batch",
+        "collator 把 list[dict] 堆叠成 dict[array]，模型才能一次处理多条样本。",
+        inputs={"feature_count": len(features), "feature_keys": list(features[0].keys())},
+        outputs={"batch_keys": list(batch.keys())},
+        tensors=[
+            {"name": key, "shape": list(value.shape), "dtype": str(value.dtype)}
+            for key, value in batch.items()
+        ],
+    )
+    trace.event(
+        "effective batch size",
+        "batch",
+        "通过梯度累积，用多个 micro batch 模拟更大的参数更新批量。",
+        inputs={
+            "micro_batch_size": args.micro_batch_size,
+            "gradient_accumulation_steps": args.gradient_accumulation_steps,
+            "num_devices": 1,
+        },
+        outputs={
+            "effective_batch_size": args.micro_batch_size * args.gradient_accumulation_steps,
+        },
+    )
 
     print("Step 1: tokenize train/validation splits")
     print(tokenized)
@@ -167,6 +206,7 @@ def main() -> None:
         args.gradient_accumulation_steps,
         args.max_length,
     )
+    trace.finish("Lesson 03 完成：样本已经被 collator 组织成训练 batch。")
     print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
 
 
