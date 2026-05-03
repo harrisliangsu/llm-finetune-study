@@ -23,8 +23,12 @@
     .section { padding:46px 0; } .kicker { font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:900; margin-bottom:8px; }
     h2 { font-size:30px; line-height:1.22; margin-bottom:10px; }
     .grid-3,.grid-2 { display:grid; gap:16px; } .grid-3 { grid-template-columns:repeat(3,1fr); } .grid-2 { grid-template-columns:1fr 1fr; }
+    .glossary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
     .card,.code { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; }
     .card-title { font-size:17px; font-weight:900; margin-bottom:8px; } .card-body { color:var(--muted); font-size:14px; }
+    .term { color:var(--purple); font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:900; margin-bottom:8px; }
+    .example { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    .example strong { color:var(--ink); }
     .metric strong { display:block; font-size:30px; line-height:1; margin-bottom:8px; }
     .metric span { color:var(--muted); font-size:12px; font-weight:800; }
     .code { color:var(--muted); white-space:pre; overflow-x:auto; font-size:13px; }
@@ -52,13 +56,13 @@
     .contrast { margin-top:16px; border-left:2px solid var(--orange); padding:12px 14px; background:rgba(249,115,22,.08); color:var(--muted); font-size:13px; line-height:1.6; }
     .contrast strong { color:var(--ink); }
     @media (max-width:900px){
-      h1{font-size:36px}.grid-3,.grid-2,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none}
+      h1{font-size:36px}.grid-3,.grid-2,.glossary-grid,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none}
       .flow-grid,.weight-stage{grid-template-columns:1fr}.flow-node{min-height:auto}.flow-node:not(:last-child)::after,.flow-node:not(:last-child)::before{display:none}.weight-arrow{transform:rotate(90deg); justify-self:center}
     }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#loss">loss</a><a href="#weights">参数流</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#loss">loss</a><a href="#weights">参数流</a><a href="#glossary">术语</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 04 · TRAINER</div>
     <h1><span>Trainer</span><br />把数据、模型和 loss 接成闭环</h1>
@@ -144,6 +148,73 @@ I ame tning toe-tuning.&lt;eos&gt;</div>
           </div>
         </div>
         <p class="contrast"><strong>和 LoRA 不同：</strong>Lesson 04 训练的是 tiny causal LM 本体，87,872 个 trainable params 全部参与更新；LoRA 通常冻结 base model，只训练额外插入的低秩 adapter 参数。</p>
+      </div>
+    </section>
+
+    <section class="section" id="glossary">
+      <div class="kicker">GLOSSARY</div>
+      <h2>专有词解释 + 简短例子</h2>
+      <div class="glossary-grid">
+        <div class="card">
+          <div class="term">Trainer</div>
+          <div class="card-body">训练调度器，把 dataset、model、参数配置、评估和保存接成一个训练闭环。</div>
+          <div class="example"><strong>例子：</strong>`Trainer.train()` 跑 30 step，最后得到 `train_loss=3.7273`。</div>
+        </div>
+        <div class="card">
+          <div class="term">forward</div>
+          <div class="card-body">模型用当前权重从输入算输出的过程，通常返回 logits，也可能返回 loss。</div>
+          <div class="example"><strong>例子：</strong>`input_ids` 进入 tiny causal LM，输出每个位置对词表的预测。</div>
+        </div>
+        <div class="card">
+          <div class="term">logits</div>
+          <div class="card-body">softmax 前的原始预测分数，用来表示模型更偏向哪个候选 token。</div>
+          <div class="example"><strong>例子：</strong>token 42 分数 3.1、token 7 分数 0.4，模型更偏向 token 42。</div>
+        </div>
+        <div class="card">
+          <div class="term">loss</div>
+          <div class="card-body">预测和正确答案之间的差距，是训练要不断降低的目标。</div>
+          <div class="example"><strong>例子：</strong>训练后 `train loss=3.7273`，说明训练样本上的预测变好了。</div>
+        </div>
+        <div class="card">
+          <div class="term">cross entropy</div>
+          <div class="card-body">常用分类 loss，正确 token 概率越低，惩罚越大。</div>
+          <div class="example"><strong>例子：</strong>正确答案是“累”，模型给“累”的概率越高，cross entropy 越低。</div>
+        </div>
+        <div class="card">
+          <div class="term">backward</div>
+          <div class="card-body">从 loss 反向计算梯度，告诉每个参数应该怎样调整才能降低 loss。</div>
+          <div class="example"><strong>例子：</strong>`loss.backward()` 后，模型参数的 `.grad` 会被填上数值。</div>
+        </div>
+        <div class="card">
+          <div class="term">gradient</div>
+          <div class="card-body">loss 对参数的变化方向和大小，是 optimizer 更新参数的依据。</div>
+          <div class="example"><strong>例子：</strong>某个权重 gradient 很大，说明它对当前 batch 的 loss 很敏感。</div>
+        </div>
+        <div class="card">
+          <div class="term">optimizer</div>
+          <div class="card-body">根据 gradient 修改参数的算法，把反向传播结果变成真正的权重更新。</div>
+          <div class="example"><strong>例子：</strong>AdamW 读取 `.grad`，结合学习率更新 `lm_head.weight`。</div>
+        </div>
+        <div class="card">
+          <div class="term">learning rate</div>
+          <div class="card-body">每次参数更新的步子大小，决定学习速度和稳定性。</div>
+          <div class="example"><strong>例子：</strong>本课 `lr=5e-3`；loss 乱跳时通常先尝试调小。</div>
+        </div>
+        <div class="card">
+          <div class="term">epoch</div>
+          <div class="card-body">完整看完一遍训练集的次数，用来描述数据被重复学习了多少轮。</div>
+          <div class="example"><strong>例子：</strong>4 条训练样本、batch size 2，跑 2 个 batch 就是 1 个 epoch。</div>
+        </div>
+        <div class="card">
+          <div class="term">overfitting</div>
+          <div class="card-body">模型更会记训练集，但对没见过的数据变差，需要看验证集发现。</div>
+          <div class="example"><strong>例子：</strong>本课 train loss 下降，但 eval loss 升到 `5.9352`，是过拟合信号。</div>
+        </div>
+        <div class="card">
+          <div class="term">checkpoint</div>
+          <div class="card-body">训练中保存的模型状态，用于恢复训练、回滚版本或做中间评估。</div>
+          <div class="example"><strong>例子：</strong>真实训练常保存 `checkpoint-100`；本课输出目录是 `lessons/04-trainer/outputs/trainer`。</div>
+        </div>
       </div>
     </section>
 

@@ -23,8 +23,12 @@
     .section { padding:46px 0; } .kicker { font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:900; margin-bottom:8px; }
     h2 { font-size:30px; line-height:1.22; margin-bottom:10px; }
     .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .glossary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     .card,.code { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; }
     .card-title { font-size:17px; font-weight:900; margin-bottom:8px; } .card-body { color:var(--muted); font-size:14px; }
+    .term { color:var(--green); font-size:12px; letter-spacing:.08em; text-transform:uppercase; font-weight:900; margin-bottom:8px; }
+    .example { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    .example strong { color:var(--ink); }
     .metric strong { display:block; color:var(--green); font-size:30px; line-height:1; margin-bottom:8px; }
     .metric span { color:var(--muted); font-size:12px; font-weight:800; }
     .code { color:var(--muted); white-space:pre; overflow-x:auto; font-size:13px; }
@@ -34,11 +38,11 @@
     .api { font-weight:900; overflow-wrap:anywhere; } .blocks { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
     .label { color:var(--cyan); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
     .text { color:var(--muted); font-size:13px; }
-    @media (max-width:900px){ h1{font-size:36px}.grid-3,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none} }
+    @media (max-width:900px){ h1{font-size:36px}.grid-3,.glossary-grid,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none} }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#shape">形状</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#shape">形状</a><a href="#glossary">术语</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 03 · BATCHING</div>
     <h1><span>Collator</span><br />把样本列表变成训练 batch</h1>
@@ -54,6 +58,48 @@
       </div>
       <div class="code" style="margin-top:16px;">labels[0][:32]
 [-100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, -100, 244, 112, 248, 111, 62, 134, 97, 107, 86, 69, 54, 51, 250, 115, 249, 168, 98, 230, 223]</div>
+    </section>
+
+    <section class="section" id="glossary">
+      <div class="kicker">GLOSSARY</div>
+      <h2>专有词解释 + 简短例子</h2>
+      <div class="glossary-grid">
+        <div class="card">
+          <div class="term">batch</div>
+          <div class="card-body">一次送进模型的一组样本，用来并行训练，并让 loss 基于一组样本计算。</div>
+          <div class="example"><strong>例子：</strong>本课 `input_ids.shape = (2, 96)`，`2` 是样本数，`96` 是每条样本长度。</div>
+        </div>
+        <div class="card">
+          <div class="term">collator</div>
+          <div class="card-body">把多条样本整理成 batch 的函数，负责把 `list[dict]` 变成 `dict[array]`。</div>
+          <div class="example"><strong>例子：</strong>2 条 tokenized samples 进入 `sft_numpy_collator`，输出带 batch 维度的数组。</div>
+        </div>
+        <div class="card">
+          <div class="term">padding</div>
+          <div class="card-body">给较短序列补 token，让同一个 batch 内所有序列等长，才能堆成矩阵。</div>
+          <div class="example"><strong>例子：</strong>70 个 token 的样本补到 96，需要在末尾补 26 个 padding token。</div>
+        </div>
+        <div class="card">
+          <div class="term">attention_mask</div>
+          <div class="card-body">告诉模型哪些位置是真实 token，哪些位置是 padding，避免模型关注补出来的位置。</div>
+          <div class="example"><strong>例子：</strong>`[1, 1, 1, 0, 0]` 表示前三个 token 有效，后两个是 padding。</div>
+        </div>
+        <div class="card">
+          <div class="term">micro batch</div>
+          <div class="card-body">一次 forward/backward 实际送进模型的小 batch，用来控制单次计算的显存占用。</div>
+          <div class="example"><strong>例子：</strong>`micro_batch_size=2` 表示每次只处理 2 条样本。</div>
+        </div>
+        <div class="card">
+          <div class="term">gradient accumulation</div>
+          <div class="card-body">多次 micro batch 先累积梯度，攒够次数后再更新参数，用小显存模拟大批量。</div>
+          <div class="example"><strong>例子：</strong>`micro=2`、`accumulation=4`，处理 4 次后才做一次 optimizer step。</div>
+        </div>
+        <div class="card">
+          <div class="term">effective batch size</div>
+          <div class="card-body">一次参数更新真正对应的样本数量，影响训练稳定性和学习率判断。</div>
+          <div class="example"><strong>例子：</strong>`2 * 4 * 1 = 8`，所以本课 effective batch size 是 8。</div>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="trace">

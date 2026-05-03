@@ -55,6 +55,11 @@
     .blocks { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
     .label { color: var(--cyan); font-size: 11px; letter-spacing: .12em; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
     .text { color: var(--muted); font-size: 13px; }
+    .term-example {
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
+      color: var(--muted); font-size: 13px; line-height: 1.6;
+    }
+    .term-example strong { color: var(--ink); font-size: 12px; }
     @media (max-width: 900px) {
       h1 { font-size: 36px; }
       .grid-2, .grid-3, .trace, .blocks { grid-template-columns: 1fr; }
@@ -65,7 +70,7 @@
 <body>
   <nav class="nav">
     <div class="brand"><span>LLM</span> Finetune Study</div>
-    <div><a href="#data">样本</a><a href="#tokens">字段</a><a href="#trace">步骤</a></div>
+    <div><a href="#data">样本</a><a href="#tokens">字段</a><a href="#trace">步骤</a><a href="#terms">术语</a></div>
   </nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 02 · TOKENIZER</div>
@@ -125,6 +130,59 @@
           <div class="block"><div class="label">作用</div><div class="text">确认只有回答区域参与 loss，prompt 不参与。</div></div>
           <div class="block"><div class="label">输入</div><div class="text mono">labels != -100</div></div>
           <div class="block"><div class="label">输出</div><div class="text">梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。&lt;eos&gt;</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="terms">
+      <div class="kicker">CONCEPT DICTIONARY</div>
+      <h2>专有词解释 + 简短例子</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:20px;">这些词会在 tokenizer、SFT 数据构造和 loss 排查里反复出现。先记住它们的作用，再看代码会清楚很多。</p>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">tokenizer</div>
+          <p class="card-body">把文本转成模型能处理的 token id，也能把 id decode 回文本。模型不直接读中文字符串。</p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">tokenizer("解释什么是梯度累积")</span> 会输出 <span class="mono">input_ids</span>。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">token</div>
+          <p class="card-body">模型处理文本的最小片段，可能是一个字、词、子词、标点或特殊符号。</p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">"梯度累积"</span> 不一定等于 4 个 token，真实切法由 tokenizer 决定。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">vocab</div>
+          <p class="card-body">词表，保存 token 和整数 id 的映射。vocab size 会影响模型输入嵌入表大小。</p>
+          <div class="term-example"><strong>例子</strong><br />本课本地 tokenizer 的 <span class="mono">vocab size = 256</span>。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">input_ids</div>
+          <p class="card-body">token 对应的整数序列，是模型真正看到的输入，会进入 embedding 层。</p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">"### Response:"</span> 会被编码成一串整数 id。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">attention_mask</div>
+          <p class="card-body">标记真实 token 和 padding。真实 token 是 1，补齐出来的位置是 0。</p>
+          <div class="term-example"><strong>例子</strong><br />补齐到 96 长度时，后 25 个 padding 的 mask 是 <span class="mono">0</span>。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">SFT labels</div>
+          <p class="card-body">告诉 loss 哪些 token 要学习。prompt 通常设为 -100，answer 保留 token id。</p>
+          <div class="term-example"><strong>例子</strong><br />本课 prompt 13 个 token，所以 labels 前 13 个都是 <span class="mono">-100</span>。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">prompt / response</div>
+          <p class="card-body">prompt 是给模型看的指令和上下文，response 是希望模型学会生成的回答。</p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">### Instruction...</span> 是 prompt；<span class="mono">梯度累积是在...</span> 是 response。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">padding / truncation</div>
+          <p class="card-body">padding 把短序列补齐，truncation 把超长序列截断，二者让 batch 形状稳定。</p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">max_length=96</span> 时，不足会补 pad，超过会截断。</div>
+        </div>
+        <div class="card">
+          <div class="card-title">EOS</div>
+          <p class="card-body">end-of-sequence，表示回答结束。SFT 中加 EOS 可以教模型在合适位置停止。</p>
+          <div class="term-example"><strong>例子</strong><br />回答末尾拼上 <span class="mono">&lt;eos&gt;</span>，decode labels 时应能看到它。</div>
         </div>
       </div>
     </section>

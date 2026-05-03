@@ -416,6 +416,20 @@
       line-height: 1.75;
     }
 
+    .term-example {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .term-example strong {
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+
     .flow-container {
       display: flex;
       align-items: stretch;
@@ -642,6 +656,7 @@
       <a href="#pipeline">流程</a>
       <a href="#execution">步骤解析</a>
       <a href="#sft">SFT</a>
+      <a href="#terms">术语</a>
       <a href="#practice">练习</a>
     </div>
   </nav>
@@ -776,11 +791,11 @@
           </div>
           <div class="grid-3">
             <div class="surface">
-              <div class="surface-title mono" style="color: var(--accent-green);">raw["train"]</div>
+              <div class="surface-title mono" style="color: var(--accent-green);">splits["train"]</div>
               <div class="surface-body">训练集。训练参数更新来自这里。</div>
             </div>
             <div class="surface">
-              <div class="surface-title mono" style="color: var(--accent-green);">raw["validation"]</div>
+              <div class="surface-title mono" style="color: var(--accent-green);">splits["validation"]</div>
               <div class="surface-body">验证集。不要和训练集重复，否则指标失真。</div>
             </div>
             <div class="surface">
@@ -1116,7 +1131,7 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="terms">
       <div class="section-header-center">
         <div class="section-label" style="color: var(--accent-blue);">CONCEPT DICTIONARY</div>
         <h2 class="section-title">这节课必须吃透的概念</h2>
@@ -1127,60 +1142,67 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
 
       <div class="grid-3">
         <div class="card card-rail-blue">
+          <div class="card-title">Dataset</div>
+          <p class="card-body" style="margin-top: 10px;">
+            带 schema 的数据表。它让本地 JSONL 变成可以按行取样、按列查看、切分、过滤、批量映射和缓存的训练数据对象。
+          </p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">dataset[0]</span> 返回第一条样本；<span class="mono">dataset.map(fn)</span> 返回处理后的新 Dataset。</div>
+        </div>
+        <div class="card card-rail-blue">
+          <div class="card-title">JSONL</div>
+          <p class="card-body" style="margin-top: 10px;">
+            JSON Lines，一行是一条 JSON 样本。它适合训练数据，因为可以逐行追加、抽查和读取，不需要包成一个巨大的 JSON 数组。
+          </p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">{"instruction": "...", "input": "", "output": "..."}</span> 是一行 SFT 样本。</div>
+        </div>
+        <div class="card card-rail-blue">
+          <div class="card-title">split / train / validation</div>
+          <p class="card-body" style="margin-top: 10px;">
+            split 是数据切分。train 用来更新参数，validation 用来观察未训练样本上的效果，避免只看训练集 loss。
+          </p>
+          <div class="term-example"><strong>例子</strong><br />5 条样本执行 <span class="mono">test_size=0.2</span> 后，本课得到 4 条 train、1 条 validation。</div>
+        </div>
+        <div class="card card-rail-purple">
+          <div class="card-title">filter</div>
+          <p class="card-body" style="margin-top: 10px;">
+            数据质量控制入口。它删除不合格样本，例如空回答、超长文本、乱码、重复样本或错误标签。
+          </p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">filter(lambda row: bool(row["output"].strip()))</span> 会删除没有回答的样本。</div>
+        </div>
+        <div class="card card-rail-purple">
+          <div class="card-title">map</div>
+          <p class="card-body" style="margin-top: 10px;">
+            微调预处理主干。它把原始字段转换成训练字段，常见动作包括拼 prompt、tokenize、padding、truncation 和构造 labels。
+          </p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">map(tokenize_batch, batched=True)</span> 把一批样本转成 <span class="mono">input_ids/attention_mask/labels</span>。</div>
+        </div>
+        <div class="card card-rail-purple">
           <div class="card-title">seed</div>
           <p class="card-body" style="margin-top: 10px;">
-            随机数种子。`seed=42` 的作用是让 split、shuffle 这类随机操作可复现。
-            同一份数据、同一个 seed，切出来的 train/validation 应该一致，方便比较实验。
+            随机数种子。固定 seed 后，split、shuffle 这类随机操作可以复现，方便判断实验变化是不是来自代码或参数。
           </p>
-        </div>
-        <div class="card card-rail-blue">
-          <div class="card-title">test_size</div>
-          <p class="card-body" style="margin-top: 10px;">
-            验证集比例。`test_size=0.2` 表示 20% 样本进入验证集。本课 5 条样本会切成 4 条 train、1 条 validation。
-          </p>
-        </div>
-        <div class="card card-rail-blue">
-          <div class="card-title">DatasetDict</div>
-          <p class="card-body" style="margin-top: 10px;">
-            多个 Dataset 的字典容器，常见键是 `train`、`validation`、`test`。
-            训练代码通常要求你明确传入 train 和 eval split。
-          </p>
-        </div>
-        <div class="card card-rail-purple">
-          <div class="card-title">batched=True</div>
-          <p class="card-body" style="margin-top: 10px;">
-            `map` 一次处理一批样本，而不是一条样本。tokenizer 通常批处理更快，也更接近真实训练数据处理方式。
-          </p>
-        </div>
-        <div class="card card-rail-purple">
-          <div class="card-title">remove_columns</div>
-          <p class="card-body" style="margin-top: 10px;">
-            删除原始文本列，只保留训练需要的列。避免 Trainer 收到 `instruction/output` 这类模型不认识的字段。
-          </p>
-        </div>
-        <div class="card card-rail-purple">
-          <div class="card-title">max_length</div>
-          <p class="card-body" style="margin-top: 10px;">
-            固定序列最大长度。超过会截断，不足会 padding。SFT 中如果 max_length 太小，answer 会被截掉，模型学不到完整回答。
-          </p>
+          <div class="term-example"><strong>例子</strong><br />同一份数据都用 <span class="mono">seed=42</span>，多次运行应该切出同样的 train/validation。</div>
         </div>
         <div class="card card-rail-green">
-          <div class="card-title">input_ids</div>
+          <div class="card-title">Arrow cache</div>
           <p class="card-body" style="margin-top: 10px;">
-            模型真正看到的 token id 序列。它来自 prompt 和 answer 拼接后的编码结果。
+            `datasets` 底层使用 Apache Arrow 存储和缓存数据。缓存能避免每次都重新解析 JSONL 或重复执行昂贵的数据处理。
           </p>
-        </div>
-        <div class="card card-rail-green">
-          <div class="card-title">attention_mask</div>
-          <p class="card-body" style="margin-top: 10px;">
-            标记哪些位置是真实 token，哪些位置是 padding。真实 token 是 1，padding 是 0。
-          </p>
+          <div class="term-example"><strong>例子</strong><br />本课缓存写入 <span class="mono">lessons/01-datasets/outputs/hf-cache</span>，课程产物集中在 lesson 目录内。</div>
         </div>
         <div class="card card-rail-green">
           <div class="card-title">labels = -100</div>
           <p class="card-body" style="margin-top: 10px;">
-            PyTorch 交叉熵里常用的忽略标记。SFT 中把 prompt 部分设成 `-100`，表示这部分不参与 loss。
+            loss 忽略标记。SFT 里 prompt 只是上下文，所以 prompt 对应的 label 设为 `-100`；answer 保留 token id，参与训练。
           </p>
+          <div class="term-example"><strong>例子</strong><br />prompt 42 个 token 时，labels 前 42 个是 <span class="mono">-100</span>；decode 非 <span class="mono">-100</span> 部分只应看到回答。</div>
+        </div>
+        <div class="card card-rail-green">
+          <div class="card-title">DatasetDict</div>
+          <p class="card-body" style="margin-top: 10px;">
+            多个 Dataset 的字典容器，常见键是 `train`、`validation`、`test`。训练代码通常从这里拿训练集和验证集。
+          </p>
+          <div class="term-example"><strong>例子</strong><br /><span class="mono">splits["train"]</span> 用于训练，<span class="mono">splits["validation"]</span> 用于评估。</div>
         </div>
       </div>
     </section>

@@ -58,11 +58,18 @@
     .equation strong { display:block; font-size:14px; margin-bottom:6px; }
     .equation p { color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
     .flow-note { color:var(--muted); font-size:13px; margin-top:14px; border-left:3px solid var(--cyan); padding-left:12px; }
+    .term-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:18px; }
+    .term { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; }
+    .term-name { color:var(--gold); font-size:15px; font-weight:900; margin-bottom:8px; }
+    .term p { color:var(--muted); font-size:13px; margin-top:8px; }
+    .term b { color:var(--ink); font-weight:900; }
+    .term .mono { color:var(--cyan); overflow-wrap:anywhere; }
     @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks,.flow-grid,.flow-row{grid-template-columns:1fr}.nav a{display:none}.flow-arrow{min-height:22px; transform:rotate(90deg)} }
+    @media (max-width:900px){ .term-grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#download">模型</a><a href="#params">参数</a><a href="#flow">数据流</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#download">模型</a><a href="#params">参数</a><a href="#flow">数据流</a><a href="#terms">术语</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 05 · LORA ADAPTER</div>
     <h1><span>LoRA</span><br />冻结 base，只训练低秩 adapter</h1>
@@ -187,6 +194,53 @@ lessons/05-lora/outputs/lora/lora_adapter.pt
 
 LoRA B norm after training:
 5.5681471824646</div>
+    </section>
+
+    <section class="section" id="terms">
+      <div class="kicker">GLOSSARY</div>
+      <h2>专有词解释 + 简短例子</h2>
+      <div class="term-grid">
+        <div class="term">
+          <div class="term-name">LoRA</div>
+          <p><b>作用：</b>一种参数高效微调方法，不直接改完整模型权重，而是在目标线性层旁边加低秩分支来学习增量。</p>
+          <p><b>例子：</b>本课不更新 <span class="mono">lm_head.weight</span>，只训练 <span class="mono">lora_A/lora_B</span>，前向变成 <span class="mono">lm_head(x) + LoRA_delta(x)</span>。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">rank / r</div>
+          <p><b>作用：</b>决定低秩矩阵的中间维度。r 越大，adapter 参数越多，表达能力越强；r 越小，越省显存和存储。</p>
+          <p><b>例子：</b>本课 <span class="mono">r=4</span>，<span class="mono">lora_A</span> 把 hidden size 96 压到 4，<span class="mono">lora_B</span> 再映射回 vocab size 256。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">alpha / scaling</div>
+          <p><b>作用：</b>控制 LoRA 分支输出加到 base 输出上时的力度，常见缩放是 <span class="mono">alpha / r</span>。</p>
+          <p><b>例子：</b>本课 <span class="mono">alpha=8</span>、<span class="mono">r=4</span>，所以 scaling 是 2，LoRA delta 会乘以 2。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">adapter</div>
+          <p><b>作用：</b>挂在 base model 上的小型可训练模块，负责学习新任务调整，base model 保留原有语言能力。</p>
+          <p><b>例子：</b>本课 adapter 是 <span class="mono">lm_head</span> 旁边的 <span class="mono">lora_A/lora_B</span>，只有 1,408 个可训练参数。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">frozen base</div>
+          <p><b>作用：</b>base model 参数被冻结，不参与 optimizer 更新，用来降低训练成本并避免整体改坏原模型。</p>
+          <p><b>例子：</b><span class="mono">TinyCausalLM</span> 原始参数设为 <span class="mono">requires_grad=False</span>，训练时只更新 LoRA adapter。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">delta</div>
+          <p><b>作用：</b>LoRA 学到的权重变化量或输出修正量，不替换原始权重，只叠加到原输出上。</p>
+          <p><b>例子：</b><span class="mono">xW^T + b + (xA^T B^T) * scaling</span> 中最后一项就是 adapter 产生的 delta。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">state dict</div>
+          <p><b>作用：</b>PyTorch 保存参数的字典，key 是参数名，value 是张量；保存和加载 adapter 本质上就是读写这些张量。</p>
+          <p><b>例子：</b>adapter checkpoint 里有类似 <span class="mono">lora_A.weight</span>、<span class="mono">lora_B.weight</span> 的参数。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">adapter-only checkpoint</div>
+          <p><b>作用：</b>只保存 adapter 参数，不保存 base model；体积小，但加载时必须配合同结构 base model。</p>
+          <p><b>例子：</b><span class="mono">lora_adapter.pt</span> 需要先创建 fresh <span class="mono">TinyCausalLM</span>，再加载 adapter。</p>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="trace">

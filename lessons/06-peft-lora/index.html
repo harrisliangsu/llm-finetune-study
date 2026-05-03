@@ -56,11 +56,18 @@
     .gradient-card { border:1px solid var(--line); border-radius:10px; padding:14px; background:#0d111b; }
     .gradient-title { font-size:13px; font-weight:900; margin-bottom:6px; }
     .gradient-text { color:var(--muted); font-size:13px; }
+    .term-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:18px; }
+    .term { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; }
+    .term-name { color:var(--blue); font-size:15px; font-weight:900; margin-bottom:8px; }
+    .term p { color:var(--muted); font-size:13px; margin-top:8px; }
+    .term b { color:var(--ink); font-weight:900; }
+    .term .mono { color:var(--cyan); overflow-wrap:anywhere; }
     @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks,.flow-row,.gradient-grid{grid-template-columns:1fr}.flow-arrow{display:none}.nav a{display:none} }
+    @media (max-width:900px){ .term-grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#terms">术语</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 06 · PEFT LORA</div>
     <h1><span>PEFT LoRA</span><br />用真实 Qwen 小模型跑 adapter</h1>
@@ -160,6 +167,58 @@ base gradients are blocked because base weights are frozen</div>
         <div class="card metric"><strong style="color:var(--cyan)">4.922</strong><span>eval before</span></div>
         <div class="card metric"><strong style="color:var(--green)">3.521</strong><span>train loss</span></div>
         <div class="card metric"><strong style="color:var(--orange)">4.762</strong><span>eval after</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="terms">
+      <div class="kicker">GLOSSARY</div>
+      <h2>专有词解释 + 简短例子</h2>
+      <div class="term-grid">
+        <div class="term">
+          <div class="term-name">PEFT</div>
+          <p><b>作用：</b>Parameter-Efficient Fine-Tuning，参数高效微调工具链。它提供统一接口来做 LoRA、Prefix Tuning 等方法；LoRA 是 PEFT 支持的一种具体方法。</p>
+          <p><b>例子：</b>本课用 <span class="mono">LoraConfig</span> 和 <span class="mono">get_peft_model</span> 把 Qwen 改造成只训练 LoRA adapter 的模型。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">Hugging Face model id</div>
+          <p><b>作用：</b>定位 Hub 上模型的名字，通常是 <span class="mono">组织或用户/模型名</span>，用于下载 tokenizer、config 和权重。</p>
+          <p><b>例子：</b><span class="mono">Qwen/Qwen2.5-0.5B-Instruct</span> 是本课 model id，<span class="mono">from_pretrained</span> 会根据它找模型文件。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">AutoModelForCausalLM</div>
+          <p><b>作用：</b>根据模型配置自动选择 causal LM 类，适合加载“输入文本，预测下一个 token”的生成式语言模型。</p>
+          <p><b>例子：</b><span class="mono">AutoModelForCausalLM.from_pretrained(model_id)</span> 加载完整 Qwen base model，再交给 PEFT 注入 LoRA。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">AutoTokenizer</div>
+          <p><b>作用：</b>根据 model id 加载对应 tokenizer，把中文、英文和符号切成模型能理解的 token id。</p>
+          <p><b>例子：</b>“介绍一下 LoRA”会被编码成一串整数 id，再喂给 Qwen 训练。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">target_modules</div>
+          <p><b>作用：</b>告诉 PEFT 要把 LoRA adapter 挂到哪些模块上。选得越多，可训练参数越多；选得太少，可调整空间可能不足。</p>
+          <p><b>例子：</b>本课设置 <span class="mono">target_modules=["q_proj", "v_proj"]</span>，只改 attention 的 query/value 投影层。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">q_proj / v_proj</div>
+          <p><b>作用：</b>Transformer attention 里的线性投影层。调整它们会影响模型“看哪里”和“取出什么信息”。</p>
+          <p><b>例子：</b>LoRA 在 q/v 投影处加 delta，相当于轻量调整注意力行为，而不是全量重训 Qwen。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">save_pretrained</div>
+          <p><b>作用：</b>Hugging Face/PEFT 常用保存接口。对 PEFT model 调用时，通常保存 adapter 配置和权重，不保存完整 base model。</p>
+          <p><b>例子：</b><span class="mono">model.save_pretrained(adapter_dir)</span> 会保存 <span class="mono">adapter_config.json</span> 和 adapter 权重文件。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">PeftModel.from_pretrained</div>
+          <p><b>作用：</b>把已经保存的 PEFT adapter 加载回 base model，推理部署常用“先加载 base，再加载 adapter”。</p>
+          <p><b>例子：</b>先加载 fresh Qwen，再用 <span class="mono">PeftModel.from_pretrained(base_model, adapter_dir)</span> 挂回本课训练出的 LoRA。</p>
+        </div>
+        <div class="term">
+          <div class="term-name">trainable ratio</div>
+          <p><b>作用：</b>可训练参数占总参数的比例，用来衡量参数高效微调到底省了多少训练量。</p>
+          <p><b>例子：</b>本课只训练 540,672 个参数，占约 494.6M 总参数的 0.1093%。</p>
+        </div>
       </div>
     </section>
 

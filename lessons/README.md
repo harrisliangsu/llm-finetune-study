@@ -8,6 +8,8 @@
 - `index.html`: 可直接打开的可视化学习页
 - `outputs/`: 本课运行时生成的缓存、checkpoint、adapter 等本地输出
 
+每课的 `README.md` 和 `index.html` 都会补充本课相关术语解释。学习时先看术语和例子，再看执行步骤，最后回到 `run.py` 对照代码。
+
 ## 课程顺序
 
 | 课程 | 主题 | 目录 | 重点 |
