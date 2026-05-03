@@ -127,3 +127,40 @@ eval loss 看起来好，但泛化无意义。
 
 如果这一步看不懂，不要开始训练。
 
+## 已执行：Lesson 02
+
+脚本：
+
+```bash
+.venv/bin/python scripts/lesson02_tokenizer_pipeline.py
+```
+
+本课把 Lesson 01 的 toy tokenizer 换成了真实 Hugging Face 加载路径：
+
+```python
+tokenizer = AutoTokenizer.from_pretrained(local_dir, local_files_only=True)
+```
+
+为了保持本地可复现，`local_dir` 里的 tokenizer 文件由 `examples/sample_sft.jsonl` 训练生成，不下载远程模型。
+
+关键输出：
+
+- tokenizer vocab size: 256
+- pad/eos/unk token id: 0 / 1 / 2
+- prompt token 数: 13
+- answer token 数: 58
+- labels 中 prompt mask 的 `-100` 数量: 13
+- labels 中 padding ignore 的 `-100` 数量: 25
+- labels 中 `-100` 总数量: 38
+- labels 中参与 loss 的 token 数: 58
+
+最重要的验收结果：
+
+```text
+decode(labels != -100)
+梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。<eos>
+```
+
+这说明 prompt 区域已经被 mask，模型只会因为回答 token 产生 loss。
+
+完整报告见 [reports/lesson02-tokenizer.md](../reports/lesson02-tokenizer.md)。

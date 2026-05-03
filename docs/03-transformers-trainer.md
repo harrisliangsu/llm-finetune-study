@@ -118,3 +118,57 @@ per_device_train_batch_size * gradient_accumulation_steps * num_devices
 - checkpoint 如何保存和恢复
 - 一个 20 条样本过拟合实验应该长什么样
 
+## 已执行：Lesson 03
+
+脚本：
+
+```bash
+.venv/bin/python scripts/lesson03_batch_collator.py
+```
+
+本课关注 Trainer 之前的最后一步：把多条 tokenized 样本合成 batch。
+
+关键输出：
+
+```text
+input_ids.shape      = (2, 96)
+attention_mask.shape = (2, 96)
+labels.shape         = (2, 96)
+effective batch size = 8
+```
+
+概念对应关系：
+
+- `micro batch size=2`: 每次 forward 实际喂 2 条样本。
+- `gradient_accumulation_steps=4`: 累积 4 次梯度后再更新参数。
+- `effective batch size=8`: 等效更新批量是 `2 * 4`。
+
+完整报告见 [reports/lesson03-batching.md](../reports/lesson03-batching.md)。
+
+## 已执行：Lesson 04
+
+脚本：
+
+```bash
+.venv/bin/python scripts/lesson04_trainer_minimal.py
+```
+
+本课用本地 tiny causal LM 跑了 `transformers.Trainer` 最小训练闭环。这个 tiny model 不是可用 LLM，只用于验证数据、loss 和 Trainer 流程。
+
+关键输出：
+
+- train 样本数: 4
+- validation 样本数: 1
+- tiny model trainable params: 87,872
+- max_steps: 30
+- eval loss before training: 5.5519
+- train loss: 3.7273
+- eval loss after training: 5.9352
+
+怎么理解：
+
+- train loss 下降，说明模型确实在训练样本上学习到了 answer token。
+- eval loss 上升，说明 4 条训练样本太少，已经出现小样本过拟合。
+- 固定 prompt 生成混杂英文，不是流程失败，而是 tiny model + 5 条样本没有真实语言能力。
+
+完整报告见 [reports/lesson04-trainer.md](../reports/lesson04-trainer.md)。
