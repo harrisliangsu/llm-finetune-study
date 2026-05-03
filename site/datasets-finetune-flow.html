@@ -306,6 +306,41 @@
       line-height: 1.65;
     }
 
+    .io-grid {
+      display: grid;
+      grid-template-columns: 88px 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .io-cell {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .io-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .io-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .io-text {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
     .kicker-row {
       display: flex;
       align-items: center;
@@ -529,6 +564,7 @@
 
     @media (max-width: 900px) {
       .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .io-grid { grid-template-columns: 1fr; }
       .nav-links { display: none; }
       .hero { padding-top: 112px; }
       .hero h1 { font-size: 38px; }
@@ -545,6 +581,7 @@
       <a href="#why">为什么先学</a>
       <a href="#object">对象模型</a>
       <a href="#pipeline">流程</a>
+      <a href="#execution">步骤解析</a>
       <a href="#sft">SFT</a>
       <a href="#practice">练习</a>
     </div>
@@ -801,6 +838,242 @@ tokenizer.pad_token = tokenizer.eos_token
     return tokenizer(texts, padding=<span class="string">"max_length"</span>, truncation=True, max_length=256)
 
 tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remove_columns=raw[<span class="string">"train"</span>].column_names)</div>
+      </div>
+    </section>
+
+    <section class="section" id="execution">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-cyan);">EXECUTION TRACE</div>
+        <h2 class="section-title">Lesson 01 每一步的作用、输入和输出</h2>
+        <p class="section-subtitle center">
+          下面对应 `scripts/lesson01_datasets_pipeline.py` 的真实执行顺序。你要把每一步看成一个数据变换：
+          输入是什么，输出是什么，输出为什么能喂给下一步。
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="card card-rail-blue">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">Step 0</div>
+              <div class="io-title">缓存目录</div>
+              <div class="io-text mono">HF_HOME<br />HF_DATASETS_CACHE</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">作用</div>
+              <div class="io-text">把 datasets 下载、解析、Arrow 缓存写到仓库内 `.cache/`，避免写系统用户目录失败。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">输入</div>
+              <div class="io-text">项目根目录路径。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">输出</div>
+              <div class="io-text mono">.cache/huggingface/datasets</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-green">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">Step 1</div>
+              <div class="io-title">load_dataset</div>
+              <div class="io-text mono">json -> Dataset</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">作用</div>
+              <div class="io-text">读取本地 JSONL，把普通文件变成 Hugging Face 的 `Dataset` 表对象。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">输入</div>
+              <div class="io-text mono">examples/sample_sft.jsonl<br />instruction/input/output</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">输出</div>
+              <div class="io-text mono">Dataset<br />features: 3 columns<br />num_rows: 5</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-green">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">Step 2</div>
+              <div class="io-title">train_test_split</div>
+              <div class="io-text mono">Dataset -> DatasetDict</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">作用</div>
+              <div class="io-text">把单表切成训练集和验证集。训练集用于更新参数，验证集用于观察泛化。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">输入</div>
+              <div class="io-text mono">raw Dataset<br />test_size=0.2<br />seed=42</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-green);">输出</div>
+              <div class="io-text mono">DatasetDict<br />train: 4 rows<br />validation: 1 row</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-orange">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-orange);">Step 3</div>
+              <div class="io-title">filter</div>
+              <div class="io-text mono">remove bad rows</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-orange);">作用</div>
+              <div class="io-text">删除不合格样本。本课只过滤空回答；真实项目还会过滤过长、乱码、重复、低质量回答。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-orange);">输入</div>
+              <div class="io-text mono">DatasetDict<br />lambda item: output not empty</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-orange);">输出</div>
+              <div class="io-text">仍然是 `DatasetDict`。本例没有空回答，所以 train/validation 数量不变。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-purple">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-purple);">Step 4</div>
+              <div class="io-title">map</div>
+              <div class="io-text mono">raw text -> tensors</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-purple);">作用</div>
+              <div class="io-text">批量执行 tokenization 和 SFT labels 构造，是微调数据处理的核心步骤。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-purple);">输入</div>
+              <div class="io-text mono">instruction/input/output<br />batched=True<br />max_length=192</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-purple);">输出</div>
+              <div class="io-text mono">input_ids<br />attention_mask<br />labels<br />prompt_length<br />answer_length</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="border-left: 3px solid var(--accent-gold);">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-gold);">Step 5</div>
+              <div class="io-title">检查 labels</div>
+              <div class="io-text mono">labels != -100</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-gold);">作用</div>
+              <div class="io-text">验证 prompt 区域没有参与 loss，answer 区域才参与 loss。这一步能抓出大多数 SFT 数据错误。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-gold);">输入</div>
+              <div class="io-text mono">tokenized["train"][0]["labels"]</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-gold);">输出</div>
+              <div class="io-text">decode 后只看到回答：`梯度累积...&lt;eos&gt;`。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-rail-blue">
+          <div class="io-grid">
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">Step 6</div>
+              <div class="io-title">with_format</div>
+              <div class="io-text mono">Dataset -> numpy</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">作用</div>
+              <div class="io-text">指定取样时返回的数组格式。真实训练中常用 `torch`，本课用 `numpy` 避免额外训练依赖。</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">输入</div>
+              <div class="io-text mono">input_ids<br />attention_mask<br />labels</div>
+            </div>
+            <div class="io-cell">
+              <div class="io-label" style="color: var(--accent-blue);">输出</div>
+              <div class="io-text mono">input_ids.shape = (192,)<br />labels.shape = (192,)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header-center">
+        <div class="section-label" style="color: var(--accent-blue);">CONCEPT DICTIONARY</div>
+        <h2 class="section-title">这节课必须吃透的概念</h2>
+        <p class="section-subtitle center">
+          这些词不是 API 名词表，而是你以后排查微调问题时会反复使用的判断工具。
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card card-rail-blue">
+          <div class="card-title">seed</div>
+          <p class="card-body" style="margin-top: 10px;">
+            随机数种子。`seed=42` 的作用是让 split、shuffle 这类随机操作可复现。
+            同一份数据、同一个 seed，切出来的 train/validation 应该一致，方便比较实验。
+          </p>
+        </div>
+        <div class="card card-rail-blue">
+          <div class="card-title">test_size</div>
+          <p class="card-body" style="margin-top: 10px;">
+            验证集比例。`test_size=0.2` 表示 20% 样本进入验证集。本课 5 条样本会切成 4 条 train、1 条 validation。
+          </p>
+        </div>
+        <div class="card card-rail-blue">
+          <div class="card-title">DatasetDict</div>
+          <p class="card-body" style="margin-top: 10px;">
+            多个 Dataset 的字典容器，常见键是 `train`、`validation`、`test`。
+            训练代码通常要求你明确传入 train 和 eval split。
+          </p>
+        </div>
+        <div class="card card-rail-purple">
+          <div class="card-title">batched=True</div>
+          <p class="card-body" style="margin-top: 10px;">
+            `map` 一次处理一批样本，而不是一条样本。tokenizer 通常批处理更快，也更接近真实训练数据处理方式。
+          </p>
+        </div>
+        <div class="card card-rail-purple">
+          <div class="card-title">remove_columns</div>
+          <p class="card-body" style="margin-top: 10px;">
+            删除原始文本列，只保留训练需要的列。避免 Trainer 收到 `instruction/output` 这类模型不认识的字段。
+          </p>
+        </div>
+        <div class="card card-rail-purple">
+          <div class="card-title">max_length</div>
+          <p class="card-body" style="margin-top: 10px;">
+            固定序列最大长度。超过会截断，不足会 padding。SFT 中如果 max_length 太小，answer 会被截掉，模型学不到完整回答。
+          </p>
+        </div>
+        <div class="card card-rail-green">
+          <div class="card-title">input_ids</div>
+          <p class="card-body" style="margin-top: 10px;">
+            模型真正看到的 token id 序列。它来自 prompt 和 answer 拼接后的编码结果。
+          </p>
+        </div>
+        <div class="card card-rail-green">
+          <div class="card-title">attention_mask</div>
+          <p class="card-body" style="margin-top: 10px;">
+            标记哪些位置是真实 token，哪些位置是 padding。真实 token 是 1，padding 是 0。
+          </p>
+        </div>
+        <div class="card card-rail-green">
+          <div class="card-title">labels = -100</div>
+          <p class="card-body" style="margin-top: 10px;">
+            PyTorch 交叉熵里常用的忽略标记。SFT 中把 prompt 部分设成 `-100`，表示这部分不参与 loss。
+          </p>
+        </div>
       </div>
     </section>
 
