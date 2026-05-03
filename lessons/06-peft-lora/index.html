@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg:#080a12; --panel:#121620; --panel-2:#171b27; --ink:#e7eaf3; --muted:#8a91a8;
-      --line:rgba(255,255,255,.08); --blue:#3b82f6; --cyan:#06b6d4; --green:#22c55e; --orange:#f97316; --gold:#eab308;
+      --line:rgba(255,255,255,.08); --blue:#3b82f6; --cyan:#06b6d4; --green:#22c55e; --orange:#f97316; --gold:#eab308; --red:#ef4444;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { background:var(--bg); color:var(--ink); font-family:-apple-system,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif; line-height:1.7; }
@@ -35,11 +35,32 @@
     .api { font-weight:900; overflow-wrap:anywhere; } .blocks { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
     .label { color:var(--cyan); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
     .text { color:var(--muted); font-size:13px; }
-    @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none} }
+    .flow-panel { margin-top:20px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px; }
+    .flow-row { display:grid; grid-template-columns:1fr 44px 1fr 44px 1fr; align-items:stretch; gap:12px; }
+    .flow-node { min-height:150px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:16px; position:relative; overflow:hidden; }
+    .flow-node::before { content:""; position:absolute; inset:0 0 auto 0; height:3px; background:linear-gradient(90deg,var(--blue),var(--cyan)); opacity:.9; }
+    .flow-node.orange::before { background:linear-gradient(90deg,var(--orange),var(--gold)); }
+    .flow-node.green::before { background:linear-gradient(90deg,var(--green),var(--cyan)); }
+    .flow-step { color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+    .flow-title { font-size:18px; font-weight:900; margin-bottom:8px; }
+    .flow-meta { color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+    .flow-arrow { display:flex; align-items:center; justify-content:center; color:var(--cyan); font-size:24px; font-weight:900; }
+    .model-box { margin-top:12px; border:1px solid rgba(59,130,246,.35); border-radius:10px; padding:12px; background:rgba(59,130,246,.08); }
+    .model-layer { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 10px; border-radius:8px; background:rgba(255,255,255,.04); margin-top:8px; color:var(--ink); font-size:13px; font-weight:800; }
+    .state { display:inline-flex; align-items:center; min-height:24px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    .frozen { color:#93c5fd; background:rgba(59,130,246,.14); border:1px solid rgba(59,130,246,.3); }
+    .trainable { color:#86efac; background:rgba(34,197,94,.13); border:1px solid rgba(34,197,94,.3); }
+    .blocked { color:#fca5a5; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.28); }
+    .formula { margin-top:14px; padding:14px; border-radius:10px; border:1px solid var(--line); background:#0b0e17; color:var(--muted); font-size:13px; overflow-x:auto; }
+    .gradient-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+    .gradient-card { border:1px solid var(--line); border-radius:10px; padding:14px; background:#0d111b; }
+    .gradient-title { font-size:13px; font-weight:900; margin-bottom:6px; }
+    .gradient-text { color:var(--muted); font-size:13px; }
+    @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks,.flow-row,.gradient-grid{grid-template-columns:1fr}.flow-arrow{display:none}.nav a{display:none} }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#params">参数</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 06 · PEFT LORA</div>
     <h1><span>PEFT LoRA</span><br />用真实 Qwen 小模型跑 adapter</h1>
@@ -63,6 +84,67 @@ Qwen/Qwen2.5-0.5B-Instruct
 
 adapter output:
 lessons/06-peft-lora/outputs/adapter</div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="kicker">MODEL CHANGE FLOW</div>
+      <h2>LoRA 让模型发生了什么变化</h2>
+      <p class="lead">训练前只有 frozen base。注入 LoRA 后，原始 Qwen 权重仍然不动，训练只把梯度写入 q_proj / v_proj 旁边新增的低秩矩阵。</p>
+
+      <div class="flow-panel">
+        <div class="flow-row">
+          <div class="flow-node">
+            <div class="flow-step">Before</div>
+            <div class="flow-title">原始 Qwen Base</div>
+            <div class="flow-meta">完整模型参数用于前向计算，但本课不会更新这些参数。</div>
+            <div class="model-box">
+              <div class="model-layer"><span>Embedding / MLP / Norm</span><span class="state frozen">frozen</span></div>
+              <div class="model-layer"><span>Attention q_proj</span><span class="state frozen">frozen</span></div>
+              <div class="model-layer"><span>Attention v_proj</span><span class="state frozen">frozen</span></div>
+            </div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node orange">
+            <div class="flow-step">Inject</div>
+            <div class="flow-title">挂载 LoRA Adapter</div>
+            <div class="flow-meta">PEFT 在目标线性层旁边增加 A/B 两个低秩矩阵。</div>
+            <div class="model-box">
+              <div class="model-layer"><span>q_proj: W + B(Ax) * scale</span><span class="state trainable">A/B</span></div>
+              <div class="model-layer"><span>v_proj: W + B(Ax) * scale</span><span class="state trainable">A/B</span></div>
+              <div class="model-layer"><span>其他原始层</span><span class="state frozen">frozen</span></div>
+            </div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node green">
+            <div class="flow-step">After</div>
+            <div class="flow-title">保存行为补丁</div>
+            <div class="flow-meta">训练结束只保存 adapter。推理时再把 adapter 加回 fresh base。</div>
+            <div class="model-box">
+              <div class="model-layer"><span>adapter_model.safetensors</span><span class="state trainable">saved</span></div>
+              <div class="model-layer"><span>adapter_config.json</span><span class="state trainable">saved</span></div>
+              <div class="model-layer"><span>Base model 权重</span><span class="state blocked">not saved</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="formula mono">forward:
+output = frozen_base(x) + lora_B(lora_A(x)) * scaling
+
+backward:
+loss -> gradients -> LoRA A/B only
+base gradients are blocked because base weights are frozen</div>
+
+        <div class="gradient-grid">
+          <div class="gradient-card">
+            <div class="gradient-title" style="color:var(--blue)">Base Model 路径</div>
+            <div class="gradient-text">输入 token 会经过 Qwen 原始层，负责保留原模型知识和语言能力。参数参与 forward，但不参与 optimizer 更新。</div>
+          </div>
+          <div class="gradient-card">
+            <div class="gradient-title" style="color:var(--green)">LoRA Adapter 路径</div>
+            <div class="gradient-text">同一批 SFT 数据产生的 loss 只更新 LoRA A/B。它学到的是“如何调整 q_proj/v_proj 的输出”，所以能作为小文件单独保存。</div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="params">

@@ -36,11 +36,33 @@
     .api { font-weight:900; overflow-wrap:anywhere; } .blocks { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
     .label { color:var(--cyan); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
     .text { color:var(--muted); font-size:13px; }
-    @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none} }
+    .flow-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:16px; align-items:stretch; }
+    .flow-board { background:linear-gradient(180deg,rgba(18,22,32,.96),rgba(12,15,24,.96)); border:1px solid var(--line); border-radius:12px; padding:20px; overflow:hidden; }
+    .flow-row { display:grid; grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr); gap:12px; align-items:stretch; margin-bottom:12px; }
+    .flow-row:last-child { margin-bottom:0; }
+    .flow-node { min-width:0; background:rgba(255,255,255,.035); border:1px solid var(--line); border-radius:10px; padding:14px; position:relative; }
+    .flow-node.base { border-color:rgba(234,179,8,.26); }
+    .flow-node.adapter { border-color:rgba(6,182,212,.28); }
+    .flow-node.train { border-color:rgba(34,197,94,.28); }
+    .flow-node.save { border-color:rgba(249,115,22,.3); }
+    .flow-node.load { border-color:rgba(168,85,247,.28); }
+    .node-tag { color:var(--muted); font-size:10px; letter-spacing:.1em; font-weight:900; text-transform:uppercase; margin-bottom:6px; }
+    .node-title { font-size:15px; font-weight:900; line-height:1.35; overflow-wrap:anywhere; }
+    .node-text { color:var(--muted); font-size:12px; margin-top:6px; overflow-wrap:anywhere; }
+    .flow-arrow { color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; }
+    .delta-line { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:4px 9px; color:var(--muted); font-size:11px; font-weight:800; background:rgba(255,255,255,.03); overflow-wrap:anywhere; }
+    .chip.hot { color:var(--cyan); border-color:rgba(6,182,212,.28); }
+    .equation-stack { display:grid; gap:10px; }
+    .equation { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:15px; }
+    .equation strong { display:block; font-size:14px; margin-bottom:6px; }
+    .equation p { color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+    .flow-note { color:var(--muted); font-size:13px; margin-top:14px; border-left:3px solid var(--cyan); padding-left:12px; }
+    @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks,.flow-grid,.flow-row{grid-template-columns:1fr}.nav a{display:none}.flow-arrow{min-height:22px; transform:rotate(90deg)} }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#download">模型</a><a href="#params">参数</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#download">模型</a><a href="#params">参数</a><a href="#flow">数据流</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 05 · LORA ADAPTER</div>
     <h1><span>LoRA</span><br />冻结 base，只训练低秩 adapter</h1>
@@ -81,6 +103,75 @@ target module = lm_head
 A shape = [4, 96]
 B shape = [256, 4]
 trainable params = 4 * 96 + 256 * 4 = 1,408</div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="kicker">MODEL DELTA FLOW</div>
+      <h2>模型变化 / LoRA 数据流</h2>
+      <div class="flow-grid">
+        <div class="flow-board">
+          <div class="flow-row">
+            <div class="flow-node base">
+              <div class="node-tag">01 frozen base</div>
+              <div class="node-title mono">TinyCausalLM.lm_head</div>
+              <div class="node-text">原始权重 W 和 bias 保留，只参与 forward，不参与梯度更新。</div>
+              <div class="delta-line"><span class="chip">requires_grad=False</span><span class="chip">base lm_head frozen</span></div>
+            </div>
+            <div class="flow-arrow">+</div>
+            <div class="flow-node adapter">
+              <div class="node-tag">02 adapter branch</div>
+              <div class="node-title mono">LoRA A / B</div>
+              <div class="node-text">新增低秩矩阵 A、B，用很少参数表达 lm_head 的可训练增量。</div>
+              <div class="delta-line"><span class="chip hot">A [4, 96]</span><span class="chip hot">B [256, 4]</span></div>
+            </div>
+          </div>
+          <div class="flow-row">
+            <div class="flow-node train">
+              <div class="node-tag">03 forward</div>
+              <div class="node-title mono">base logits + adapter delta</div>
+              <div class="node-text">前向时不替换 base，而是在 base 输出上叠加 LoRA 分支算出的 delta。</div>
+              <div class="delta-line"><span class="chip">xW^T + b</span><span class="chip hot">(xA^T B^T) * scale</span></div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node train">
+              <div class="node-tag">04 backward</div>
+              <div class="node-title mono">only adapter grads</div>
+              <div class="node-text">loss 反传会经过 base 路径，但 optimizer 只看到 LoRA A/B 的可训练参数。</div>
+              <div class="delta-line"><span class="chip hot">update lora_A</span><span class="chip hot">update lora_B</span><span class="chip">keep W</span></div>
+            </div>
+          </div>
+          <div class="flow-row">
+            <div class="flow-node save">
+              <div class="node-tag">05 save</div>
+              <div class="node-title mono">lora_adapter.pt</div>
+              <div class="node-text">保存 adapter state dict，不保存 tiny base 的完整权重副本。</div>
+              <div class="delta-line"><span class="chip">small checkpoint</span><span class="chip">adapter only</span></div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node load">
+              <div class="node-tag">06 reload</div>
+              <div class="node-title mono">fresh base + adapter</div>
+              <div class="node-text">重新创建一个 fresh TinyCausalLM，再把 LoRA A/B 加载回 lm_head。</div>
+              <div class="delta-line"><span class="chip">same base shape</span><span class="chip hot">load adapter delta</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="equation-stack">
+          <div class="equation">
+            <strong>这节课的核心不是大模型框架</strong>
+            <p>目标是用手写 tiny LoRA 看清 adapter 机制：base 权重冻结，adapter 作为可训练旁路提供 delta。</p>
+          </div>
+          <div class="equation">
+            <strong class="mono">forward = base + delta</strong>
+            <p class="mono">logits = lm_head(x) + lora_B(lora_A(x)) * alpha / r</p>
+          </div>
+          <div class="equation">
+            <strong>和 Lesson 06 的边界</strong>
+            <p>Lesson 05 不是真 Qwen / PEFT 训练，不讲工程化 adapter 注入；它只服务于理解 LoRA 为什么能“只保存增量、加载到 fresh base”。</p>
+          </div>
+          <div class="flow-note">判断实现是否正确：训练前后 base 参数应保持不变，checkpoint 里应只包含 LoRA A/B 相关权重。</div>
+        </div>
+      </div>
     </section>
 
     <section class="section">

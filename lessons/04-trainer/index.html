@@ -34,11 +34,31 @@
     .api { font-weight:900; overflow-wrap:anywhere; } .blocks { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
     .label { color:var(--cyan); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
     .text { color:var(--muted); font-size:13px; }
-    @media (max-width:900px){ h1{font-size:36px}.grid-3,.grid-2,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none} }
+    .flow-panel { background:linear-gradient(180deg, rgba(18,22,32,.98), rgba(12,15,24,.98)); border:1px solid var(--line); border-radius:12px; padding:20px; overflow:hidden; }
+    .flow-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; align-items:stretch; }
+    .flow-node { position:relative; min-height:154px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:15px; display:flex; flex-direction:column; justify-content:space-between; }
+    .flow-node:not(:last-child)::after { content:""; position:absolute; top:50%; right:-10px; width:10px; height:1px; background:linear-gradient(90deg, var(--cyan), var(--purple)); }
+    .flow-node:not(:last-child)::before { content:""; position:absolute; top:calc(50% - 4px); right:-11px; width:8px; height:8px; border-top:1px solid var(--purple); border-right:1px solid var(--purple); transform:rotate(45deg); background:transparent; }
+    .flow-step { color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
+    .flow-title { font-size:15px; line-height:1.25; font-weight:900; margin-bottom:8px; overflow-wrap:anywhere; }
+    .flow-desc { color:var(--muted); font-size:12px; line-height:1.55; }
+    .flow-chip { align-self:flex-start; margin-top:12px; padding:5px 8px; border-radius:999px; background:rgba(6,182,212,.1); border:1px solid rgba(6,182,212,.25); color:var(--cyan); font-size:11px; font-weight:900; }
+    .weight-stage { margin-top:18px; display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; }
+    .weight-box { background:rgba(168,85,247,.08); border:1px solid rgba(168,85,247,.28); border-radius:10px; padding:16px; min-width:0; }
+    .weight-box.updated { background:rgba(34,197,94,.08); border-color:rgba(34,197,94,.3); }
+    .weight-title { font-size:13px; font-weight:900; margin-bottom:6px; }
+    .weight-text { color:var(--muted); font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
+    .weight-arrow { color:var(--orange); font-size:24px; font-weight:900; }
+    .contrast { margin-top:16px; border-left:2px solid var(--orange); padding:12px 14px; background:rgba(249,115,22,.08); color:var(--muted); font-size:13px; line-height:1.6; }
+    .contrast strong { color:var(--ink); }
+    @media (max-width:900px){
+      h1{font-size:36px}.grid-3,.grid-2,.trace,.blocks{grid-template-columns:1fr}.nav a{display:none}
+      .flow-grid,.weight-stage{grid-template-columns:1fr}.flow-node{min-height:auto}.flow-node:not(:last-child)::after,.flow-node:not(:last-child)::before{display:none}.weight-arrow{transform:rotate(90deg); justify-self:center}
+    }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#loss">loss</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#loss">loss</a><a href="#weights">参数流</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 04 · TRAINER</div>
     <h1><span>Trainer</span><br />把数据、模型和 loss 接成闭环</h1>
@@ -63,6 +83,67 @@
 
 ### Response:
 I ame tning toe-tuning.&lt;eos&gt;</div>
+      </div>
+    </section>
+
+    <section class="section" id="weights">
+      <div class="kicker">MODEL UPDATE FLOW</div>
+      <h2>tiny causal LM 训练时，真正变化的是模型权重</h2>
+      <div class="flow-panel">
+        <div class="flow-grid">
+          <div class="flow-node">
+            <div>
+              <div class="flow-step">01 batch</div>
+              <div class="flow-title">tokenized batch</div>
+              <p class="flow-desc">Dataset 取出一批 input_ids 和 labels，labels 通常是右移后的下一个 token 目标。</p>
+            </div>
+            <div class="flow-chip mono">[B, T]</div>
+          </div>
+          <div class="flow-node">
+            <div>
+              <div class="flow-step">02 forward</div>
+              <div class="flow-title">logits / loss</div>
+              <p class="flow-desc">当前权重做前向计算，得到每个位置对 vocab 的预测分布，再和 labels 算交叉熵。</p>
+            </div>
+            <div class="flow-chip mono">loss scalar</div>
+          </div>
+          <div class="flow-node">
+            <div>
+              <div class="flow-step">03 backward</div>
+              <div class="flow-title">gradients</div>
+              <p class="flow-desc">loss.backward() 把误差沿计算图反传，给每个可训练参数累计梯度。</p>
+            </div>
+            <div class="flow-chip mono">param.grad</div>
+          </div>
+          <div class="flow-node">
+            <div>
+              <div class="flow-step">04 optimize</div>
+              <div class="flow-title">optimizer step</div>
+              <p class="flow-desc">AdamW 读取梯度和学习率，计算每个参数张量应该移动的方向与幅度。</p>
+            </div>
+            <div class="flow-chip mono">lr=5e-3</div>
+          </div>
+          <div class="flow-node">
+            <div>
+              <div class="flow-step">05 update</div>
+              <div class="flow-title">weights updated</div>
+              <p class="flow-desc">参数值被原地更新，下一批数据 forward 时使用的已经是新模型。</p>
+            </div>
+            <div class="flow-chip mono">all trainable</div>
+          </div>
+        </div>
+        <div class="weight-stage">
+          <div class="weight-box">
+            <div class="weight-title">step 前：旧的 tiny model</div>
+            <p class="weight-text mono">embedding.weight / blocks.* / lm_head.weight<br />这些参数共同决定 logits。</p>
+          </div>
+          <div class="weight-arrow">-></div>
+          <div class="weight-box updated">
+            <div class="weight-title">step 后：同一模型，权重数值变了</div>
+            <p class="weight-text mono">param = param - update<br />下一轮 loss 会基于更新后的全量参数重新计算。</p>
+          </div>
+        </div>
+        <p class="contrast"><strong>和 LoRA 不同：</strong>Lesson 04 训练的是 tiny causal LM 本体，87,872 个 trainable params 全部参与更新；LoRA 通常冻结 base model，只训练额外插入的低秩 adapter 参数。</p>
       </div>
     </section>
 
