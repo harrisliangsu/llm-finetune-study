@@ -1,0 +1,33 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Training outputs
+outputs/
+output/
+checkpoints/
+checkpoint-*/
+runs/
+wandb/
+mlruns/
+*.ckpt
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Data and caches
+data/raw/
+data/processed/
+.cache/
+cache/
+hf_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
