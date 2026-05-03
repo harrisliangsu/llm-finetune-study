@@ -39,6 +39,7 @@
       padding:8px 11px; font-size:12px; font-weight:800; cursor:pointer;
     }
     .button:hover { border-color:rgba(6,182,212,.45); color:white; }
+    .button.active { border-color:rgba(34,197,94,.42); background:rgba(34,197,94,.1); color:#bbf7d0; }
     .layout { display:grid; grid-template-columns:280px minmax(0,1fr) 360px; gap:18px; margin-top:18px; align-items:start; }
     .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; }
     .panel-title { font-size:13px; font-weight:900; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:13px; }
@@ -62,8 +63,10 @@
     }
     .node:last-child::after { display:none; }
     .node.active { border-color:rgba(6,182,212,.7); box-shadow:0 0 0 1px rgba(6,182,212,.22), 0 18px 42px rgba(0,0,0,.28); transform:translateY(-2px); }
+    .node.current:not(.active) { border-color:rgba(234,179,8,.58); box-shadow:0 0 0 1px rgba(234,179,8,.16); }
     .node.done { border-color:rgba(34,197,94,.24); }
     .node-id { color:var(--faint); font-size:11px; font-weight:900; margin-bottom:7px; }
+    .node.current .node-id { color:var(--gold); }
     .node-name { font-size:14px; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
     .node-summary { color:var(--muted); font-size:12px; margin-top:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     .kind { display:inline-flex; align-items:center; min-height:23px; margin-top:10px; border-radius:999px; padding:3px 8px; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; border:1px solid var(--line); color:var(--muted); }
@@ -80,6 +83,30 @@
     .box { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:13px; min-width:0; }
     .box-title { color:var(--muted); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:8px; }
     pre { color:#b9c2d8; white-space:pre-wrap; word-break:break-word; font-size:12px; max-height:260px; overflow:auto; }
+    .field-grid { display:grid; gap:8px; }
+    .field-card {
+      width:100%; text-align:left; color:var(--ink); border:1px solid var(--line); border-radius:8px;
+      background:rgba(23,29,42,.72); padding:10px; cursor:pointer; transition:.16s ease; min-width:0; font:inherit;
+    }
+    .field-card:hover { border-color:rgba(6,182,212,.42); background:rgba(6,182,212,.07); }
+    .field-card.active { border-color:rgba(6,182,212,.72); box-shadow:0 0 0 1px rgba(6,182,212,.18); }
+    .field-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+    .field-key { font-size:13px; font-weight:900; overflow-wrap:anywhere; }
+    .field-type { flex:0 0 auto; color:var(--cyan); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+    .field-preview { color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+    .field-action { display:inline-flex; margin-top:8px; color:#bbf7d0; border:1px solid rgba(34,197,94,.25); background:rgba(34,197,94,.08); border-radius:999px; padding:3px 7px; font-size:10px; font-weight:900; }
+    .inspector { margin-top:12px; border-color:rgba(6,182,212,.2); background:linear-gradient(180deg,rgba(6,182,212,.06),rgba(13,17,26,.96)); }
+    .inspector-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px; }
+    .inspector-title { font-size:16px; font-weight:900; overflow-wrap:anywhere; }
+    .inspector-source { color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; }
+    .meta-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+    .meta-item { border:1px solid var(--line); border-radius:8px; padding:8px; background:rgba(8,10,18,.42); min-width:0; }
+    .meta-label { color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+    .meta-value { margin-top:4px; color:var(--ink); font-size:12px; overflow-wrap:anywhere; }
+    .file-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 8px; padding:9px; border:1px solid rgba(34,197,94,.2); border-radius:8px; background:rgba(34,197,94,.07); }
+    .file-link { color:#bbf7d0; font-size:12px; font-weight:900; text-decoration:none; white-space:nowrap; }
+    .file-link:hover { color:white; }
+    .file-content { max-height:360px; border:1px solid var(--line); border-radius:8px; background:rgba(8,10,18,.72); padding:10px; }
     .tensor-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; }
     .tensor { border:1px solid rgba(6,182,212,.18); background:rgba(6,182,212,.06); border-radius:10px; padding:12px; min-width:0; }
     .tensor-name { font-weight:900; overflow-wrap:anywhere; }
@@ -93,7 +120,7 @@
     .metric-row:last-child { border-bottom:0; padding-bottom:0; }
     .metric-row code { color:var(--green); }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid { grid-template-columns:1fr; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid { grid-template-columns:1fr; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
   </style>
 </head>
@@ -103,6 +130,7 @@
       <div class="brand"><span>LLM</span> Training Visualizer</div>
       <div class="status"><span class="pulse" id="pulse"></span><span id="statusText">等待 trace...</span></div>
       <div class="toolbar">
+        <button class="button active" id="followCurrent">跟随当前步骤</button>
         <button class="button" id="toggleLive">暂停刷新</button>
         <button class="button" id="openLive">打开 live trace</button>
       </div>
@@ -116,6 +144,8 @@
         <div class="stat-grid">
           <div class="stat"><div class="stat-value" id="eventCount">0</div><div class="stat-label">events</div></div>
           <div class="stat"><div class="stat-value" id="runStatus">-</div><div class="stat-label">status</div></div>
+          <div class="stat"><div class="stat-value" id="pollSeconds">5s</div><div class="stat-label">poll interval</div></div>
+          <div class="stat"><div class="stat-value" id="followState">auto</div><div class="stat-label">flow mode</div></div>
         </div>
         <div class="run-card">
           <div class="panel-title">Trace Source</div>
@@ -143,15 +173,34 @@
     const params = new URLSearchParams(window.location.search);
     const liveTracePath = params.get("trace") || "traces/live.json";
     const demoTracePath = "demo-trace.json";
+    const requestedInterval = Number(params.get("interval") || 5000);
+    const pollIntervalMs = Number.isFinite(requestedInterval) ? Math.max(1000, requestedInterval) : 5000;
+    const repoRoot = "/Users/liangsu/dev/repo/llm-finetune-study/";
+    const repoPathPrefixes = ["examples/", "lessons/", "docs/", "visualizer/", "checklists/"];
+    const repoPathFiles = ["README.md", "ROADMAP.md", "LICENSE"];
     let activeEventId = null;
+    let followCurrent = true;
     let live = true;
     let lastTrace = null;
     let usingDemo = false;
+    let selectedField = null;
+    let fileFetchToken = 0;
 
     const $ = (id) => document.getElementById(id);
-    const json = (value) => JSON.stringify(value ?? {}, null, 2);
+    const json = (value) => {
+      const rendered = JSON.stringify(value, null, 2);
+      return rendered === undefined ? String(value) : rendered;
+    };
     const kindClass = (kind) => `kind kind-${String(kind || "event").replace(/[^a-z0-9_-]/gi, "-").toLowerCase()}`;
 
+    $("followCurrent").addEventListener("click", () => {
+      followCurrent = true;
+      const currentId = getCurrentEventId(lastTrace);
+      if (currentId) activeEventId = currentId;
+      selectedField = null;
+      if (lastTrace) render(lastTrace, { forceScroll: true });
+      updateControls();
+    });
     $("toggleLive").addEventListener("click", () => {
       live = !live;
       $("toggleLive").textContent = live ? "暂停刷新" : "继续刷新";
@@ -174,25 +223,32 @@
       }
     }
 
-    function render(trace) {
+    function render(trace, options = {}) {
       lastTrace = trace;
       const events = trace.events || [];
-      const currentId = trace.current_event_id || (events.at(-1) && events.at(-1).id);
-      if (!activeEventId || !events.some((event) => event.id === activeEventId)) activeEventId = currentId;
+      const currentId = getCurrentEventId(trace);
+      const previousActiveId = activeEventId;
+      if (followCurrent || !activeEventId || !events.some((event) => event.id === activeEventId)) {
+        activeEventId = currentId;
+      }
+      if (previousActiveId !== activeEventId) selectedField = null;
       const selected = events.find((event) => event.id === activeEventId) || events.at(-1);
 
       $("lessonTitle").textContent = trace.title || "No trace";
-      $("lessonMeta").textContent = `${trace.lesson_id || "-"} · updated ${trace.updated_at || "-"}`;
+      $("lessonMeta").textContent = `${trace.lesson_id || "-"} · updated ${trace.updated_at || "-"} · poll ${formatInterval(pollIntervalMs)}`;
       $("eventCount").textContent = events.length;
       $("runStatus").textContent = trace.status || "-";
+      $("pollSeconds").textContent = formatInterval(pollIntervalMs);
+      $("followState").textContent = followCurrent ? "auto" : "manual";
       $("traceSource").textContent = usingDemo ? `${demoTracePath} (demo)` : liveTracePath;
       $("statusText").textContent = usingDemo
         ? "未检测到 live trace，正在显示 demo。运行课程脚本后会自动切换。"
         : `${trace.status === "done" ? "已完成" : "运行中"} · ${trace.updated_at || ""}`;
       $("pulse").style.background = trace.status === "done" ? "var(--cyan)" : "var(--green)";
+      updateControls();
 
       $("flow").innerHTML = events.map((event) => `
-        <article class="node ${event.id === activeEventId ? "active" : "done"}" data-event-id="${event.id}">
+        <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}">
           <div class="node-id">STEP ${event.id}</div>
           <div class="node-name">${escapeHtml(event.name)}</div>
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>
@@ -201,10 +257,17 @@
       `).join("");
       document.querySelectorAll(".node").forEach((node) => {
         node.addEventListener("click", () => {
+          followCurrent = false;
           activeEventId = node.dataset.eventId;
-          render(lastTrace);
+          selectedField = null;
+          render(lastTrace, { forceScroll: true });
         });
       });
+      if (options.forceScroll || (followCurrent && previousActiveId !== activeEventId)) {
+        requestAnimationFrame(() => {
+          document.querySelector(".node.active")?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        });
+      }
 
       renderDetail(selected);
       renderSide(selected, trace);
@@ -224,12 +287,177 @@
           <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
         </div>
         <div class="section-grid">
-          <div class="box"><div class="box-title">Input</div><pre>${escapeHtml(json(event.inputs))}</pre></div>
-          <div class="box"><div class="box-title">Output</div><pre>${escapeHtml(json(event.outputs))}</pre></div>
+          <div class="box"><div class="box-title">Input</div>${renderFieldList(event.inputs || {}, "inputs", event.id)}</div>
+          <div class="box"><div class="box-title">Output</div>${renderFieldList(event.outputs || {}, "outputs", event.id)}</div>
         </div>
+        <div class="box inspector" id="fieldInspector"></div>
         ${renderTensors(event.tensors || [])}
         ${event.sample && Object.keys(event.sample).length ? `<div style="height:12px"></div><div class="box"><div class="box-title">Sample</div><pre>${escapeHtml(json(event.sample))}</pre></div>` : ""}
       `;
+      bindFieldCards(event);
+      refreshSelectedField(event);
+      renderFieldInspector(selectedField);
+    }
+
+    function renderFieldList(fields, source, eventId) {
+      const entries = Object.entries(fields || {});
+      if (!entries.length) return `<div class="subtle">当前事件没有 ${source === "inputs" ? "输入" : "输出"} 字段。</div>`;
+      return `
+        <div class="field-grid">
+          ${entries.map(([key, value]) => {
+            const pathInfo = repoPathInfo(value);
+            const isActive = selectedField
+              && selectedField.eventId === eventId
+              && selectedField.source === source
+              && selectedField.key === key;
+            return `
+              <button type="button" class="field-card ${isActive ? "active" : ""}" data-source="${source}" data-key="${escapeAttr(key)}">
+                <div class="field-row">
+                  <span class="field-key">${escapeHtml(key)}</span>
+                  <span class="field-type">${escapeHtml(pathInfo ? "repo path" : valueType(value))}</span>
+                </div>
+                <div class="field-preview">${escapeHtml(previewValue(value))}</div>
+                <span class="field-action">${pathInfo ? "查看仓库内容" : "查看字段详情"}</span>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function bindFieldCards(event) {
+      document.querySelectorAll(".field-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          const source = card.dataset.source;
+          const key = card.dataset.key;
+          const value = (event[source] || {})[key];
+          void selectField(event.id, source, key, value);
+        });
+      });
+    }
+
+    function refreshSelectedField(event) {
+      if (!selectedField || selectedField.eventId !== event.id) {
+        selectedField = null;
+        return;
+      }
+      const fields = event[selectedField.source] || {};
+      if (!Object.prototype.hasOwnProperty.call(fields, selectedField.key)) {
+        selectedField = null;
+        return;
+      }
+      const nextValue = fields[selectedField.key];
+      const nextPath = repoPathInfo(nextValue);
+      const previousPath = selectedField.pathInfo && selectedField.pathInfo.repoPath;
+      const changedPath = (nextPath && nextPath.repoPath) !== previousPath;
+      selectedField = {
+        ...selectedField,
+        value: nextValue,
+        pathInfo: nextPath,
+        fileStatus: changedPath ? (nextPath ? "idle" : "none") : selectedField.fileStatus,
+        fileContent: changedPath ? "" : selectedField.fileContent,
+        fileMeta: changedPath ? "" : selectedField.fileMeta,
+      };
+    }
+
+    async function selectField(eventId, source, key, value) {
+      fileFetchToken += 1;
+      const token = fileFetchToken;
+      const pathInfo = repoPathInfo(value);
+      selectedField = {
+        eventId,
+        source,
+        key,
+        value,
+        pathInfo,
+        fileStatus: pathInfo ? "loading" : "none",
+        fileContent: "",
+        fileMeta: "",
+      };
+      syncFieldCards();
+      renderFieldInspector(selectedField);
+      if (!pathInfo) return;
+
+      try {
+        const response = await fetch(`${toRepoUrl(pathInfo.repoPath)}?ts=${Date.now()}`, { cache: "no-store" });
+        let content = "";
+        let meta = "";
+        if (pathInfo.isBinary) {
+          const bytes = await response.arrayBuffer();
+          content = response.ok
+            ? `Binary file (${formatBytes(bytes.byteLength)}). Use "打开原始路径" to inspect it outside the text viewer.`
+            : `${response.status} ${response.statusText}`;
+          meta = `${response.status} · binary · ${formatBytes(bytes.byteLength)}`;
+        } else {
+          const text = await response.text();
+          content = response.ok ? truncateText(text, 24000) : `${response.status} ${response.statusText}\n${truncateText(text, 4000)}`;
+          meta = `${response.status} · ${response.headers.get("content-type") || "text"} · ${formatBytes(text.length)}`;
+        }
+        if (token !== fileFetchToken || !selectedField || selectedField.eventId !== eventId || selectedField.source !== source || selectedField.key !== key) return;
+        selectedField = { ...selectedField, fileStatus: response.ok ? "loaded" : "error", fileContent: content, fileMeta: meta };
+      } catch (error) {
+        if (token !== fileFetchToken || !selectedField) return;
+        selectedField = { ...selectedField, fileStatus: "error", fileContent: error.message, fileMeta: "fetch failed" };
+      }
+      renderFieldInspector(selectedField);
+    }
+
+    function renderFieldInspector(field) {
+      const container = $("fieldInspector");
+      if (!container) return;
+      if (!field) {
+        container.innerHTML = `
+          <div class="inspector-source">Field Inspector</div>
+          <div class="detail-title" style="font-size:16px; margin-top:4px;">点击 Input / Output 字段</div>
+          <p class="subtle" style="margin-top:8px;">这里会展示字段的原始值、类型、仓库路径；如果字段指向文件，会直接读取文件内容。</p>
+        `;
+        return;
+      }
+      const pathInfo = field.pathInfo;
+      container.innerHTML = `
+        <div class="inspector-head">
+          <div>
+            <div class="inspector-source">${escapeHtml(field.source === "inputs" ? "Input Field" : "Output Field")}</div>
+            <div class="inspector-title">${escapeHtml(field.key)}</div>
+          </div>
+          <span class="field-type">${escapeHtml(pathInfo ? "repo path" : valueType(field.value))}</span>
+        </div>
+        <div class="meta-grid">
+          <div class="meta-item"><div class="meta-label">source</div><div class="meta-value">${escapeHtml(field.source)}</div></div>
+          <div class="meta-item"><div class="meta-label">type</div><div class="meta-value">${escapeHtml(valueType(field.value))}</div></div>
+          <div class="meta-item"><div class="meta-label">path</div><div class="meta-value">${escapeHtml(pathInfo ? pathInfo.repoPath : "-")}</div></div>
+        </div>
+        <div class="box-title">Field Value</div>
+        <pre>${escapeHtml(json(field.value))}</pre>
+        ${pathInfo ? renderFilePanel(field, pathInfo) : ""}
+      `;
+    }
+
+    function renderFilePanel(field, pathInfo) {
+      const content = field.fileStatus === "loading"
+        ? "正在读取仓库内容..."
+        : field.fileContent || "尚未读取。";
+      return `
+        <div class="file-bar">
+          <div>
+            <div class="meta-label">repo file / directory</div>
+            <div class="meta-value">${escapeHtml(pathInfo.repoPath)}</div>
+            <div class="subtle">${escapeHtml(field.fileMeta || "fetch pending")}</div>
+          </div>
+          <a class="file-link" href="${escapeAttr(toRepoUrl(pathInfo.repoPath))}" target="_blank" rel="noreferrer">打开原始路径</a>
+        </div>
+        <pre class="file-content">${escapeHtml(content)}</pre>
+      `;
+    }
+
+    function syncFieldCards() {
+      document.querySelectorAll(".field-card").forEach((card) => {
+        const isActive = selectedField
+          && selectedField.eventId === activeEventId
+          && selectedField.source === card.dataset.source
+          && selectedField.key === card.dataset.key;
+        card.classList.toggle("active", Boolean(isActive));
+      });
     }
 
     function renderTensors(tensors) {
@@ -278,6 +506,92 @@
       `;
     }
 
+    function nodeClass(event, currentId) {
+      const classes = ["node"];
+      if (event.id === activeEventId) classes.push("active");
+      if (event.id === currentId) classes.push("current");
+      if (event.id !== currentId) classes.push("done");
+      return classes.join(" ");
+    }
+
+    function getCurrentEventId(trace) {
+      const events = (trace && trace.events) || [];
+      return trace && (trace.current_event_id || (events.at(-1) && events.at(-1).id));
+    }
+
+    function updateControls() {
+      $("followCurrent").classList.toggle("active", followCurrent);
+      $("followCurrent").textContent = followCurrent ? "正在跟随当前步骤" : "回到当前步骤";
+      $("followState").textContent = followCurrent ? "auto" : "manual";
+    }
+
+    function valueType(value) {
+      if (value === null) return "null";
+      if (Array.isArray(value)) return `array(${value.length})`;
+      return typeof value;
+    }
+
+    function previewValue(value, depth = 0) {
+      let text;
+      if (value === null) text = "null";
+      else if (value === undefined) text = "undefined";
+      else if (typeof value === "string") text = value;
+      else if (typeof value === "number" || typeof value === "boolean") text = String(value);
+      else if (Array.isArray(value)) {
+        const shown = value.slice(0, 4).map((item) => previewValue(item, depth + 1)).join(", ");
+        text = `[${shown}${value.length > 4 ? ", ..." : ""}]`;
+      } else if (typeof value === "object" && depth < 1) {
+        const entries = Object.entries(value).slice(0, 4).map(([key, item]) => `${key}: ${previewValue(item, depth + 1)}`);
+        text = `{ ${entries.join(" · ")}${Object.keys(value).length > 4 ? " · ..." : ""} }`;
+      } else {
+        text = json(value);
+      }
+      return text.length > 150 ? `${text.slice(0, 147)}...` : text;
+    }
+
+    function repoPathInfo(value) {
+      if (typeof value !== "string") return null;
+      let repoPath = value.trim();
+      if (!repoPath || /^https?:\/\//i.test(repoPath) || repoPath.includes("\\")) return null;
+      if (repoPath.startsWith(repoRoot)) repoPath = repoPath.slice(repoRoot.length);
+      repoPath = repoPath.replace(/^\.\//, "").replace(/^\/+/, "");
+      if (repoPath.split("/").includes("..")) return null;
+      const allowed = repoPathFiles.includes(repoPath)
+        || repoPathPrefixes.some((prefix) => repoPath === prefix.slice(0, -1) || repoPath.startsWith(prefix));
+      if (!allowed) return null;
+      return {
+        original: value,
+        repoPath,
+        isBinary: /\.(bin|pt|pkl|safetensors|model|onnx)$/i.test(repoPath),
+      };
+    }
+
+    function toRepoUrl(repoPath) {
+      const encoded = repoPath.split("/").map(encodeURIComponent).join("/");
+      return new URL(`../${encoded}`, window.location.href).toString();
+    }
+
+    function truncateText(text, limit) {
+      if (text.length <= limit) return text;
+      return `${text.slice(0, limit)}\n\n... truncated. Open the raw path to view the full content.`;
+    }
+
+    function formatBytes(size) {
+      if (!Number.isFinite(size)) return "-";
+      const units = ["B", "KB", "MB", "GB"];
+      let value = size;
+      let index = 0;
+      while (value >= 1024 && index < units.length - 1) {
+        value /= 1024;
+        index += 1;
+      }
+      return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+    }
+
+    function formatInterval(ms) {
+      return ms >= 1000 ? `${Math.round(ms / 100) / 10}s` : `${ms}ms`;
+    }
+
     function escapeHtml(value) {
       return String(value)
         .replaceAll("&", "&amp;")
@@ -285,6 +599,10 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replaceAll("`", "&#096;");
     }
 
     async function tick() {
@@ -295,7 +613,7 @@
           $("statusText").textContent = `读取 trace 失败: ${error.message}`;
         }
       }
-      setTimeout(tick, 700);
+      setTimeout(tick, pollIntervalMs);
     }
     tick();
   </script>
