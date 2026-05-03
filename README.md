@@ -54,6 +54,7 @@
 - [lessons/02-tokenizer/index.html](lessons/02-tokenizer/index.html)
 - [lessons/03-batching/index.html](lessons/03-batching/index.html)
 - [lessons/04-trainer/index.html](lessons/04-trainer/index.html)
+- [lessons/05-lora/index.html](lessons/05-lora/index.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
@@ -66,6 +67,7 @@
 - [lessons/02-tokenizer/report.md](lessons/02-tokenizer/report.md): 本地 `AutoTokenizer`、`input_ids`、`attention_mask`、SFT `labels` 检查
 - [lessons/03-batching/report.md](lessons/03-batching/report.md): batch、collator、padding 和 effective batch size
 - [lessons/04-trainer/report.md](lessons/04-trainer/report.md): `transformers.Trainer` 最小训练闭环和过拟合观察
+- [lessons/05-lora/report.md](lessons/05-lora/report.md): 冻结 base、训练 LoRA adapter、保存并重新加载 adapter
 
 ## 参考仓库
 

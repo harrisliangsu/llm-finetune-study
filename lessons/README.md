@@ -15,6 +15,7 @@
 | 02 | AutoTokenizer | [02-tokenizer](02-tokenizer) | text -> input_ids / attention_mask / labels |
 | 03 | Batch / Collator | [03-batching](03-batching) | list[dict] -> dict[tensor] |
 | 04 | Trainer 闭环 | [04-trainer](04-trainer) | model + dataset + loss + optimizer |
+| 05 | LoRA Adapter | [05-lora](05-lora) | frozen base + trainable adapter |
 
 ## 运行顺序
 
@@ -23,6 +24,7 @@
 .venv/bin/python lessons/02-tokenizer/run.py
 .venv/bin/python lessons/03-batching/run.py
 .venv/bin/python lessons/04-trainer/run.py
+.venv/bin/python lessons/05-lora/run.py
 ```
 
 如果你只想学习页面，直接打开每课目录里的 `index.html`。
