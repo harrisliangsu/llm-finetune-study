@@ -4,16 +4,10 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-os.environ.setdefault("HF_HOME", str(PROJECT_ROOT / ".cache" / "huggingface"))
-os.environ.setdefault(
-    "HF_DATASETS_CACHE",
-    str(PROJECT_ROOT / ".cache" / "huggingface" / "datasets"),
-)
 
 from datasets import DatasetDict, load_dataset
 
@@ -71,7 +65,7 @@ def iter_training_texts(data_path: str | Path) -> list[str]:
 
 def ensure_local_auto_tokenizer(
     data_path: str | Path,
-    tokenizer_dir: str | Path = ".cache/local-sft-tokenizer",
+    tokenizer_dir: str | Path = "lessons/02-tokenizer/outputs/local-sft-tokenizer",
     vocab_size: int = 256,
 ):
     """Train a tiny local tokenizer and load it through AutoTokenizer.

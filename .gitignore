@@ -10,6 +10,7 @@ env/
 # Training outputs
 outputs/
 output/
+lessons/**/outputs/
 checkpoints/
 checkpoint-*/
 runs/
@@ -30,4 +31,3 @@ hf_cache/
 
 # Notebooks
 .ipynb_checkpoints/
-

@@ -24,6 +24,7 @@ JSONL -> Dataset -> train/validation split -> filter -> map -> formatted arrays
 
 - [report.md](report.md)
 - [index.html](index.html)
+- 本课 datasets 缓存：`lessons/01-datasets/outputs/hf-cache`
 
 ## 你必须理解的点
 

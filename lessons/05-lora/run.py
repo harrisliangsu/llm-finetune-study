@@ -11,12 +11,17 @@ from __future__ import annotations
 
 import argparse
 import inspect
+import os
 import sys
 from pathlib import Path
 from textwrap import dedent
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
+LESSON_OUTPUTS = Path(__file__).resolve().parent / "outputs"
+os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
 from lessons.common.lesson_common import (
     count_trainable_parameters,
@@ -268,9 +273,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/05-lora/report.md")
-    parser.add_argument("--tokenizer-dir", default=".cache/local-sft-tokenizer")
-    parser.add_argument("--output-dir", default="outputs/lesson05-lora")
-    parser.add_argument("--adapter-path", default="outputs/lesson05-lora/lora_adapter.pt")
+    parser.add_argument("--tokenizer-dir", default="lessons/02-tokenizer/outputs/local-sft-tokenizer")
+    parser.add_argument("--output-dir", default="lessons/05-lora/outputs/lora")
+    parser.add_argument("--adapter-path", default="lessons/05-lora/outputs/lora/lora_adapter.pt")
     parser.add_argument("--max-length", type=int, default=96)
     parser.add_argument("--max-steps", type=int, default=40)
     parser.add_argument("--learning-rate", type=float, default=1e-2)

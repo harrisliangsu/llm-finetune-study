@@ -28,7 +28,7 @@
 - eval loss before training: 4.92194128036499
 - train loss: 3.520887096722921
 - eval loss after training: 4.761502742767334
-- adapter dir: `outputs/lesson06-peft-lora/adapter`
+- adapter dir: `lessons/06-peft-lora/outputs/adapter`
 
 ## 第 1 条训练样本的 label 检查
 

@@ -5,12 +5,17 @@ from __future__ import annotations
 
 import argparse
 import inspect
+import os
 import sys
 from pathlib import Path
 from textwrap import dedent
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
+LESSON_OUTPUTS = Path(__file__).resolve().parent / "outputs"
+os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
 from lessons.common.lesson_common import (
     count_trainable_parameters,
@@ -138,7 +143,7 @@ def write_report(
 
         | 步骤 | 作用 | 输入 | 输出 |
         |---|---|---|---|
-        | 构造 tokenizer | 本地加载真实 `AutoTokenizer` | `.cache/local-sft-tokenizer` | token/id 映射 |
+        | 构造 tokenizer | 本地加载真实 `AutoTokenizer` | `lessons/02-tokenizer/outputs/local-sft-tokenizer` | token/id 映射 |
         | 构造 tokenized dataset | 复用 Lesson 02 的 SFT labels | JSONL + tokenizer | `input_ids/attention_mask/labels` |
         | `with_format("torch")` | 让 Dataset 取样时返回 torch tensor | tokenized DatasetDict | Trainer 可消费的 split |
         | tiny causal LM | 提供最小可训练模型 | vocab size | logits/loss |
@@ -168,8 +173,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/04-trainer/report.md")
-    parser.add_argument("--tokenizer-dir", default=".cache/local-sft-tokenizer")
-    parser.add_argument("--output-dir", default="outputs/lesson04-trainer")
+    parser.add_argument("--tokenizer-dir", default="lessons/02-tokenizer/outputs/local-sft-tokenizer")
+    parser.add_argument("--output-dir", default="lessons/04-trainer/outputs/trainer")
     parser.add_argument("--max-length", type=int, default=96)
     parser.add_argument("--max-steps", type=int, default=30)
     parser.add_argument("--learning-rate", type=float, default=5e-3)

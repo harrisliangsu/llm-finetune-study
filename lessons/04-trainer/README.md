@@ -24,7 +24,8 @@ tokenized dataset -> torch tensors -> model forward -> loss -> backward -> optim
 
 - [report.md](report.md)
 - [index.html](index.html)
-- 本地训练输出目录：`outputs/lesson04-trainer`
+- 本课 datasets 缓存：`lessons/04-trainer/outputs/hf-cache`
+- 本地训练输出目录：`lessons/04-trainer/outputs/trainer`
 
 ## 本课关键结果
 

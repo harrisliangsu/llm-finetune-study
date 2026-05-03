@@ -17,12 +17,13 @@ prompt + answer -> AutoTokenizer -> input_ids / attention_mask / labels
 ## 输入
 
 - `examples/sample_sft.jsonl`
-- 本地生成的 tokenizer 目录：`.cache/local-sft-tokenizer`
+- 本地生成的 tokenizer 目录：`lessons/02-tokenizer/outputs/local-sft-tokenizer`
 
 ## 输出
 
 - [report.md](report.md)
 - [index.html](index.html)
+- 本课 datasets 缓存：`lessons/02-tokenizer/outputs/hf-cache`
 
 ## 本课关键结果
 

@@ -9,11 +9,10 @@ import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-os.environ.setdefault("HF_HOME", str(PROJECT_ROOT / ".cache" / "huggingface"))
-os.environ.setdefault(
-    "HF_DATASETS_CACHE",
-    str(PROJECT_ROOT / ".cache" / "huggingface" / "datasets"),
-)
+LESSON_OUTPUTS = Path(__file__).resolve().parent / "outputs"
+os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
 try:
     from datasets import load_dataset

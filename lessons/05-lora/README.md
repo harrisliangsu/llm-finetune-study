@@ -38,7 +38,8 @@ tiny causal LM -> freeze base -> attach LoRA -> train adapter -> save adapter ->
 
 - [report.md](report.md)
 - [index.html](index.html)
-- adapter-only checkpoint: `outputs/lesson05-lora/lora_adapter.pt`
+- 本课 datasets 缓存：`lessons/05-lora/outputs/hf-cache`
+- adapter-only checkpoint: `lessons/05-lora/outputs/lora/lora_adapter.pt`
 
 ## 本课关键结果
 

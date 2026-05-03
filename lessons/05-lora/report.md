@@ -23,7 +23,7 @@
 - train loss: 5.074154376983643
 - eval loss after LoRA training: 5.733215808868408
 - LoRA B norm after training: 5.5681471824646
-- adapter path: `outputs/lesson05-lora/lora_adapter.pt`
+- adapter path: `lessons/05-lora/outputs/lora/lora_adapter.pt`
 
 ## 第 1 条训练样本的 label 检查
 

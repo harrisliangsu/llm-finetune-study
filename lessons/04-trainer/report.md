@@ -10,7 +10,7 @@
 - tiny model trainable params: 87872
 - tiny model total params: 87872
 - eval loss before training: 5.551877498626709
-- train loss: 3.7272937456766764
+- train loss: 3.7272937138875326
 - eval loss after training: 5.935162544250488
 - 观察: train loss 下降但 eval loss 上升，这是 4 条训练样本上开始过拟合的信号。
 
@@ -36,7 +36,7 @@ I ame tning toe-tuning.<eos>
 
 | 步骤 | 作用 | 输入 | 输出 |
 |---|---|---|---|
-| 构造 tokenizer | 本地加载真实 `AutoTokenizer` | `.cache/local-sft-tokenizer` | token/id 映射 |
+| 构造 tokenizer | 本地加载真实 `AutoTokenizer` | `lessons/02-tokenizer/outputs/local-sft-tokenizer` | token/id 映射 |
 | 构造 tokenized dataset | 复用 Lesson 02 的 SFT labels | JSONL + tokenizer | `input_ids/attention_mask/labels` |
 | `with_format("torch")` | 让 Dataset 取样时返回 torch tensor | tokenized DatasetDict | Trainer 可消费的 split |
 | tiny causal LM | 提供最小可训练模型 | vocab size | logits/loss |

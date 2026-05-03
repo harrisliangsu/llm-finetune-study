@@ -5,12 +5,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from textwrap import dedent
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
+LESSON_OUTPUTS = Path(__file__).resolve().parent / "outputs"
+os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
 from lessons.common.lesson_common import (
     IGNORE_INDEX,
@@ -123,7 +128,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/02-tokenizer/report.md")
-    parser.add_argument("--tokenizer-dir", default=".cache/local-sft-tokenizer")
+    parser.add_argument("--tokenizer-dir", default="lessons/02-tokenizer/outputs/local-sft-tokenizer")
     parser.add_argument("--max-length", type=int, default=96)
     args = parser.parse_args()
 

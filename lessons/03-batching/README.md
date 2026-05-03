@@ -24,6 +24,7 @@ list[dict] -> collator -> dict[array]
 
 - [report.md](report.md)
 - [index.html](index.html)
+- 本课 datasets 缓存：`lessons/03-batching/outputs/hf-cache`
 
 ## 本课关键结果
 

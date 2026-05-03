@@ -969,15 +969,15 @@ tokenized = raw.<span class="call">map</span>(tokenize_batch, batched=True, remo
           <div class="trace-content">
             <div class="trace-block">
               <div class="trace-block-label" style="color: var(--accent-blue);">作用</div>
-              <div class="trace-block-text">把 `datasets` 解析后的 Arrow 缓存写到仓库内 `.cache/`，避免写系统用户目录时因为权限失败。</div>
+              <div class="trace-block-text">把 `datasets` 解析后的 Arrow 缓存写到本课程 `outputs/`，避免课程输出散落到仓库根目录或系统用户目录。</div>
             </div>
             <div class="trace-block">
               <div class="trace-block-label" style="color: var(--accent-blue);">输入</div>
-              <div class="trace-block-text mono">项目根目录<br />/Users/liangsu/dev/repo/llm-finetune-study</div>
+              <div class="trace-block-text mono">lessons/01-datasets<br />课程目录</div>
             </div>
             <div class="trace-block">
               <div class="trace-block-label" style="color: var(--accent-blue);">输出</div>
-              <div class="trace-block-text mono">.cache/huggingface/datasets</div>
+              <div class="trace-block-text mono">lessons/01-datasets/outputs/hf-cache/datasets</div>
             </div>
           </div>
         </div>

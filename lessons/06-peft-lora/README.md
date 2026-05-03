@@ -11,7 +11,7 @@ Qwen/Qwen2.5-0.5B-Instruct
 下载位置在仓库内：
 
 ```text
-.cache/huggingface
+lessons/06-peft-lora/outputs/hf-cache
 ```
 
 首次下载后，后续运行会直接读本地缓存。Hugging Face 登录可以减少匿名请求限流，但本课已经跑完后不再强制需要登录。
@@ -55,7 +55,8 @@ AutoModelForCausalLM
 
 - [report.md](report.md)
 - [index.html](index.html)
-- adapter-only checkpoint: `outputs/lesson06-peft-lora/adapter`
+- 本课 model/datasets 缓存：`lessons/06-peft-lora/outputs/hf-cache`
+- adapter-only checkpoint: `lessons/06-peft-lora/outputs/adapter`
 
 ## 本课关键结果
 

@@ -6,6 +6,7 @@
 - `run.py`: 可执行脚本
 - `report.md`: 本地执行后生成的结果报告
 - `index.html`: 可直接打开的可视化学习页
+- `outputs/`: 本课运行时生成的缓存、checkpoint、adapter 等本地输出
 
 ## 课程顺序
 
@@ -28,5 +29,7 @@
 .venv/bin/python lessons/05-lora/run.py
 .venv/bin/python lessons/06-peft-lora/run.py
 ```
+
+每课脚本会把 Hugging Face cache、Trainer checkpoint、adapter 等生成内容写到自己目录下的 `outputs/`。这些内容已被 `.gitignore` 忽略，不会提交到 GitHub。
 
 如果你只想学习页面，直接打开每课目录里的 `index.html`。

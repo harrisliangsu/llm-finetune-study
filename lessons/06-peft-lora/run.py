@@ -19,16 +19,18 @@ from textwrap import dedent
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+LESSON_DIR = Path(__file__).resolve().parent
+LESSON_OUTPUTS = LESSON_DIR / "outputs"
+os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
+
 from lessons.common.lesson_common import (
     decode_learned_labels,
     load_sft_splits,
     make_sft_tokenize_fn,
     resolve_project_path,
 )
-
-
-os.environ.setdefault("HF_HOME", str(PROJECT_ROOT / ".cache" / "huggingface"))
-os.environ.setdefault("HF_DATASETS_CACHE", str(PROJECT_ROOT / ".cache" / "huggingface" / "datasets"))
 
 
 def require_training_stack():
@@ -263,8 +265,8 @@ def main() -> None:
     parser.add_argument("--model-name", default="Qwen/Qwen2.5-0.5B-Instruct")
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/06-peft-lora/report.md")
-    parser.add_argument("--output-dir", default="outputs/lesson06-peft-lora/trainer")
-    parser.add_argument("--adapter-dir", default="outputs/lesson06-peft-lora/adapter")
+    parser.add_argument("--output-dir", default="lessons/06-peft-lora/outputs/trainer")
+    parser.add_argument("--adapter-dir", default="lessons/06-peft-lora/outputs/adapter")
     parser.add_argument("--max-length", type=int, default=128)
     parser.add_argument("--max-steps", type=int, default=6)
     parser.add_argument("--learning-rate", type=float, default=2e-4)
