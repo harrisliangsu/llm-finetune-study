@@ -5,7 +5,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+os.environ.setdefault("HF_HOME", str(PROJECT_ROOT / ".cache" / "huggingface"))
+os.environ.setdefault(
+    "HF_DATASETS_CACHE",
+    str(PROJECT_ROOT / ".cache" / "huggingface" / "datasets"),
+)
 
 try:
     from datasets import load_dataset

@@ -21,6 +21,22 @@
 - max length 如何影响结果
 - eval accuracy/F1 怎么看
 
+## 已落地脚本
+
+先执行 datasets 数据管线课：
+
+```bash
+.venv/bin/python scripts/lesson01_datasets_pipeline.py
+```
+
+它会生成：
+
+```text
+reports/lesson01-datasets.md
+```
+
+这一步的目标不是训练模型，而是确认你已经理解 `load_dataset`、`train_test_split`、`filter`、`map(batched=True)` 和 SFT `labels=-100`。
+
 ## 练习 2：causal LM 微调
 
 目标：
@@ -89,4 +105,3 @@
 - 数据质量比数据规模更早影响效果
 - 指令、输入、回答风格要稳定
 - 评估 prompts 要固定
-

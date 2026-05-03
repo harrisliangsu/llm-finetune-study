@@ -56,6 +56,10 @@
 
 然后照着 [examples/README.md](examples/README.md) 里的练习顺序做小实验。
 
+## 已执行课程
+
+- [reports/lesson01-datasets.md](reports/lesson01-datasets.md): Hugging Face Datasets 微调数据管线执行结果
+
 ## 参考仓库
 
 这些仓库来自个人 GitHub stars 中适合学习模型训练/微调的项目：
