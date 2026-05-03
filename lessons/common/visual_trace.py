@@ -60,6 +60,8 @@ class VisualTrace:
         self.status = "running"
         self.current_event_id: str | None = None
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.archive_path = self._archive_path()
+        self.archive_path.parent.mkdir(parents=True, exist_ok=True)
         self._write()
 
     def _resolve(self, path: str | Path) -> Path:
@@ -67,6 +69,13 @@ class VisualTrace:
         if candidate.is_absolute():
             return candidate
         return PROJECT_ROOT / candidate
+
+    def _archive_path(self) -> Path:
+        safe_lesson_id = "".join(
+            character if character.isalnum() or character in {"-", "_"} else "-"
+            for character in self.lesson_id
+        ).strip("-")
+        return PROJECT_ROOT / "visualizer" / "traces" / f"{safe_lesson_id}.json"
 
     def event(
         self,
@@ -121,9 +130,14 @@ class VisualTrace:
             "current_event_id": self.current_event_id,
             "events": self.events,
         }
-        tmp_path = self.path.with_suffix(self.path.suffix + ".tmp")
+        self._write_payload(self.path, payload)
+        if self.archive_path != self.path:
+            self._write_payload(self.archive_path, payload)
+
+    def _write_payload(self, path: Path, payload: dict[str, Any]) -> None:
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
         tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        tmp_path.replace(self.path)
+        tmp_path.replace(path)
 
 
 def make_trainer_trace_callback(trace: VisualTrace, label: str = "Trainer"):

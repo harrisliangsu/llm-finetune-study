@@ -12,6 +12,7 @@ outputs/
 output/
 lessons/**/outputs/
 visualizer/traces/live.json
+visualizer/traces/[0-9][0-9]-*.json
 visualizer/traces/*.tmp
 checkpoints/
 checkpoint-*/

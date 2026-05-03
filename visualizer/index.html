@@ -51,6 +51,25 @@
     .stat-label { margin-top:6px; color:var(--muted); font-size:11px; font-weight:800; }
     .run-card { margin-top:14px; padding:13px; border-radius:10px; background:var(--panel-3); border:1px solid var(--line); }
     .run-card .mono { color:var(--cyan); font-size:12px; overflow-wrap:anywhere; }
+    .course-list { display:grid; gap:9px; margin-top:14px; max-height:430px; overflow:auto; padding-right:3px; }
+    .course-card {
+      width:100%; text-align:left; font:inherit; color:var(--ink); border:1px solid var(--line); border-radius:10px;
+      background:rgba(13,17,26,.82); padding:11px; cursor:pointer; transition:.16s ease; position:relative; overflow:hidden;
+    }
+    .course-card::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--faint); opacity:.9; }
+    .course-card:hover { border-color:rgba(6,182,212,.42); background:rgba(6,182,212,.06); }
+    .course-card.active { border-color:rgba(6,182,212,.72); box-shadow:0 0 0 1px rgba(6,182,212,.18); }
+    .course-card.executed::before { background:var(--green); }
+    .course-card.live::before { background:var(--cyan); animation:barPulse 1.8s ease-in-out infinite; }
+    .course-card.missing::before { background:var(--gold); }
+    @keyframes barPulse { 50% { opacity:.35; } }
+    .course-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+    .course-id { color:var(--cyan); font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .course-status { color:var(--muted); font-size:10px; font-weight:900; border:1px solid var(--line); border-radius:999px; padding:2px 7px; white-space:nowrap; }
+    .course-card.executed .course-status { color:#bbf7d0; border-color:rgba(34,197,94,.28); background:rgba(34,197,94,.08); }
+    .course-card.missing .course-status { color:#fde68a; border-color:rgba(234,179,8,.28); background:rgba(234,179,8,.08); }
+    .course-name { margin-top:5px; font-size:13px; line-height:1.25; font-weight:900; overflow-wrap:anywhere; }
+    .course-meta { margin-top:6px; color:var(--muted); font-size:11px; overflow-wrap:anywhere; }
     .flow-wrap { overflow-x:auto; padding-bottom:6px; }
     .flow { display:flex; gap:10px; min-width:max-content; }
     .node {
@@ -107,6 +126,53 @@
     .file-link { color:#bbf7d0; font-size:12px; font-weight:900; text-decoration:none; white-space:nowrap; }
     .file-link:hover { color:white; }
     .file-content { max-height:360px; border:1px solid var(--line); border-radius:8px; background:rgba(8,10,18,.72); padding:10px; }
+    .stage {
+      margin-top:12px; border:1px solid rgba(6,182,212,.18); border-radius:12px; overflow:hidden;
+      background:
+        linear-gradient(135deg,rgba(6,182,212,.08),transparent 44%),
+        linear-gradient(180deg,rgba(13,17,26,.94),rgba(8,10,18,.92));
+    }
+    .stage-grid { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:0; min-height:310px; }
+    .stage-cell { padding:15px; border-right:1px solid var(--line); min-width:0; position:relative; overflow:hidden; }
+    .stage-cell:last-child { border-right:0; }
+    .stage-label { color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
+    .data-lane { position:relative; min-height:128px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; align-items:center; }
+    .flow-line { position:absolute; left:14%; right:14%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.25),rgba(6,182,212,.75),rgba(34,197,94,.38)); overflow:hidden; }
+    .flow-line::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent); animation:scanLine 2.2s linear infinite; }
+    @keyframes scanLine { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
+    .data-node { min-height:96px; border:1px solid var(--line); border-radius:10px; background:rgba(8,10,18,.76); padding:11px; position:relative; z-index:1; }
+    .data-node strong { display:block; font-size:13px; margin-bottom:6px; }
+    .data-node span { display:block; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+    .data-node.input { border-color:rgba(59,130,246,.3); }
+    .data-node.process { border-color:rgba(6,182,212,.36); animation:nodePulse 2.1s ease-in-out infinite; }
+    .data-node.output { border-color:rgba(34,197,94,.3); }
+    @keyframes nodePulse { 50% { box-shadow:0 0 0 1px rgba(6,182,212,.22), 0 0 28px rgba(6,182,212,.12); } }
+    .particle { position:absolute; top:calc(50% - 4px); left:13%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 18px rgba(6,182,212,.9); z-index:2; animation:particleMove 2.7s linear infinite; }
+    .particle.p2 { animation-delay:.65s; background:var(--green); box-shadow:0 0 18px rgba(34,197,94,.8); }
+    .particle.p3 { animation-delay:1.3s; background:var(--blue); box-shadow:0 0 18px rgba(59,130,246,.82); }
+    @keyframes particleMove { from { transform:translateX(0) scale(.75); opacity:0; } 12% { opacity:1; } 88% { opacity:1; } to { transform:translateX(620px) scale(1.15); opacity:0; } }
+    .tensor-strip { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .tensor-pill { border:1px solid rgba(6,182,212,.25); background:rgba(6,182,212,.07); color:#bae6fd; border-radius:999px; padding:4px 8px; font-size:11px; font-weight:900; }
+    .model-viz { display:grid; gap:10px; }
+    .model-core { position:relative; min-height:146px; border:1px solid rgba(168,85,247,.22); border-radius:12px; background:rgba(8,10,18,.72); padding:12px; overflow:hidden; }
+    .model-core::before { content:""; position:absolute; inset:10px; border:1px dashed rgba(255,255,255,.08); border-radius:10px; }
+    .layer-stack { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; position:relative; z-index:1; }
+    .layer { min-height:76px; border:1px solid rgba(255,255,255,.1); border-radius:8px; background:linear-gradient(180deg,rgba(23,29,42,.92),rgba(13,17,26,.92)); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; font-weight:900; }
+    .layer.trainable { border-color:rgba(34,197,94,.45); color:#bbf7d0; animation:trainGlow 2.4s ease-in-out infinite; }
+    .layer.frozen { opacity:.72; }
+    @keyframes trainGlow { 50% { transform:translateY(-2px); box-shadow:0 12px 30px rgba(34,197,94,.12); } }
+    .adapter-rail { margin-top:12px; display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
+    .adapter-chip { flex:1; border:1px solid rgba(249,115,22,.28); background:rgba(249,115,22,.08); color:#fed7aa; border-radius:8px; padding:7px; text-align:center; font-size:11px; font-weight:900; animation:adapterFlow 2.6s ease-in-out infinite; }
+    @keyframes adapterFlow { 50% { border-color:rgba(249,115,22,.65); box-shadow:0 0 24px rgba(249,115,22,.14); } }
+    .ratio-bar { height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:10px; }
+    .ratio-fill { height:100%; width:var(--ratio,0%); min-width:3px; max-width:100%; background:linear-gradient(90deg,var(--green),var(--cyan)); animation:ratioEnter .9s ease both; }
+    @keyframes ratioEnter { from { width:0; } }
+    .metric-viz { margin-top:10px; border:1px solid var(--line); background:rgba(8,10,18,.72); border-radius:10px; padding:10px; }
+    .sparkline { width:100%; height:86px; overflow:visible; }
+    .sparkline path { fill:none; stroke:var(--green); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 8px rgba(34,197,94,.45)); }
+    .sparkline circle { fill:var(--cyan); animation:dotPulse 1.6s ease-in-out infinite; }
+    @keyframes dotPulse { 50% { transform:scale(1.25); opacity:.6; } }
+    .stage-note { margin-top:10px; color:var(--muted); font-size:12px; }
     .tensor-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; }
     .tensor { border:1px solid rgba(6,182,212,.18); background:rgba(6,182,212,.06); border-radius:10px; padding:12px; min-width:0; }
     .tensor-name { font-weight:900; overflow-wrap:anywhere; }
@@ -120,7 +186,7 @@
     .metric-row:last-child { border-bottom:0; padding-bottom:0; }
     .metric-row code { color:var(--green); }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid { grid-template-columns:1fr; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid { grid-template-columns:1fr; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
   </style>
 </head>
@@ -152,11 +218,17 @@
           <div class="mono" id="traceSource">visualizer/traces/live.json</div>
           <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
         </div>
+        <div style="height:18px"></div>
+        <div class="panel-title">Course Archive</div>
+        <div class="course-list" id="courseList"></div>
       </aside>
 
       <section class="panel">
         <div class="panel-title">Execution Flow</div>
         <div class="flow-wrap"><div class="flow" id="flow"></div></div>
+        <div style="height:18px"></div>
+        <div class="panel-title">Animated Stage</div>
+        <div id="visualStage"></div>
         <div style="height:18px"></div>
         <div class="panel-title">Selected Event</div>
         <div id="detail"></div>
@@ -172,12 +244,26 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const liveTracePath = params.get("trace") || "traces/live.json";
+    const catalogPath = params.get("catalog") || "traces/catalog.json";
     const demoTracePath = "demo-trace.json";
     const requestedInterval = Number(params.get("interval") || 5000);
     const pollIntervalMs = Number.isFinite(requestedInterval) ? Math.max(1000, requestedInterval) : 5000;
     const repoRoot = "/Users/liangsu/dev/repo/llm-finetune-study/";
     const repoPathPrefixes = ["examples/", "lessons/", "docs/", "visualizer/", "checklists/"];
     const repoPathFiles = ["README.md", "ROADMAP.md", "LICENSE"];
+    const fallbackCatalog = [
+      { lesson_id: "01-datasets", title: "Lesson 01 · Datasets Pipeline", trace: "traces/01-datasets.json", outputs: "lessons/01-datasets/outputs", topic: "JSONL -> Dataset -> split -> map" },
+      { lesson_id: "02-tokenizer", title: "Lesson 02 · AutoTokenizer and SFT Labels", trace: "traces/02-tokenizer.json", outputs: "lessons/02-tokenizer/outputs", topic: "text -> token ids -> labels" },
+      { lesson_id: "03-batching", title: "Lesson 03 · Batch and Collator", trace: "traces/03-batching.json", outputs: "lessons/03-batching/outputs", topic: "samples -> padded tensor batch" },
+      { lesson_id: "04-trainer", title: "Lesson 04 · Trainer Loop", trace: "traces/04-trainer.json", outputs: "lessons/04-trainer/outputs", topic: "forward -> loss -> backward -> update" },
+      { lesson_id: "05-lora", title: "Lesson 05 · Handwritten LoRA", trace: "traces/05-lora.json", outputs: "lessons/05-lora/outputs", topic: "frozen base + adapter delta" },
+      { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter" }
+    ];
+    let selectedCourseId = "live";
+    let selectedTracePath = liveTracePath;
+    let catalog = fallbackCatalog;
+    let courseStates = [];
+    let liveSummary = null;
     let activeEventId = null;
     let followCurrent = true;
     let live = true;
@@ -205,7 +291,8 @@
       live = !live;
       $("toggleLive").textContent = live ? "暂停刷新" : "继续刷新";
     });
-    $("openLive").addEventListener("click", () => window.open(liveTracePath, "_blank"));
+    $("openLive").textContent = "打开当前 trace";
+    $("openLive").addEventListener("click", () => window.open(selectedTracePath, "_blank"));
 
     async function fetchJson(path) {
       const response = await fetch(`${path}?ts=${Date.now()}`, { cache: "no-store" });
@@ -213,14 +300,158 @@
       return response.json();
     }
 
+    async function loadCatalog() {
+      try {
+        const payload = await fetchJson(catalogPath);
+        catalog = payload.courses && payload.courses.length ? payload.courses : fallbackCatalog;
+      } catch (error) {
+        catalog = fallbackCatalog;
+      }
+    }
+
+    async function refreshCourseStates() {
+      liveSummary = await fetchTraceSummary(liveTracePath, "Live Trace");
+      courseStates = await Promise.all(catalog.map(async (course) => {
+        const traceSummary = await fetchTraceSummary(course.trace, course.title);
+        const outputsDetected = await pathExists(course.outputs);
+        return {
+          ...course,
+          traceAvailable: traceSummary.available,
+          outputsDetected,
+          executed: traceSummary.available || outputsDetected,
+          status: traceSummary.available ? traceSummary.status : (outputsDetected ? "outputs" : "not-run"),
+          events: traceSummary.events,
+          updated_at: traceSummary.updated_at,
+          missingTrace: !traceSummary.available && outputsDetected,
+          title: traceSummary.title || course.title,
+        };
+      }));
+      renderCourseList();
+    }
+
+    async function fetchTraceSummary(path, fallbackTitle) {
+      try {
+        const trace = await fetchJson(path);
+        return {
+          available: true,
+          title: trace.title || fallbackTitle,
+          lesson_id: trace.lesson_id || "-",
+          status: trace.status || "-",
+          events: (trace.events || []).length,
+          updated_at: trace.updated_at || "-",
+        };
+      } catch (error) {
+        return { available: false, title: fallbackTitle, status: "missing", events: 0, updated_at: "-" };
+      }
+    }
+
+    async function pathExists(repoPath) {
+      if (!repoPath) return false;
+      try {
+        const response = await fetch(`${toRepoUrl(repoPath)}?ts=${Date.now()}`, { cache: "no-store" });
+        return response.ok;
+      } catch (error) {
+        return false;
+      }
+    }
+
     async function loadTrace() {
+      if (selectedCourseId === "live") {
+        try {
+          usingDemo = false;
+          return await fetchJson(liveTracePath);
+        } catch (error) {
+          usingDemo = true;
+          return await fetchJson(demoTracePath);
+        }
+      }
       try {
         usingDemo = false;
-        return await fetchJson(liveTracePath);
+        return await fetchJson(selectedTracePath);
       } catch (error) {
-        usingDemo = true;
-        return await fetchJson(demoTracePath);
+        usingDemo = false;
+        const course = courseStates.find((item) => item.lesson_id === selectedCourseId)
+          || catalog.find((item) => item.lesson_id === selectedCourseId);
+        return missingTrace(course, error);
       }
+    }
+
+    function missingTrace(course, error) {
+      return {
+        schema_version: 1,
+        lesson_id: course && course.lesson_id ? course.lesson_id : "missing",
+        title: course && course.title ? course.title : "Trace missing",
+        status: course && course.outputsDetected ? "outputs-only" : "not-run",
+        started_at: "-",
+        updated_at: "-",
+        current_event_id: null,
+        events: [],
+        missing_trace: true,
+        missing_reason: error.message,
+        expected_trace: course && course.trace,
+        outputs_detected: Boolean(course && course.outputsDetected),
+      };
+    }
+
+    function renderCourseList() {
+      const liveCard = {
+        lesson_id: "live",
+        title: liveSummary && liveSummary.available ? liveSummary.title : "Live Trace",
+        trace: liveTracePath,
+        topic: "正在运行或最后一次运行的课程",
+        status: liveSummary && liveSummary.available ? liveSummary.status : "demo",
+        events: liveSummary && liveSummary.available ? liveSummary.events : 0,
+        updated_at: liveSummary && liveSummary.available ? liveSummary.updated_at : "-",
+        traceAvailable: Boolean(liveSummary && liveSummary.available),
+        executed: Boolean(liveSummary && liveSummary.available),
+        isLive: true,
+      };
+      const cards = [liveCard, ...courseStates];
+      $("courseList").innerHTML = cards.map((course) => `
+        <button type="button" class="${courseCardClass(course)}" data-course-id="${escapeAttr(course.lesson_id)}" data-trace="${escapeAttr(course.trace)}">
+          <div class="course-top">
+            <span class="course-id">${escapeHtml(course.lesson_id === "live" ? "LIVE" : course.lesson_id)}</span>
+            <span class="course-status">${escapeHtml(courseStatusLabel(course))}</span>
+          </div>
+          <div class="course-name">${escapeHtml(course.title)}</div>
+          <div class="course-meta">${escapeHtml(course.events ? `${course.events} events · ${course.updated_at}` : course.topic || "waiting for trace")}</div>
+        </button>
+      `).join("");
+      document.querySelectorAll(".course-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          void selectCourse(card.dataset.courseId, card.dataset.trace);
+        });
+      });
+    }
+
+    async function selectCourse(courseId, tracePath) {
+      selectedCourseId = courseId;
+      selectedTracePath = tracePath;
+      followCurrent = true;
+      activeEventId = null;
+      selectedField = null;
+      renderCourseList();
+      try {
+        render(await loadTrace(), { forceScroll: true });
+      } catch (error) {
+        $("statusText").textContent = `读取课程 trace 失败: ${error.message}`;
+      }
+    }
+
+    function courseCardClass(course) {
+      const classes = ["course-card"];
+      if (course.lesson_id === selectedCourseId) classes.push("active");
+      if (course.isLive) classes.push("live");
+      else if (course.traceAvailable) classes.push("executed");
+      else if (course.outputsDetected || course.missingTrace) classes.push("missing");
+      return classes.join(" ");
+    }
+
+    function courseStatusLabel(course) {
+      if (course.isLive) return course.traceAvailable ? "live" : "demo";
+      if (course.traceAvailable) return course.status === "done" ? "executed" : course.status;
+      if (course.outputsDetected || course.missingTrace) return "need rerun trace";
+      return "not run";
     }
 
     function render(trace, options = {}) {
@@ -228,7 +459,10 @@
       const events = trace.events || [];
       const currentId = getCurrentEventId(trace);
       const previousActiveId = activeEventId;
-      if (followCurrent || !activeEventId || !events.some((event) => event.id === activeEventId)) {
+      if (!events.length) {
+        activeEventId = null;
+        selectedField = null;
+      } else if (followCurrent || !activeEventId || !events.some((event) => event.id === activeEventId)) {
         activeEventId = currentId;
       }
       if (previousActiveId !== activeEventId) selectedField = null;
@@ -240,21 +474,22 @@
       $("runStatus").textContent = trace.status || "-";
       $("pollSeconds").textContent = formatInterval(pollIntervalMs);
       $("followState").textContent = followCurrent ? "auto" : "manual";
-      $("traceSource").textContent = usingDemo ? `${demoTracePath} (demo)` : liveTracePath;
+      $("traceSource").textContent = usingDemo ? `${demoTracePath} (demo)` : selectedTracePath;
       $("statusText").textContent = usingDemo
         ? "未检测到 live trace，正在显示 demo。运行课程脚本后会自动切换。"
-        : `${trace.status === "done" ? "已完成" : "运行中"} · ${trace.updated_at || ""}`;
+        : `${selectedCourseId === "live" ? "Live" : selectedCourseId} · ${trace.status === "done" ? "已完成" : trace.status || "读取中"} · ${trace.updated_at || ""}`;
       $("pulse").style.background = trace.status === "done" ? "var(--cyan)" : "var(--green)";
       updateControls();
+      renderCourseList();
 
-      $("flow").innerHTML = events.map((event) => `
+      $("flow").innerHTML = events.length ? events.map((event) => `
         <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}">
           <div class="node-id">STEP ${event.id}</div>
           <div class="node-name">${escapeHtml(event.name)}</div>
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>
           <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
         </article>
-      `).join("");
+      `).join("") : `<div class="empty" style="min-width:100%">${escapeHtml(trace.missing_trace ? "这个课程检测到了 outputs，但还没有归档 trace。重新运行课程后会自动生成。" : "暂无事件。")}</div>`;
       document.querySelectorAll(".node").forEach((node) => {
         node.addEventListener("click", () => {
           followCurrent = false;
@@ -269,13 +504,186 @@
         });
       }
 
+      renderStage(selected, trace, events);
       renderDetail(selected);
       renderSide(selected, trace);
     }
 
+    function renderStage(event, trace, events) {
+      if (!event) {
+        $("visualStage").innerHTML = `
+          <div class="stage">
+            <div class="empty" style="margin:15px;">${escapeHtml(trace.missing_trace ? "缺少课程 trace。重新执行课程后，这里会播放数据和模型变化。" : "等待课程事件。")}</div>
+          </div>
+        `;
+        return;
+      }
+      const model = event.model || {};
+      const tensors = event.tensors || [];
+      const ratio = trainableRatio(event);
+      const ratioLabel = ratio == null ? "not shown" : `${formatNumber(ratio)}% trainable`;
+      const metric = latestMetric(event);
+      const series = metricSeries(events);
+      const adapterVisible = hasAdapter(event);
+      $("visualStage").innerHTML = `
+        <div class="stage">
+          <div class="stage-grid">
+            <div class="stage-cell">
+              <div class="stage-label">Data Movement</div>
+              <div class="data-lane">
+                <div class="flow-line"></div>
+                <span class="particle"></span><span class="particle p2"></span><span class="particle p3"></span>
+                <div class="data-node input">
+                  <strong>Input</strong>
+                  <span>${escapeHtml(dataSummary(event.inputs || {}))}</span>
+                </div>
+                <div class="data-node process">
+                  <strong>${escapeHtml(processLabel(event))}</strong>
+                  <span>${escapeHtml(event.kind || "event")} · ${escapeHtml(stepVerb(event))}</span>
+                </div>
+                <div class="data-node output">
+                  <strong>Output</strong>
+                  <span>${escapeHtml(dataSummary(event.outputs || {}))}</span>
+                </div>
+              </div>
+              <div class="tensor-strip">
+                ${tensors.length ? tensors.map((tensor) => `<span class="tensor-pill">${escapeHtml(tensor.name || "tensor")} ${escapeHtml(JSON.stringify(tensor.shape || ""))}</span>`).join("") : `<span class="tensor-pill">no tensor emitted</span>`}
+              </div>
+              <p class="stage-note">${escapeHtml(event.summary || "")}</p>
+            </div>
+            <div class="stage-cell">
+              <div class="stage-label">Model Change</div>
+              <div class="model-viz">
+                <div class="model-core">
+                  <div class="layer-stack">
+                    ${renderLayers(event)}
+                  </div>
+                  ${adapterVisible ? `
+                    <div class="adapter-rail">
+                      <div class="adapter-chip">LoRA A</div>
+                      <div class="adapter-chip">${escapeHtml(Array.isArray(model.target_modules) ? model.target_modules.join(" / ") : model.target_module || "adapter")}</div>
+                      <div class="adapter-chip">LoRA B</div>
+                    </div>
+                  ` : ""}
+                </div>
+                <div>
+                  <div class="meta-label">trainable ratio</div>
+                  <div class="ratio-bar"><div class="ratio-fill" style="--ratio:${escapeAttr(String(ratio == null ? 0 : ratio))}%"></div></div>
+                  <div class="stage-note">${escapeHtml(ratioLabel)} · base ${escapeHtml(model.base || model.mode || "not shown")} · adapter ${escapeHtml(model.adapter || "none")}</div>
+                </div>
+                <div class="metric-viz">
+                  <div class="meta-label">loss / metric pulse</div>
+                  ${renderSparkline(series)}
+                  <div class="stage-note">${escapeHtml(metric ? `${metric.key}: ${formatNumber(metric.value)}` : "当前事件没有 loss 类 metric。")}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLayers(event) {
+      const model = event.model || {};
+      const fullTrain = model.base === "trainable" || String(model.mode || "").includes("full");
+      const frozen = model.base === "frozen" || hasAdapter(event);
+      const labels = ["embed", "block", "proj", "head"];
+      return labels.map((label, index) => {
+        const trainable = fullTrain || (!frozen && event.kind === "train") || (hasAdapter(event) && index >= 2);
+        return `<div class="layer ${trainable ? "trainable" : "frozen"}">${escapeHtml(label)}</div>`;
+      }).join("");
+    }
+
+    function dataSummary(fields) {
+      const entries = Object.entries(fields);
+      if (!entries.length) return "empty";
+      const first = entries.slice(0, 3).map(([key, value]) => `${key}: ${previewValue(value)}`);
+      return first.join(" · ");
+    }
+
+    function processLabel(event) {
+      const kind = String(event.kind || "event").toLowerCase();
+      if (kind.includes("data")) return "Dataset Transform";
+      if (kind.includes("token")) return "Tokenizer";
+      if (kind.includes("batch")) return "Collator";
+      if (kind.includes("model")) return "Model Build";
+      if (kind.includes("train")) return "Training Step";
+      if (kind.includes("eval")) return "Evaluation";
+      if (kind.includes("checkpoint")) return "Checkpoint";
+      if (kind.includes("generation")) return "Generation";
+      return "Step Processor";
+    }
+
+    function stepVerb(event) {
+      const kind = String(event.kind || "event").toLowerCase();
+      if (kind.includes("train")) return "weights receive gradients";
+      if (kind.includes("eval")) return "loss is measured";
+      if (kind.includes("model")) return "parameters are arranged";
+      if (kind.includes("data") || kind.includes("token") || kind.includes("batch")) return "fields become tensors";
+      if (kind.includes("checkpoint")) return "state is saved or restored";
+      return "state moves forward";
+    }
+
+    function hasAdapter(event) {
+      const model = event.model || {};
+      const text = `${event.name || ""} ${event.summary || ""} ${model.adapter || ""} ${model.target_module || ""} ${Array.isArray(model.target_modules) ? model.target_modules.join(" ") : ""}`.toLowerCase();
+      return text.includes("lora") || text.includes("adapter") || text.includes("peft");
+    }
+
+    function trainableRatio(event) {
+      const model = event.model || {};
+      if (typeof model.trainable_ratio === "string" && model.trainable_ratio.includes("%")) {
+        const parsed = parseFloat(model.trainable_ratio);
+        return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : null;
+      }
+      const outputs = event.outputs || {};
+      if (Number.isFinite(outputs.trainable_params) && Number.isFinite(outputs.total_params) && outputs.total_params > 0) {
+        return Math.max(0, Math.min(100, (outputs.trainable_params / outputs.total_params) * 100));
+      }
+      if (model.base === "trainable") return 100;
+      if (model.adapter === "trainable") return 1;
+      return null;
+    }
+
+    function latestMetric(event) {
+      const metrics = event.metrics || {};
+      const keys = ["loss", "train_loss", "eval_loss", "grad_norm", "learning_rate"];
+      const key = keys.find((item) => Number.isFinite(metrics[item]));
+      return key ? { key, value: metrics[key] } : null;
+    }
+
+    function metricSeries(events) {
+      const values = [];
+      events.forEach((event) => {
+        const metric = latestMetric(event);
+        if (metric && (metric.key.includes("loss") || metric.key === "grad_norm")) values.push(metric.value);
+      });
+      return values.slice(-18);
+    }
+
+    function renderSparkline(values) {
+      if (!values.length) {
+        return `<svg class="sparkline" viewBox="0 0 240 86" role="img" aria-label="No metric"><path d="M8 66 L232 66" style="stroke:rgba(255,255,255,.14)"></path></svg>`;
+      }
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const spread = max - min || 1;
+      const points = values.map((value, index) => {
+        const x = values.length === 1 ? 120 : 8 + (index * (224 / (values.length - 1)));
+        const y = 74 - ((value - min) / spread) * 58;
+        return [x, y];
+      });
+      const path = points.map(([x, y], index) => `${index ? "L" : "M"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+      const last = points.at(-1);
+      return `<svg class="sparkline" viewBox="0 0 240 86" role="img" aria-label="Metric sparkline"><path d="${path}"></path><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="5"></circle></svg>`;
+    }
+
     function renderDetail(event) {
       if (!event) {
-        $("detail").innerHTML = `<div class="empty">暂无事件。运行任意课程脚本后会出现数据流。</div>`;
+        const trace = lastTrace || {};
+        $("detail").innerHTML = trace.missing_trace
+          ? `<div class="empty">已选择 ${escapeHtml(trace.lesson_id)}，但缺少 ${escapeHtml(trace.expected_trace || "trace 文件")}。重新运行该课程后，页面会显示完整步骤、输入输出和动画。</div>`
+          : `<div class="empty">暂无事件。运行任意课程脚本后会出现数据流。</div>`;
         return;
       }
       $("detail").innerHTML = `
@@ -592,6 +1000,13 @@
       return ms >= 1000 ? `${Math.round(ms / 100) / 10}s` : `${ms}ms`;
     }
 
+    function formatNumber(value) {
+      if (!Number.isFinite(value)) return String(value);
+      if (Math.abs(value) >= 100) return value.toFixed(1);
+      if (Math.abs(value) >= 1) return value.toFixed(3);
+      return value.toPrecision(3);
+    }
+
     function escapeHtml(value) {
       return String(value)
         .replaceAll("&", "&amp;")
@@ -608,6 +1023,7 @@
     async function tick() {
       if (live) {
         try {
+          await refreshCourseStates();
           render(await loadTrace());
         } catch (error) {
           $("statusText").textContent = `读取 trace 失败: ${error.message}`;
@@ -615,7 +1031,13 @@
       }
       setTimeout(tick, pollIntervalMs);
     }
-    tick();
+
+    async function init() {
+      await loadCatalog();
+      renderCourseList();
+      tick();
+    }
+    init();
   </script>
 </body>
 </html>

@@ -34,9 +34,12 @@ http://127.0.0.1:8765/visualizer/
 
 ```text
 visualizer/traces/live.json
+visualizer/traces/<lesson-id>.json
 ```
 
-页面每 700ms 自动读取一次。`--trace-delay` 不是训练必需参数，只是为了让演示时每一步停顿一下，方便肉眼观察。
+页面默认每 5s 自动读取一次。`live.json` 用来观察当前运行；`<lesson-id>.json` 是课程归档，页面左侧的 Course Archive 可以切换查看已执行过的课程。`--trace-delay` 不是训练必需参数，只是为了让演示时每一步停顿一下，方便肉眼观察。
+
+如果某个课程显示 `need rerun trace`，说明本地有课程输出目录，但旧运行没有留下归档 trace。重新执行该课程后，课程卡片会变成可查看状态。
 
 ## Trace 内容
 
