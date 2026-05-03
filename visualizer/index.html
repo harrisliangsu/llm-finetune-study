@@ -40,39 +40,39 @@
     }
     .button:hover { border-color:rgba(6,182,212,.45); color:white; }
     .button.active { border-color:rgba(34,197,94,.42); background:rgba(34,197,94,.1); color:#bbf7d0; }
-    .layout { display:grid; grid-template-columns:280px minmax(0,1fr) 360px; gap:18px; margin-top:18px; align-items:start; }
-    .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; }
+    .layout { display:grid; grid-template-columns:minmax(0,280px) minmax(0,1fr) minmax(0,360px); gap:18px; margin-top:18px; align-items:start; }
+    .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; overflow:hidden; }
     .panel-title { font-size:13px; font-weight:900; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:13px; }
     .lesson-title { font-size:27px; line-height:1.15; font-weight:900; margin-bottom:8px; overflow-wrap:anywhere; }
     .subtle { color:var(--muted); font-size:13px; }
-    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
-    .stat { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:12px; }
+    .stat-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; margin-top:16px; min-width:0; }
+    .stat { background:var(--panel-3); border:1px solid var(--line); border-radius:10px; padding:12px; min-width:0; overflow:hidden; }
     .stat-value { font-size:22px; font-weight:900; line-height:1; }
     .stat-label { margin-top:6px; color:var(--muted); font-size:11px; font-weight:800; }
-    .run-card { margin-top:14px; padding:13px; border-radius:10px; background:var(--panel-3); border:1px solid var(--line); }
+    .run-card { margin-top:14px; padding:13px; border-radius:10px; background:var(--panel-3); border:1px solid var(--line); min-width:0; overflow:hidden; }
     .run-card .mono { color:var(--cyan); font-size:12px; overflow-wrap:anywhere; }
-    .course-picker { display:grid; gap:10px; margin-top:14px; }
+    .course-picker { display:grid; gap:10px; margin-top:14px; min-width:0; }
     .course-select {
-      width:100%; min-height:42px; color:var(--ink); border:1px solid rgba(6,182,212,.22); border-radius:10px;
+      width:100%; max-width:100%; min-width:0; min-height:42px; color:var(--ink); border:1px solid rgba(6,182,212,.22); border-radius:10px;
       background:rgba(13,17,26,.96); padding:0 12px; font:inherit; font-size:13px; font-weight:850;
     }
     .course-select:focus { outline:0; border-color:rgba(6,182,212,.72); box-shadow:0 0 0 2px rgba(6,182,212,.14); }
-    .course-dashboard { border:1px solid var(--line); border-radius:10px; background:var(--panel-3); padding:12px; display:grid; gap:11px; }
-    .progress-block { display:grid; gap:6px; }
-    .progress-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .progress-name { font-size:12px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .progress-percent { color:var(--cyan); font-size:12px; font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap; }
-    .progress-track { height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; position:relative; }
+    .course-dashboard { border:1px solid var(--line); border-radius:10px; background:var(--panel-3); padding:12px; display:grid; gap:11px; min-width:0; overflow:hidden; }
+    .progress-block { display:grid; gap:6px; min-width:0; overflow:hidden; }
+    .progress-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
+    .progress-name { flex:1 1 auto; min-width:0; font-size:12px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .progress-percent { flex:0 0 auto; color:var(--cyan); font-size:12px; font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .progress-track { width:100%; min-width:0; height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; position:relative; }
     .progress-track::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent); animation:trackSweep 2.8s linear infinite; }
     @keyframes trackSweep { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
     .progress-fill { height:100%; width:var(--progress,0%); min-width:3px; max-width:100%; border-radius:inherit; background:linear-gradient(90deg,var(--green),var(--cyan)); transition:width .45s ease; }
     .progress-fill.course { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
-    .course-meter-list { display:grid; gap:8px; margin-top:12px; }
-    .course-meter-row { border:1px solid var(--line); border-radius:9px; background:rgba(13,17,26,.72); padding:9px; }
+    .course-meter-list { display:grid; gap:8px; margin-top:12px; min-width:0; overflow:hidden; }
+    .course-meter-row { border:1px solid var(--line); border-radius:9px; background:rgba(13,17,26,.72); padding:9px; min-width:0; overflow:hidden; }
     .course-meter-row.active { border-color:rgba(6,182,212,.5); background:rgba(6,182,212,.07); }
-    .course-meter-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
-    .course-meter-name { font-size:11px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .course-meter-state { color:var(--muted); font-size:10px; font-weight:900; white-space:nowrap; }
+    .course-meter-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-width:0; }
+    .course-meter-name { flex:1 1 auto; min-width:0; max-width:100%; font-size:11px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .course-meter-state { flex:0 0 auto; color:var(--muted); font-size:10px; font-weight:900; white-space:nowrap; }
     @keyframes barPulse { 50% { opacity:.35; } }
     .flow-wrap { overflow-x:auto; padding-bottom:6px; }
     .flow { display:flex; gap:10px; min-width:max-content; }
@@ -517,19 +517,19 @@
       $("courseDashboard").innerHTML = `
         <div class="progress-block">
           <div class="progress-head">
-            <span class="progress-name">${escapeHtml(courseLabel)}</span>
+            <span class="progress-name" title="${escapeAttr(courseLabel)}">${escapeHtml(courseLabel)}</span>
             <span class="progress-percent">${formatPercent(coursePercent)}</span>
           </div>
           <div class="progress-track"><div class="progress-fill course" style="--progress:${escapeAttr(formatProgress(coursePercent))}"></div></div>
         </div>
         <div class="progress-block">
           <div class="progress-head">
-            <span class="progress-name">${escapeHtml(selected ? `STEP ${selected.id} · ${selected.name}` : "No step")}</span>
+            <span class="progress-name" title="${escapeAttr(selected ? `STEP ${selected.id} · ${selected.name}` : "No step")}">${escapeHtml(selected ? `STEP ${selected.id} · ${selected.name}` : "No step")}</span>
             <span class="progress-percent">${formatPercent(stepPercent)}</span>
           </div>
           <div class="progress-track"><div class="progress-fill" style="--progress:${escapeAttr(formatProgress(stepPercent))}"></div></div>
         </div>
-        <p class="subtle">课程和步骤进度都按本课 expected events 估算；课程完成后固定为 100%。</p>
+        <p class="subtle">课程进度按本课 expected events 估算；步骤事件写入 trace 后代表该步骤已完成，所以显示 100%。</p>
       `;
     }
 
@@ -540,7 +540,7 @@
         return `
           <div class="course-meter-row ${isActive ? "active" : ""}">
             <div class="course-meter-top">
-              <span class="course-meter-name">${String(index + 1).padStart(2, "0")} · ${escapeHtml(course.title)}</span>
+              <span class="course-meter-name" title="${escapeAttr(course.title)}">${String(index + 1).padStart(2, "0")} · ${escapeHtml(course.title)}</span>
               <span class="course-meter-state">${escapeHtml(formatPercent(percent))}</span>
             </div>
             <div class="progress-track"><div class="progress-fill ${isActive ? "course" : ""}" style="--progress:${escapeAttr(formatProgress(percent))}"></div></div>
@@ -570,9 +570,10 @@
     function stepProgressPercent(event, trace, events = trace.events || []) {
       if (!event) return 0;
       const index = events.findIndex((item) => item.id === event.id);
-      const currentIndex = index >= 0 ? index : getCurrentEventIndex(trace, events);
-      const expected = expectedEventCount(trace);
-      return clamp(((currentIndex + 1) / expected) * 100, 0, 100);
+      if (index < 0) return 0;
+      if (trace.status === "done") return 100;
+      const currentIndex = getCurrentEventIndex(trace, events);
+      return index <= currentIndex ? 100 : 0;
     }
 
     function courseRowPercent(course, activeTrace) {
