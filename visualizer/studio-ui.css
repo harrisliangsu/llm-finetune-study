@@ -3780,3 +3780,341 @@ body[data-view="learn"] .job-card {
     animation: none !important;
   }
 }
+
+/* UI13 Pro Max polish: developer-tool density with clearer hierarchy. */
+:root {
+  --bg: oklch(96.8% 0.007 230);
+  --surface: oklch(99.1% 0.003 230);
+  --surface-2: oklch(95.2% 0.008 225);
+  --surface-3: oklch(92.8% 0.011 225);
+  --field-bg: oklch(98% 0.004 230);
+  --field-disabled: oklch(93.8% 0.006 230);
+  --ink: oklch(18.5% 0.028 232);
+  --ink-soft: oklch(30% 0.026 232);
+  --muted: oklch(43% 0.022 232);
+  --faint: oklch(57% 0.019 232);
+  --line: color-mix(in oklch, var(--ink) 10%, transparent);
+  --line-strong: color-mix(in oklch, var(--ink) 17%, transparent);
+  --accent: oklch(44.5% 0.096 180);
+  --accent-soft: oklch(92.5% 0.035 180);
+  --accent-strong: oklch(34% 0.094 180);
+  --blue: oklch(48% 0.118 252);
+  --green: oklch(50% 0.12 150);
+  --gold: oklch(63% 0.12 82);
+  --shadow-panel: 0 1px 1px color-mix(in oklch, var(--ink) 5%, transparent), 0 14px 32px color-mix(in oklch, var(--ink) 8%, transparent);
+  --shadow-control: 0 1px 1px color-mix(in oklch, var(--ink) 6%, transparent), 0 7px 18px color-mix(in oklch, var(--ink) 5%, transparent);
+}
+
+html,
+body {
+  background:
+    linear-gradient(180deg, oklch(94.8% 0.011 222), var(--bg) 280px),
+    linear-gradient(90deg, color-mix(in oklch, var(--blue) 5%, transparent), transparent 34%),
+    var(--bg) !important;
+}
+
+.topbar {
+  min-height: 58px !important;
+  grid-template-columns: auto minmax(180px, 1fr) auto !important;
+  gap: 14px !important;
+  border: 1px solid color-mix(in oklch, var(--ink) 8%, transparent) !important;
+  background: color-mix(in oklch, var(--surface) 94%, var(--surface-2)) !important;
+  padding: 9px 12px !important;
+}
+
+body[data-view="learn"] .topbar {
+  grid-template-columns: auto minmax(96px, 176px) auto minmax(260px, 1fr) auto !important;
+  gap: 10px !important;
+}
+
+body[data-view="learn"] .status {
+  justify-self: stretch;
+  max-width: 176px;
+}
+
+body[data-view="learn"] .status > span:last-child {
+  min-width: 0;
+}
+
+body[data-view="learn"] .top-course-picker.course-only {
+  min-width: 0 !important;
+}
+
+body[data-view="learn"] .toolbar.course-only {
+  gap: 8px !important;
+}
+
+body[data-view="learn"] .toolbar.course-only .button {
+  padding-inline: 12px !important;
+}
+
+.brand span {
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, white 16%, transparent);
+}
+
+.status {
+  justify-self: center;
+  min-height: 34px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--surface-2) 62%, var(--surface));
+  padding: 0 12px;
+}
+
+.app-tabs {
+  border-color: color-mix(in oklch, var(--ink) 12%, transparent) !important;
+  box-shadow: inset 0 1px 0 color-mix(in oklch, white 72%, transparent);
+}
+
+.app-tab,
+.button,
+.studio-input,
+.studio-textarea,
+.course-select,
+.learning-link,
+body[data-view="learn"] .node {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease !important;
+}
+
+.button,
+.app-tab,
+.course-select,
+.studio-input {
+  min-height: 38px !important;
+}
+
+.button {
+  border: 1px solid color-mix(in oklch, var(--ink) 13%, transparent) !important;
+  background: color-mix(in oklch, var(--surface) 92%, var(--surface-2)) !important;
+  box-shadow: var(--shadow-control) !important;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled),
+.app-tab:hover,
+.learning-link:hover {
+  transform: translateY(-1px);
+}
+
+.button.active {
+  border-color: color-mix(in oklch, var(--accent-strong) 78%, transparent) !important;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong)) !important;
+  color: white !important;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+.button:focus-visible,
+.app-tab:focus-visible,
+.course-select:focus-visible,
+.studio-input:focus-visible,
+.studio-textarea:focus-visible,
+.learning-link:focus-visible,
+body[data-view="learn"] .node:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--blue) 34%, transparent) !important;
+  outline-offset: 2px !important;
+}
+
+body[data-view="studio"] .workbench-head,
+body[data-view="learn"] .course-canvas-head,
+body[data-view="studio"] .training-surface-head {
+  position: relative;
+  overflow: hidden;
+}
+
+body[data-view="studio"] .workbench-head::before,
+body[data-view="learn"] .course-canvas-head::before,
+body[data-view="studio"] .training-surface-head::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--blue));
+}
+
+body[data-view="studio"] .workbench-head,
+body[data-view="learn"] .course-canvas-head {
+  background:
+    linear-gradient(135deg, var(--surface), color-mix(in oklch, var(--accent-soft) 32%, var(--surface))) !important;
+}
+
+body[data-view="studio"] .workbench-title,
+body[data-view="learn"] .course-canvas-title,
+body[data-view="learn"] .stage-title strong {
+  letter-spacing: 0 !important;
+}
+
+body[data-view="studio"] .training-surface {
+  border: 1px solid color-mix(in oklch, var(--ink) 8%, transparent) !important;
+  background: linear-gradient(180deg, var(--surface), color-mix(in oklch, var(--surface-2) 28%, var(--surface))) !important;
+}
+
+body[data-view="studio"] .training-surface-head {
+  background: color-mix(in oklch, var(--surface-2) 42%, var(--surface)) !important;
+}
+
+body[data-view="studio"] .training-surface-kicker,
+body[data-view="studio"] .panel-title,
+body[data-view="learn"] .panel-title {
+  letter-spacing: .075em !important;
+}
+
+body[data-view="studio"] .studio-card-title {
+  color: var(--ink) !important;
+  font-size: 14px !important;
+  letter-spacing: .02em !important;
+}
+
+body[data-view="studio"] .studio-card {
+  border: 1px solid color-mix(in oklch, var(--ink) 6%, transparent) !important;
+}
+
+body[data-view="studio"] .method-pill,
+body[data-view="studio"] .choice-note,
+body[data-view="studio"] .method-hint,
+body[data-view="studio"] .dataset-summary,
+body[data-view="studio"] .compare-meta-item,
+body[data-view="studio"] .learning-link,
+body[data-view="learn"] .course-meter-row,
+body[data-view="learn"] .stat,
+body[data-view="learn"] .job-card,
+body[data-view="learn"] .run-card {
+  border: 1px solid color-mix(in oklch, var(--ink) 5%, transparent) !important;
+}
+
+body[data-view="studio"] .params-grid {
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)) !important;
+}
+
+body[data-view="studio"] .training-side.panel {
+  background: linear-gradient(180deg, var(--surface), color-mix(in oklch, var(--surface-2) 48%, var(--surface))) !important;
+}
+
+body[data-view="studio"] .map-step {
+  position: relative;
+  min-height: 76px;
+  padding: 13px 14px 13px 50px !important;
+}
+
+body[data-view="studio"] .map-step::before {
+  content: "";
+  position: absolute;
+  left: 28px;
+  top: 16px;
+  bottom: -16px;
+  width: 1px;
+  background: color-mix(in oklch, var(--accent) 22%, transparent);
+}
+
+body[data-view="studio"] .map-step:last-child::before {
+  display: none;
+}
+
+body[data-view="studio"] .map-step span {
+  position: absolute;
+  left: 12px;
+  top: 13px;
+  background: var(--surface) !important;
+}
+
+body[data-view="studio"] .map-step.active,
+body[data-view="learn"] .node.active {
+  border-color: color-mix(in oklch, var(--accent) 34%, transparent) !important;
+}
+
+body[data-view="studio"] .learning-link {
+  border-left: 3px solid color-mix(in oklch, var(--blue) 55%, transparent) !important;
+}
+
+body[data-view="learn"] .trace-rail-card {
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--surface-2) 70%, var(--surface)), var(--surface)) !important;
+}
+
+body[data-view="learn"] .node {
+  border: 1px solid color-mix(in oklch, var(--ink) 6%, transparent) !important;
+}
+
+body[data-view="learn"] .node:hover {
+  background: color-mix(in oklch, var(--surface) 78%, var(--accent-soft)) !important;
+}
+
+body[data-view="learn"] .node.active {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--accent-soft) 86%, var(--surface)), var(--surface)) !important;
+}
+
+body[data-view="learn"] .stage,
+body[data-view="learn"] .event-inspector,
+body[data-view="learn"] .stage-progress-grid {
+  border: 1px solid color-mix(in oklch, var(--ink) 5%, transparent) !important;
+}
+
+body[data-view="learn"] .scene3d {
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--surface) 92%, var(--accent-soft)), var(--surface)) !important;
+}
+
+.dataset-drawer-panel {
+  box-shadow: 0 24px 70px color-mix(in oklch, var(--ink) 18%, transparent) !important;
+}
+
+@media (max-width: 920px) {
+  body[data-view="learn"] .topbar,
+  .topbar {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .status {
+    justify-self: stretch;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    padding: 14px !important;
+  }
+
+  .brand {
+    font-size: 18px !important;
+  }
+
+  .brand span {
+    height: 34px !important;
+    min-width: 50px !important;
+    font-size: 16px !important;
+  }
+
+  .status {
+    min-height: 36px;
+    font-size: 15px !important;
+  }
+
+  .app-tab {
+    min-height: 42px !important;
+    font-size: 16px !important;
+  }
+
+  body[data-view="studio"] .workbench-title,
+  body[data-view="learn"] .course-canvas-title {
+    font-size: 28px !important;
+  }
+
+  body[data-view="studio"] .training-surface-title {
+    font-size: 22px !important;
+  }
+
+  body[data-view="studio"] .workbench-head p,
+  body[data-view="learn"] .course-canvas-note,
+  body[data-view="studio"] .training-surface-note {
+    font-size: 14px !important;
+  }
+}
