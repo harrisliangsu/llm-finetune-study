@@ -29,6 +29,21 @@
     .metric strong { display:block; font-size:30px; line-height:1; margin-bottom:8px; }
     .metric span { color:var(--muted); font-size:12px; font-weight:800; }
     .code { color:var(--muted); white-space:pre-wrap; overflow-x:auto; font-size:13px; }
+    .effect-panel { margin-top:26px; border:1px solid rgba(6,182,212,.22); border-radius:16px; background:linear-gradient(180deg,rgba(6,182,212,.07),rgba(18,22,32,.94)); padding:22px; }
+    .effect-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:16px; }
+    .effect-status { display:inline-flex; align-items:center; min-height:30px; padding:5px 11px; border-radius:999px; border:1px solid rgba(234,179,8,.32); background:rgba(234,179,8,.08); color:#fde68a; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
+    .compare-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .compare-card { min-height:260px; border:1px solid var(--line); border-radius:12px; background:#0c1019; padding:16px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+    .compare-card.base { border-color:rgba(59,130,246,.28); }
+    .compare-card.tuned { border-color:rgba(34,197,94,.32); }
+    .compare-card.reload { border-color:rgba(6,182,212,.32); }
+    .compare-label { display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .compare-label span { display:inline-flex; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.05); color:var(--ink); letter-spacing:0; text-transform:none; }
+    .compare-text { color:#cbd5e1; font-size:12px; line-height:1.65; white-space:pre-wrap; overflow:auto; max-height:190px; padding-right:4px; }
+    .diagnosis-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    .diagnosis { border:1px solid var(--line); border-radius:12px; padding:14px; background:rgba(255,255,255,.035); }
+    .diagnosis strong { display:block; color:var(--ink); font-size:13px; margin-bottom:6px; }
+    .diagnosis p { color:var(--muted); font-size:12px; line-height:1.6; }
     .trace { display:grid; grid-template-columns:210px 1fr; gap:14px; margin-bottom:14px; }
     .side,.block { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:15px; }
     .side-num { color:var(--blue); font-size:11px; letter-spacing:.12em; font-weight:900; text-transform:uppercase; margin-bottom:10px; }
@@ -62,16 +77,50 @@
     .term p { color:var(--muted); font-size:13px; margin-top:8px; }
     .term b { color:var(--ink); font-weight:900; }
     .term .mono { color:var(--cyan); overflow-wrap:anywhere; }
-    @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks,.flow-row,.gradient-grid{grid-template-columns:1fr}.flow-arrow{display:none}.nav a{display:none} }
+    @media (max-width:900px){ h1{font-size:36px}.grid-4,.grid-3,.grid-2,.trace,.blocks,.flow-row,.gradient-grid,.compare-grid,.diagnosis-grid{grid-template-columns:1fr}.flow-arrow{display:none}.nav a{display:none}.effect-head{display:block}.effect-status{margin-top:12px} }
     @media (max-width:900px){ .term-grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#terms">术语</a><a href="#peft-methods">PEFT方法</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#effect">效果</a><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#terms">术语</a><a href="#peft-methods">PEFT方法</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 06 · PEFT LORA</div>
     <h1><span>PEFT LoRA</span><br />用真实 Qwen 小模型跑 adapter</h1>
     <p class="lead">这一课下载并加载 `Qwen/Qwen2.5-0.5B-Instruct`，用 PEFT 的 `LoraConfig/get_peft_model/PeftModel` 跑真实 Hugging Face LoRA 流程。</p>
+
+    <section class="section" id="effect">
+      <div class="kicker">VISIBLE EFFECT</div>
+      <h2>先看训练前后回答，而不是先看参数</h2>
+      <p class="lead">本课的重点是 PEFT/LoRA 工程流程，不是做出强效果。下面把已有固定 prompt 对比放到第一层，同时明确为什么这次变化不够明显。</p>
+      <div class="effect-panel">
+        <div class="effect-head">
+          <div>
+            <div class="card-title">固定 prompt：解释什么是梯度累积</div>
+            <p class="card-body">结论：adapter 路径已经生效，重新加载后输出和训练后路径一致；但 5 条样本、6 step、通用概念解释场景，不适合展示强烈行为变化。</p>
+          </div>
+          <div class="effect-status">效果弱，但流程有效</div>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-card base">
+            <div class="compare-label">Before <span>base model</span></div>
+            <div class="compare-text mono">梯度累积是一种在机器学习和深度学习中常用的计算方法，用于评估模型的性能。它通过将每个样本的输出值与预测值进行比较，并计算它们之间的差异来实现。</div>
+          </div>
+          <div class="compare-card tuned">
+            <div class="compare-label">After <span>trained LoRA</span></div>
+            <div class="compare-text mono">梯度累积是指在机器学习中，通过计算每个样本的损失函数对所有样本的累积和。这个累积值可以用来评估模型的性能，并指导后续的优化过程。</div>
+          </div>
+          <div class="compare-card reload">
+            <div class="compare-label">Reload <span>adapter loaded</span></div>
+            <div class="compare-text mono">梯度累积是指在机器学习中，通过计算每个样本的损失函数对所有样本的累积和。这个累积值可以用来评估模型的性能，并指导后续的优化过程。</div>
+          </div>
+        </div>
+        <div class="diagnosis-grid">
+          <div class="diagnosis"><strong>UI 层级问题</strong><p>原来对比藏在 report 和 trace 末尾，学习者先看到参数和流程，后看到效果。现在把 before/after/reload 放到页面第一屏之后。</p></div>
+          <div class="diagnosis"><strong>数据量问题</strong><p>5 条样本只够验证代码链路，不够让模型稳定内化新行为。后续 SFT baseline 应使用 40-80 条同分布样本。</p></div>
+          <div class="diagnosis"><strong>场景问题</strong><p>“解释梯度累积”是模型本来就会的通用知识。经典 SFT 应选择格式约束强的任务，例如客服工单路由到 JSON。</p></div>
+        </div>
+      </div>
+    </section>
 
     <section class="section" id="model">
       <div class="kicker">MODEL SELECTION</div>

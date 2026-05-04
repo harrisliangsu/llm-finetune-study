@@ -274,6 +274,11 @@
     .compare-row strong { color:#67e8f9; font-size:11px; }
     .compare-bar { height:20px; border-radius:999px; background:rgba(255,255,255,.07); overflow:hidden; }
     .compare-bar span { display:block; width:var(--w,45%); height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--blue),var(--cyan)); animation:ratioEnter .9s ease both; }
+    .generation-compare { display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:8px; width:100%; }
+    .generation-card { min-height:96px; border:1px solid rgba(148,163,184,.16); border-radius:10px; background:rgba(15,23,42,.58); padding:9px; overflow:hidden; }
+    .generation-card strong { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#67e8f9; font-size:10px; margin-bottom:6px; text-transform:uppercase; letter-spacing:.06em; }
+    .generation-card strong span { color:var(--faint); font-size:9px; letter-spacing:0; text-transform:none; }
+    .generation-card p { color:#cbd5e1; font-size:10px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
     .pipeline-board::before,.pipeline-board::after { display:none; }
     .pipeline-viz { position:relative; z-index:1; min-height:278px; display:grid; grid-template-columns:repeat(5,minmax(68px,1fr)); gap:8px; align-items:center; }
     .pipeline-viz::before { content:""; position:absolute; left:7%; right:7%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(6,182,212,.72),rgba(34,197,94,.4)); box-shadow:0 0 18px rgba(6,182,212,.12); }
@@ -1280,11 +1285,11 @@
         <div class="sim-board">
           <div class="sim-flow">
             ${renderSimPanel("Prompt", `<div class="token-viz">${renderTokenChips(textTokens(inputs.prompt || "解释什么是梯度累积", 10), "prompt")}</div>`, "source")}
-            ${renderProcessor("generate", "model -> text")}
-            ${renderSimPanel("Outputs", renderGenerationBars(outputs), "target")}
+            ${renderProcessor("compare", "same prompt")}
+            ${renderSimPanel("Before / After", renderGenerationBars(outputs), "target")}
           </div>
         </div>
-        ${renderSimChips(["same prompt", "base / tuned / reload", "对比输出差异"], 1)}
+        ${renderSimChips(["直接看文本差异", "base / tuned / reload", "reload 应接近 trained"], 1)}
       `;
     }
 
@@ -1448,11 +1453,11 @@
       const entries = Object.entries(outputs || {});
       if (!entries.length) return renderMatrixViz(3, 8, 3);
       return `
-        <div class="compare-stack">
+        <div class="generation-compare">
           ${entries.slice(0, 3).map(([key, value], index) => `
-            <div class="compare-row">
-              <strong>${escapeHtml(compactText(key, 12))}</strong>
-              <div class="compare-bar" title="${escapeAttr(compactText(value, 180))}"><span style="--w:${45 + index * 18}%"></span></div>
+            <div class="generation-card" title="${escapeAttr(compactText(value, 300))}">
+              <strong>${escapeHtml(compactText(key, 14))}<span>${index === 0 ? "before" : index === 1 ? "after" : "reload"}</span></strong>
+              <p>${escapeHtml(compactText(value, 260))}</p>
             </div>
           `).join("")}
         </div>

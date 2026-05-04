@@ -517,11 +517,17 @@ trainer.save_model("outputs/adapter")
 下一步建议不是马上做 DPO/RLHF，而是先把 SFT 独立成课：
 
 ```text
-Lesson 07: SFT baseline，固定 eval prompts，比较训练前后输出
+Lesson 07: SFT baseline，用客服工单 -> 严格 JSON 路由任务，固定 eval prompts，比较训练前后输出
 Lesson 08: DPO 小样本偏好优化
 Lesson 09: Reward model / RLHF 概念实验
 Lesson 10: QLoRA / Training Engineering，理解量化和大模型训练工程边界
 ```
+
+Lesson 07 的场景选择要满足三个条件：
+
+- 训练前后能肉眼判断：是否输出严格 JSON，字段是否齐全，intent/department 是否正确。
+- 数据分布足够集中：40-80 条同一格式样本，比 5 条杂糅问答更适合观察 SFT 行为变化。
+- 场景足够经典：客服工单路由、信息抽取、工具调用参数生成，都比“解释一个通用概念”更适合展示 SFT。
 
 ## 参考资料
 
