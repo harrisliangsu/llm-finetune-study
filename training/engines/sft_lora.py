@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lesson 07: SFT baseline on a strict JSON ticket routing task."""
+"""Studio SFT + LoRA engine for strict JSON ticket routing."""
 
 from __future__ import annotations
 
@@ -15,14 +15,15 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-LESSON_DIR = Path(__file__).resolve().parent
-LESSON_OUTPUTS = LESSON_DIR / "outputs"
-os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
-os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
-os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
+ENGINE_DIR = Path(__file__).resolve().parent
+DEFAULT_OUTPUTS = ENGINE_DIR / "outputs"
+os.environ["HF_HOME"] = str(DEFAULT_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(DEFAULT_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(DEFAULT_OUTPUTS / "hf-cache" / "xet")
 
-from lessons.common.hf_model_policy import detect_local_config, infer_lora_target_modules, resolve_model_name
-from lessons.common.lesson_common import (
+from training.common.hf_model_policy import detect_local_config, infer_lora_target_modules, resolve_model_name
+from training.common.extra_args import training_argument_overrides
+from training.common.run_common import (
     build_prompt,
     decode_learned_labels,
     load_sft_splits,
@@ -30,7 +31,7 @@ from lessons.common.lesson_common import (
     read_sft_records,
     resolve_project_path,
 )
-from lessons.common.visual_trace import VisualTrace, make_trainer_trace_callback
+from training.common.visual_trace import VisualTrace, make_trainer_trace_callback
 
 
 def require_training_stack():
@@ -40,8 +41,8 @@ def require_training_stack():
         from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, default_data_collator, set_seed
     except ImportError as exc:
         raise SystemExit(
-            "Lesson 07 requires torch, transformers, datasets, accelerate, and peft. "
-            "Install them in .venv before running this lesson."
+            "Studio SFT requires torch, transformers, datasets, accelerate, and peft. "
+            "Install them in .venv before running this engine."
         ) from exc
 
     return (
@@ -59,12 +60,14 @@ def require_training_stack():
     )
 
 
-def make_training_arguments(TrainingArguments, **kwargs):
+def make_training_arguments(TrainingArguments, extra_args: dict[str, Any] | None = None, **kwargs):
     parameters = inspect.signature(TrainingArguments.__init__).parameters
-    if "eval_strategy" in parameters:
+    extra_args = extra_args or {}
+    if "eval_strategy" in parameters and "eval_strategy" not in extra_args and "evaluation_strategy" not in extra_args:
         kwargs["eval_strategy"] = "steps"
-    else:
+    elif "eval_strategy" not in parameters and "evaluation_strategy" not in extra_args:
         kwargs["evaluation_strategy"] = "steps"
+    kwargs.update(extra_args)
     return TrainingArguments(**{key: value for key, value in kwargs.items() if key in parameters})
 
 
@@ -114,6 +117,10 @@ def display_path(path: Path) -> Path | str:
         return path.relative_to(resolve_project_path("."))
     except ValueError:
         return str(path)
+
+
+def parse_target_modules(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 def clean_multiline(value: Any) -> str:
@@ -268,11 +275,11 @@ def write_report(
     loaded_example = loaded_rows[0] if loaded_rows else {}
     report = dedent(
         f"""
-        # Lesson 07: SFT Baseline
+        # Studio: SFT + LoRA
 
-        ## 本课目标
+        ## 训练目标
 
-        本课用“客服工单 -> 严格 JSON 路由”做独立 SFT baseline。它比通用概念解释更适合观察训练效果，因为可以直接检查：
+        本次 Studio 运行用“客服工单 -> 严格 JSON 路由”做独立 SFT baseline。它比通用概念解释更适合观察训练效果，因为可以直接检查：
 
         - 是否输出合法 JSON
         - 是否包含 `intent/priority/department/summary`
@@ -286,9 +293,9 @@ def write_report(
         - memory: {machine["memory_gb"]} GB
         - MPS available: {machine["mps_available"]}
         - selected model: `{model_name}`
-        - HF cache: `lessons/07-sft-baseline/outputs/hf-cache`
+        - HF cache: `{os.environ.get("HF_HOME", "-")}`
 
-        选择 `{model_name}` 的原因：本机 32GB + MPS 可以承受 0.5B 级模型短步数 LoRA/SFT。课程默认从 Hugging Face 下载真实模型，不再自己生成模型。
+        选择 `{model_name}` 的原因：本机 32GB + MPS 可以承受 0.5B 级模型短步数 LoRA/SFT。Studio 走真实 Hugging Face 加载路径，不自己生成模型。
 
         ## 数据和输出
 
@@ -323,7 +330,7 @@ def write_report(
         这组指标要分开看：
 
         - `extractable JSON rate` 说明输出里能不能抽出一个 JSON 对象；base model 本来就可能做到。
-        - `strict JSON-only rate` 说明输出是否只剩 JSON，没有 Markdown、解释文字或继续补写下一段 prompt；这是本课最直观的 SFT 效果。
+        - `strict JSON-only rate` 说明输出是否只剩 JSON，没有 Markdown、解释文字或继续补写下一段 prompt；这是本次运行最直观的 SFT 效果。
         - `intent/department match rate` 是更难的业务分类指标。短步数 LoRA/SFT 先学会格式约束，精确 taxonomy 还需要更明确的标签集合、更高质量数据或更多训练步数。
 
         ## 第 1 条训练样本的 label 检查
@@ -334,7 +341,7 @@ def write_report(
         {sample_label_text}
         ```
 
-        > 报告生成时完整 label 内容写在 trace 的 `build SFT dataset` 事件中；学习时重点看 `labels = -100` 只 mask prompt，answer token 才计算 loss。
+        > 报告生成时完整 label 内容写在 trace 的 `build SFT dataset` 事件中；重点看 `labels = -100` 只 mask prompt，answer token 才计算 loss。
 
         ## 固定 prompt 对比示例
 
@@ -386,7 +393,7 @@ def write_report(
 
         ## 下一步
 
-        完成 SFT baseline 后，再进入 Lesson 08: DPO。DPO 不包含 SFT，它通常接在 SFT 后，用 chosen/rejected 偏好对继续优化模型偏好。
+        完成 SFT baseline 后，可以切换到 DPO。DPO 不包含 SFT，它通常接在 SFT 后，用 chosen/rejected 偏好对继续优化模型偏好。
         """
     ).strip()
     report = "\n".join(line[8:] if line.startswith("        ") else line for line in report.splitlines())
@@ -399,7 +406,7 @@ def write_index(index_path: Path) -> None:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 07 · SFT Baseline</title>
+  <title>Studio · SFT + LoRA</title>
   <style>
     body { margin:0; background:#090b10; color:#eef3ff; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; line-height:1.65; }
     main { max-width:1120px; margin:0 auto; padding:48px 22px 80px; }
@@ -419,16 +426,16 @@ def write_index(index_path: Path) -> None:
 </head>
 <body>
   <main>
-    <h1>Lesson 07 · SFT Baseline</h1>
-    <p>目标：用真实 Hugging Face Qwen 0.5B + LoRA，在本地训练一个客服工单到严格 JSON 的 SFT baseline。</p>
+    <h1>Studio · SFT + LoRA</h1>
+    <p>目标：用真实 Hugging Face 模型 + LoRA，在本地训练一个客服工单到严格 JSON 的 SFT baseline。</p>
     <div class="grid">
-      <div class="card"><strong>数据</strong><code>data/train.jsonl</code><br>40 条 instruction/input/output。</div>
-      <div class="card"><strong>评估</strong><code>data/eval_prompts.jsonl</code><br>固定 6 条 prompt，对比训练前后。</div>
-      <div class="card"><strong>模型</strong><code>Qwen/Qwen2.5-0.5B-Instruct</code><br>按本机 32GB/MPS 选择。</div>
-      <div class="card"><strong>产物</strong><code>outputs/adapter/</code><br>adapter、generations、metrics。</div>
+      <div class="card"><strong>数据</strong><code>run/data/*.jsonl</code><br>Studio 粘贴、上传或示例数据副本。</div>
+      <div class="card"><strong>评估</strong><code>studio/data/*eval*.jsonl</code><br>固定 prompts，对比训练前后。</div>
+      <div class="card"><strong>模型</strong><code>--model-name</code><br>按用户选择或本机策略解析。</div>
+      <div class="card"><strong>产物</strong><code>run/adapter/</code><br>adapter、generations、metrics。</div>
     </div>
     <h2>执行命令</h2>
-    <pre>.venv/bin/python lessons/07-sft-baseline/run.py --trace-delay 0.5</pre>
+    <pre>.venv/bin/python visualizer/studio/run.py --method sft-lora ...</pre>
     <h2>训练流程</h2>
     <div class="flow">
       <div class="step"><span>01</span>选择 HF 模型</div>
@@ -443,13 +450,13 @@ def write_index(index_path: Path) -> None:
     <h2>关键概念</h2>
     <p><strong>SFT</strong> 是用标准答案训练模型。这里标准答案是严格 JSON。</p>
     <p><strong>loss mask</strong> 是让 prompt 的 labels 等于 <code>-100</code>，只让 answer token 计算 loss。</p>
-    <p><strong>LoRA</strong> 是参数高效训练方式，本课为了在本地跑 Qwen，只训练 adapter，不更新 base model。</p>
+    <p><strong>LoRA</strong> 是参数高效训练方式，本次运行为了在本地跑小模型，只训练 adapter，不更新 base model。</p>
     <p><strong>adapter</strong> 是训练后的增量权重，部署时用同一个 base model 加载 adapter。</p>
     <h2>看什么结果</h2>
     <ul>
       <li>打开 <a href="report.md">report.md</a> 看训练前后 JSON 格式指标。</li>
       <li>打开 <a href="outputs/generations/before.jsonl">before.jsonl</a> 和 <a href="outputs/generations/after.jsonl">after.jsonl</a> 看固定 prompt 输出。</li>
-      <li>打开可视化页看 <code>visualizer/traces/07-sft-baseline.json</code> 的数据流和模型变化。</li>
+      <li>打开可视化页看本次 run 目录里的 <code>trace.json</code> 数据流和模型变化。</li>
     </ul>
   </main>
 </body>
@@ -461,14 +468,14 @@ def write_index(index_path: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", default="auto")
-    parser.add_argument("--data", default="lessons/07-sft-baseline/data/train.jsonl")
-    parser.add_argument("--eval-prompts", default="lessons/07-sft-baseline/data/eval_prompts.jsonl")
-    parser.add_argument("--report", default="lessons/07-sft-baseline/report.md")
-    parser.add_argument("--index", default="lessons/07-sft-baseline/index.html")
-    parser.add_argument("--output-dir", default="lessons/07-sft-baseline/outputs/trainer")
-    parser.add_argument("--adapter-dir", default="lessons/07-sft-baseline/outputs/adapter")
-    parser.add_argument("--generation-dir", default="lessons/07-sft-baseline/outputs/generations")
-    parser.add_argument("--metrics", default="lessons/07-sft-baseline/outputs/metrics.json")
+    parser.add_argument("--data", default="visualizer/studio/data/sft-example.jsonl")
+    parser.add_argument("--eval-prompts", default="visualizer/studio/data/sft-eval-prompts.jsonl")
+    parser.add_argument("--report", default="visualizer/runtime/studio-manual/sft-report.md")
+    parser.add_argument("--index", default="visualizer/runtime/studio-manual/sft-index.html")
+    parser.add_argument("--output-dir", default="visualizer/runtime/studio-manual/sft-trainer")
+    parser.add_argument("--adapter-dir", default="visualizer/runtime/studio-manual/sft-adapter")
+    parser.add_argument("--generation-dir", default="visualizer/runtime/studio-manual/sft-generations")
+    parser.add_argument("--metrics", default="visualizer/runtime/studio-manual/sft-metrics.json")
     parser.add_argument("--max-length", type=int, default=192)
     parser.add_argument("--max-new-tokens", type=int, default=96)
     parser.add_argument("--max-steps", type=int, default=24)
@@ -476,8 +483,16 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=8)
     parser.add_argument("--alpha", type=int, default=16)
     parser.add_argument("--dropout", type=float, default=0.05)
-    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--per-device-train-batch-size", type=int, default=1)
+    parser.add_argument("--per-device-eval-batch-size", type=int, default=1)
+    parser.add_argument("--gradient-accumulation-steps", type=int, default=1)
+    parser.add_argument("--warmup-steps", type=int, default=0)
+    parser.add_argument("--weight-decay", type=float, default=0.0)
+    parser.add_argument("--lr-scheduler-type", default="linear")
+    parser.add_argument("--target-modules", default="")
+    parser.add_argument("--trace", default="visualizer/runtime/studio-manual/trace.json")
     parser.add_argument("--trace-delay", type=float, default=0.0)
+    parser.add_argument("--extra-args-json", default="")
     args = parser.parse_args()
 
     (
@@ -497,6 +512,7 @@ def main() -> None:
 
     machine = detect_local_config(torch)
     model_name = resolve_model_name(args.model_name, machine)
+    extra_training_args = training_argument_overrides(TrainingArguments, args.extra_args_json)
 
     report_path = resolve_project_path(args.report)
     index_path = resolve_project_path(args.index)
@@ -507,7 +523,11 @@ def main() -> None:
     for path in [report_path.parent, index_path.parent, output_dir, adapter_dir, generation_dir, metrics_path.parent]:
         path.mkdir(parents=True, exist_ok=True)
 
-    trace = VisualTrace("07-sft-baseline", "Lesson 07 · SFT Baseline", args.trace, args.trace_delay)
+    os.environ["HF_HOME"] = str(output_dir / "hf-cache")
+    os.environ["HF_DATASETS_CACHE"] = str(output_dir / "hf-cache" / "datasets")
+    os.environ["HF_XET_CACHE"] = str(output_dir / "hf-cache" / "xet")
+
+    trace = VisualTrace("studio-sft-lora", "Studio · SFT + LoRA", args.trace, args.trace_delay)
     raw_rows = read_sft_records(args.data)
     eval_prompts = load_eval_prompts(args.eval_prompts)
 
@@ -564,7 +584,7 @@ def main() -> None:
         metrics=before_scores,
     )
 
-    target_modules = infer_lora_target_modules(model_name)
+    target_modules = parse_target_modules(args.target_modules) or infer_lora_target_modules(model_name)
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=args.rank,
@@ -579,7 +599,7 @@ def main() -> None:
     trace.event(
         "attach LoRA for SFT",
         "model",
-        "为了本地可执行，本课用 LoRA 执行 SFT：base 冻结，只训练所选 target modules 上的 adapter。",
+        "为了本地可执行，本次运行用 LoRA 执行 SFT：base 冻结，只训练所选 target modules 上的 adapter。",
         inputs={"target_modules": target_modules, "rank": args.rank, "alpha": args.alpha, "dropout": args.dropout},
         outputs={"trainable_params": trainable_params, "total_params": total_params},
         model={
@@ -592,13 +612,17 @@ def main() -> None:
 
     training_args = make_training_arguments(
         TrainingArguments,
+        extra_args=extra_training_args,
         output_dir=str(output_dir),
         overwrite_output_dir=True,
-        per_device_train_batch_size=1,
-        per_device_eval_batch_size=1,
-        gradient_accumulation_steps=1,
+        per_device_train_batch_size=args.per_device_train_batch_size,
+        per_device_eval_batch_size=args.per_device_eval_batch_size,
+        gradient_accumulation_steps=args.gradient_accumulation_steps,
         max_steps=args.max_steps,
         learning_rate=args.learning_rate,
+        warmup_steps=args.warmup_steps,
+        weight_decay=args.weight_decay,
+        lr_scheduler_type=args.lr_scheduler_type,
         logging_steps=2,
         eval_steps=8,
         save_strategy="no",
@@ -671,7 +695,7 @@ def main() -> None:
     trace.event(
         "save SFT adapter",
         "checkpoint",
-        "保存 adapter-only checkpoint 和 tokenizer，保持课程输出自包含。",
+        "保存 adapter-only checkpoint 和 tokenizer，保持 Studio 运行产物自包含。",
         outputs={"adapter_dir": adapter_dir},
         model={"saved": ["adapter_config.json", "adapter_model.safetensors"], "base_saved": False},
     )
@@ -733,7 +757,7 @@ def main() -> None:
     write_index(index_path)
 
     trace.finish(
-        "Lesson 07 完成：SFT baseline、训练前后固定 prompt 对比、adapter 保存加载都已可视化。",
+        "Studio SFT 完成：SFT baseline、训练前后固定 prompt 对比、adapter 保存加载都已写出。",
         metrics={"valid_json_after": after_scores["valid_json_rate"], "intent_match_after": after_scores["intent_match_rate"]},
     )
     print(f"\nReport written: {display_path(report_path)}")

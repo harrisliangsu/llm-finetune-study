@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Structured trace writer for the local lesson visualizer."""
+"""Structured trace writer for shared training engines."""
 
 from __future__ import annotations
 
@@ -43,13 +43,13 @@ def _jsonable(value: Any) -> Any:
 
 
 class VisualTrace:
-    """Append-only lesson execution trace rendered by `visualizer/index.html`."""
+    """Append-only execution trace rendered by `visualizer/index.html`."""
 
     def __init__(
         self,
         lesson_id: str,
         title: str,
-        path: str | Path = "visualizer/traces/live.json",
+        path: str | Path = "visualizer/runtime/training-trace.json",
         delay: float = 0.0,
     ) -> None:
         self.lesson_id = lesson_id
@@ -74,11 +74,7 @@ class VisualTrace:
         return PROJECT_ROOT / candidate
 
     def _archive_path(self) -> Path:
-        safe_lesson_id = "".join(
-            character if character.isalnum() or character in {"-", "_"} else "-"
-            for character in self.lesson_id
-        ).strip("-")
-        return PROJECT_ROOT / "visualizer" / "traces" / f"{safe_lesson_id}.json"
+        return self.path
 
     def event(
         self,

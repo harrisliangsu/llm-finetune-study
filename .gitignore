@@ -14,6 +14,7 @@ lessons/**/outputs/
 visualizer/traces/live.json
 visualizer/traces/[0-9][0-9]-*.json
 visualizer/traces/*.tmp
+visualizer/runtime/
 checkpoints/
 checkpoint-*/
 runs/

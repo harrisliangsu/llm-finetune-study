@@ -52,7 +52,15 @@ def main() -> None:
         raise SystemExit("No lessons selected.")
 
     for lesson_id, script, extra in selected:
-        command = [sys.executable, script, "--trace-delay", str(args.trace_delay), *extra]
+        command = [
+            sys.executable,
+            script,
+            "--trace",
+            "visualizer/traces/live.json",
+            "--trace-delay",
+            str(args.trace_delay),
+            *extra,
+        ]
         if args.quick:
             command.extend(QUICK_ARGS.get(lesson_id, []))
         print(f"\n== Lesson {lesson_id}: {' '.join(command)} ==")

@@ -1,0 +1,117 @@
+{
+  "lesson_id": "studio-qlora-plan",
+  "title": "QLoRA / Training Engineering",
+  "notes": [
+    "This studio engine is a planner, not a CUDA trainer.",
+    "bitsandbytes 4-bit and 8-bit training paths are CUDA-oriented and are not treated as native Apple MPS QLoRA.",
+    "Mac execution should use this planner to choose between CPU/MPS LoRA, remote CUDA QLoRA, or inference-focused local quantization stacks."
+  ],
+  "candidate_models": [
+    {
+      "id": "auto",
+      "label": "Policy auto model",
+      "fallback_params_b": 0.494,
+      "fallback_hidden_size": 896,
+      "fallback_num_layers": 24,
+      "fallback_vocab_size": 151936,
+      "why": "Uses training.common.hf_model_policy.resolve_model_name for this machine."
+    },
+    {
+      "id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "label": "Small local instruct model",
+      "fallback_params_b": 0.494,
+      "fallback_hidden_size": 896,
+      "fallback_num_layers": 24,
+      "fallback_vocab_size": 151936,
+      "why": "Good local LoRA/SFT teaching model; QLoRA is usually unnecessary at this scale."
+    },
+    {
+      "id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "label": "1B class open chat model",
+      "fallback_params_b": 1.1,
+      "fallback_hidden_size": 2048,
+      "fallback_num_layers": 22,
+      "fallback_vocab_size": 32000,
+      "why": "Still small enough for local planning; useful as a bridge between toy and 7B models."
+    },
+    {
+      "id": "mistralai/Mistral-7B-Instruct-v0.2",
+      "label": "7B QLoRA target",
+      "fallback_params_b": 7.24,
+      "fallback_hidden_size": 4096,
+      "fallback_num_layers": 32,
+      "fallback_vocab_size": 32000,
+      "why": "Typical single-GPU QLoRA candidate on 24GB CUDA cards."
+    },
+    {
+      "id": "meta-llama/Llama-2-13b-hf",
+      "label": "13B memory pressure case",
+      "fallback_params_b": 13.0,
+      "fallback_hidden_size": 5120,
+      "fallback_num_layers": 40,
+      "fallback_vocab_size": 32000,
+      "why": "Shows where activation checkpointing, sequence length, and optimizer memory matter."
+    },
+    {
+      "id": "meta-llama/Llama-3.1-70B",
+      "label": "70B distributed boundary",
+      "fallback_params_b": 70.6,
+      "fallback_hidden_size": 8192,
+      "fallback_num_layers": 80,
+      "fallback_vocab_size": 128256,
+      "why": "A planning example for multi-GPU sharding; not a local execution target."
+    }
+  ],
+  "profiles": [
+    {
+      "name": "mac_mps_lora_planning",
+      "device_family": "mps_or_cpu",
+      "quantization": "none",
+      "weight_bytes_per_param": 2.0,
+      "target_vram_gb": 0,
+      "system_ram_headroom": 0.72,
+      "description": "Apple Silicon path: run fp16/bf16/fp32 LoRA or plan remote CUDA. Do not claim bitsandbytes QLoRA is native on MPS."
+    },
+    {
+      "name": "single_cuda_qlora_24gb",
+      "device_family": "cuda",
+      "quantization": "nf4_double_quant",
+      "weight_bytes_per_param": 0.56,
+      "target_vram_gb": 24,
+      "system_ram_headroom": 0.88,
+      "description": "Common QLoRA workstation profile with bitsandbytes 4-bit base weights plus trainable LoRA adapters."
+    },
+    {
+      "name": "single_cuda_lora_24gb",
+      "device_family": "cuda",
+      "quantization": "fp16_lora",
+      "weight_bytes_per_param": 2.0,
+      "target_vram_gb": 24,
+      "system_ram_headroom": 0.88,
+      "description": "Baseline fp16 LoRA profile, useful for comparing why QLoRA exists."
+    },
+    {
+      "name": "multi_cuda_deepspeed_zero3",
+      "device_family": "cuda_distributed",
+      "quantization": "bf16_or_fp16_sharded",
+      "weight_bytes_per_param": 2.0,
+      "target_vram_gb": 80,
+      "world_size": 8,
+      "shard_parameters": true,
+      "shard_gradients": true,
+      "shard_optimizer": true,
+      "system_ram_headroom": 0.9,
+      "description": "DeepSpeed boundary example: approximate per-GPU memory with world_size-way parameter/gradient/optimizer sharding. Validate with real ZeRO/FSDP config."
+    }
+  ],
+  "defaults": {
+    "seq_length": 2048,
+    "per_device_batch_size": 1,
+    "gradient_accumulation_steps": 16,
+    "lora_rank": 64,
+    "target_module_count": 7,
+    "activation_multiplier": 5.0,
+    "checkpoint_activation_multiplier": 1.8,
+    "safety_margin_gb": 2.0
+  }
+}

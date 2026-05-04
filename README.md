@@ -77,9 +77,9 @@
 
 然后照着 [examples/README.md](examples/README.md) 里的练习顺序做小实验。
 
-## 实时训练可视化
+## LLM Study Studio
 
-启动本地可视化页面：
+启动本地网页工作室：
 
 ```bash
 .venv/bin/python visualizer/serve.py
@@ -91,7 +91,12 @@
 http://127.0.0.1:8765/visualizer/
 ```
 
-另开一个终端运行课程脚本，页面会自动读取 `visualizer/traces/live.json` 并展示数据流、张量形状、模型状态、训练指标和 checkpoint 变化：
+网页端现在分成两个子页面：
+
+- **模型训练**：默认首页，像一个独立的本地训练工作室。可以选择 SFT + LoRA、PEFT LoRA、DPO 或 QLoRA 规划，选择 `auto` / Qwen 0.5B / tiny-gpt2 / 自定义 Hugging Face model id；数据入口按训练方法切换 schema，只支持粘贴 JSONL、上传 JSONL 文件，或使用 `visualizer/studio/data/` 里的 Studio 示例数据，不再绑定课程数据文件，数据路径和 `查看数据` 会打开独立窗口展示完整 JSONL 内容。训练参数包含基础参数、按方法启用的高级参数，以及 `Extra Engine Args JSON` 这类引擎级额外配置入口。Studio 入口是 `visualizer/studio/run.py`，实际训练逻辑在公共 `training/engines/`，公共 helper 在 `training/common/`，不调用 `lessons/` 里的课程脚本。Studio 每次 run 都是自包含目录：数据副本、trace、adapter、report、metrics 全部写入 `visualizer/runtime/studio-runs/<run-id>/`，不会覆盖课程报告，也不会更新课程页读取的 `visualizer/traces/live.json`；Chat 对比会固定输出 base、adapter、reloaded adapter 三个结果，并显式显示正在比较的 model、adapter 路径和 instruction。
+- **课程学习**：从训练页点入，继续展示 01-10 的课程 trace、数据流、张量形状、模型状态、训练指标和 checkpoint 变化；也保留选择课程、运行 01-10、quick run、暂停、单步、继续和停止。
+
+如果仍想手动运行课程脚本，页面会自动读取 `visualizer/traces/live.json`：
 
 ```bash
 .venv/bin/python lessons/06-peft-lora/run.py --trace-delay 0.5
@@ -102,6 +107,8 @@ http://127.0.0.1:8765/visualizer/
 ```
 
 `--trace-delay` 只用于演示时放慢步骤，方便观察页面变化；正常跑课可以不加。
+
+课程页右侧 `Chat Lab` 默认连接 Lesson 07 SFT baseline；训练页内的 `Chat 对比` 可以改 model、adapter dir 和 instruction，也可以一键使用最新 Studio 训练产物。这样对比时能直接看到 base model 和 adapter 分别来自哪里。
 
 ## 已执行课程
 

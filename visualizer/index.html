@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LLM Study Visualizer</title>
+  <title>LLM Study Studio</title>
   <style>
     :root {
       --bg:#080a12; --panel:#111620; --panel-2:#171d2a; --panel-3:#0d111a; --panel-4:#10131c;
@@ -499,6 +499,7 @@
     }
     .button:hover { background:#1b2433; border-color:rgba(56,189,248,.38); transform:translateY(-1px); }
     .button.active { background:rgba(34,197,94,.1); border-color:rgba(34,197,94,.36); color:#bbf7d0; }
+    .button:disabled { cursor:not-allowed; opacity:.45; transform:none; }
     button:focus-visible,
     select:focus-visible,
     .node:focus-visible,
@@ -1354,14 +1355,623 @@
       border-color:rgba(56,189,248,.34);
       background:rgba(56,189,248,.08);
     }
+    .studio-stack { display:grid; gap:10px; }
+    .studio-field { display:grid; gap:6px; min-width:0; }
+    .studio-label {
+      color:#8d98af;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .studio-bar {
+      display:grid;
+      grid-template-columns:minmax(90px,.18fr) minmax(120px,.22fr) auto minmax(520px,1fr);
+      gap:10px;
+      align-items:end;
+      margin-top:12px;
+      padding:12px;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:10px;
+      background:#0c121b;
+      box-shadow:0 10px 26px rgba(0,0,0,.16);
+    }
+    .studio-bar .studio-field { min-width:0; }
+    .studio-bar-actions {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(86px,1fr)) repeat(4,minmax(62px,.72fr));
+      gap:8px;
+      align-items:end;
+    }
+    .studio-bar .studio-toggle {
+      min-height:38px;
+      justify-content:center;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:#0b111b;
+      padding:0 10px;
+    }
+    .studio-input,
+    .studio-textarea {
+      width:100%;
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:8px;
+      background:#0b111b;
+      color:#e8edf8;
+      font:inherit;
+      font-size:12px;
+      padding:9px 10px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .studio-textarea {
+      min-height:118px;
+      resize:vertical;
+      line-height:1.5;
+    }
+    .studio-input:focus-visible,
+    .studio-textarea:focus-visible {
+      outline:2px solid var(--ring);
+      outline-offset:2px;
+    }
+    .studio-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; min-width:0; }
+    .studio-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .studio-actions.compact { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .studio-toggle {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:36px;
+      color:#cbd5e1;
+      font-size:12px;
+      font-weight:850;
+    }
+    .studio-toggle input { accent-color:#38bdf8; }
+    .job-card,
+    .chat-result {
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:#0d131d;
+      padding:11px;
+      min-width:0;
+      overflow:hidden;
+    }
+    .job-line {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(148,163,184,.1);
+      padding-bottom:8px;
+      margin-bottom:8px;
+    }
+    .job-state {
+      color:#bae6fd;
+      font-size:11px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      white-space:nowrap;
+    }
+    .job-meta,
+    .chat-meta {
+      color:#8d98af;
+      font-size:11px;
+      overflow-wrap:anywhere;
+    }
+    .job-log {
+      max-height:138px;
+      overflow:auto;
+      border:1px solid rgba(148,163,184,.1);
+      border-radius:7px;
+      background:#080d14;
+      padding:8px;
+      color:#b9c2d8;
+      font-size:10px;
+      white-space:pre-wrap;
+    }
+    .chat-result { display:grid; gap:9px; }
+    .chat-answer {
+      border:1px solid rgba(56,189,248,.18);
+      border-radius:8px;
+      background:rgba(56,189,248,.055);
+      padding:10px;
+    }
+    .chat-answer.adapter {
+      border-color:rgba(34,197,94,.22);
+      background:rgba(34,197,94,.055);
+    }
+    .chat-answer.error {
+      border-color:rgba(239,68,68,.26);
+      background:rgba(239,68,68,.07);
+    }
+    .chat-answer-title {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:7px;
+      color:#f8fafc;
+      font-size:12px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .chat-answer pre {
+      max-height:220px;
+      padding:0;
+      border:0;
+      background:transparent;
+      color:#dbeafe;
+      font-size:11px;
+    }
+    .progress-track::after,
+    .pipeline-viz::after,
+    .sim-board::after,
+    .flow-line::after,
+    .particle {
+      display:none !important;
+    }
+    .pulse,
+    .processor-ring,
+    .viz-token,
+    .token-chip,
+    .matrix-viz span,
+    .matrix-cell,
+    .model-unit.trainable,
+    .adapter-box,
+    .sample-dot,
+    .pipeline-dots span,
+    .pipeline-mini-model span.hot,
+    .pipeline-train-grid span,
+    .data-node.process,
+    .gradient-loop::before,
+    .update-beam,
+    .layer.trainable,
+    .adapter-chip,
+    .param-dot,
+    .sparkline circle,
+    .scene-packet,
+    .scene-cube,
+    .scene-token,
+    .scene-matrix span {
+      animation:none !important;
+    }
+    .pulse { box-shadow:none; }
+    html { scroll-behavior:auto; }
+    .topbar { backdrop-filter:none; box-shadow:0 10px 24px rgba(0,0,0,.2); }
+    .panel { box-shadow:0 8px 24px rgba(0,0,0,.16); }
+    #visualStage,
+    #detail,
+    #sideDetail,
+    .course-meter-list {
+      content-visibility:auto;
+      contain-intrinsic-size:420px;
+    }
+    .topbar {
+      grid-template-columns:minmax(210px,auto) minmax(200px,1fr) auto minmax(320px,500px) auto;
+    }
+    body[data-view="studio"] .topbar {
+      grid-template-columns:minmax(210px,auto) minmax(240px,1fr) auto;
+    }
+    body[data-view="studio"] .course-only,
+    body[data-view="learn"] .studio-only {
+      display:none !important;
+    }
+    .app-tabs {
+      display:inline-grid;
+      grid-template-columns:1fr 1fr;
+      gap:4px;
+      align-items:center;
+      min-width:232px;
+      padding:4px;
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:9px;
+      background:#080d14;
+    }
+    .app-tab {
+      min-height:34px;
+      border:0;
+      border-radius:7px;
+      background:transparent;
+      color:#93a1b8;
+      cursor:pointer;
+      font:inherit;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.02em;
+    }
+    .app-tab.active {
+      color:#e0f2fe;
+      background:linear-gradient(180deg,rgba(56,189,248,.18),rgba(56,189,248,.08));
+      box-shadow:inset 0 0 0 1px rgba(56,189,248,.22);
+    }
+    .app-tab:focus-visible,
+    .learning-link:focus-visible {
+      outline:2px solid var(--ring);
+      outline-offset:2px;
+    }
+    .app-page {
+      display:none;
+      margin-top:16px;
+    }
+    .app-page.active { display:block; }
+    .training-workbench {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(300px,360px);
+      gap:18px;
+      align-items:start;
+    }
+    .training-main,
+    .training-side {
+      min-width:0;
+    }
+    .workbench-head {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:18px;
+      align-items:start;
+      padding-bottom:16px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+    }
+    .workbench-title {
+      font-size:34px;
+      line-height:1.05;
+      letter-spacing:0;
+      margin:0 0 8px;
+    }
+    .workbench-subtitle {
+      max-width:820px;
+      color:#a8b3c7;
+      font-size:14px;
+      line-height:1.65;
+    }
+    .workbench-status {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:36px;
+      padding:0 10px;
+      border:1px solid rgba(34,197,94,.24);
+      border-radius:999px;
+      color:#bbf7d0;
+      background:rgba(34,197,94,.07);
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .status-dot {
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#22c55e;
+    }
+    .training-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      margin-top:16px;
+    }
+    .studio-card {
+      min-width:0;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:#0d131d;
+      padding:14px;
+      overflow:hidden;
+    }
+    .studio-card-title {
+      margin-bottom:12px;
+      color:#dbeafe;
+      font-size:13px;
+      font-weight:950;
+      letter-spacing:.04em;
+    }
+    .model-choice-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .choice-note {
+      min-width:0;
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:7px;
+      background:#0a1018;
+      padding:9px;
+    }
+    .choice-note strong {
+      display:block;
+      color:#bae6fd;
+      font-size:11px;
+      margin-bottom:4px;
+    }
+    .choice-note span {
+      display:block;
+      color:#94a3b8;
+      font-size:11px;
+      line-height:1.45;
+    }
+    .dataset-editor {
+      min-height:188px;
+      font-family:"Fira Code","SF Mono",Menlo,Consolas,monospace;
+    }
+    .dataset-pointer {
+      cursor:pointer;
+      color:#e0f2fe;
+      border-color:rgba(56,189,248,.24);
+      background:#0a121d;
+    }
+    .dataset-pointer:hover {
+      border-color:rgba(56,189,248,.45);
+      background:#0d1724;
+    }
+    .dataset-footer {
+      display:grid;
+      grid-template-columns:auto auto minmax(0,1fr);
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+    }
+    .dataset-summary {
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:8px;
+      background:#0a1018;
+      padding:8px 10px;
+      color:#a8b3c7;
+      font-size:12px;
+      overflow-wrap:anywhere;
+    }
+    .dataset-summary.ok {
+      color:#bbf7d0;
+      border-color:rgba(34,197,94,.25);
+      background:rgba(34,197,94,.06);
+    }
+    .dataset-summary.error {
+      color:#fecaca;
+      border-color:rgba(239,68,68,.28);
+      background:rgba(239,68,68,.07);
+    }
+    .params-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
+    .advanced-panel {
+      margin-top:12px;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:#0a1018;
+      overflow:hidden;
+    }
+    .advanced-panel summary {
+      cursor:pointer;
+      padding:10px 12px;
+      color:#dbeafe;
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.02em;
+      list-style:none;
+    }
+    .advanced-panel summary::-webkit-details-marker { display:none; }
+    .advanced-body {
+      display:grid;
+      gap:12px;
+      padding:0 12px 12px;
+      border-top:1px solid rgba(148,163,184,.1);
+    }
+    .advanced-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      padding-top:12px;
+    }
+    .extra-args-editor {
+      min-height:104px;
+      font-family:"Fira Code","SF Mono",Menlo,Consolas,monospace;
+    }
+    .run-console {
+      display:grid;
+      gap:12px;
+      align-content:start;
+      grid-column:1 / -1;
+    }
+    .run-console #studioJobCard {
+      min-height:300px;
+    }
+    .run-console #studioJobCard .job-log {
+      max-height:440px;
+      font-size:11px;
+      line-height:1.5;
+    }
+    .studio-chat-card {
+      grid-column:1 / -1;
+      display:grid;
+      grid-template-columns:minmax(280px,.9fr) minmax(360px,1.1fr);
+      gap:14px;
+      align-items:start;
+    }
+    .compare-controls {
+      display:grid;
+      gap:10px;
+    }
+    .compare-meta-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .compare-meta-item {
+      min-width:0;
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:8px;
+      background:#0a1018;
+      padding:9px 10px;
+    }
+    .compare-meta-item span {
+      display:block;
+      color:#8d98af;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .compare-meta-item strong {
+      display:block;
+      margin-top:5px;
+      color:#dbeafe;
+      font-size:12px;
+      line-height:1.4;
+      overflow-wrap:anywhere;
+    }
+    .method-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .method-pill {
+      min-height:72px;
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:8px;
+      background:#0a1018;
+      padding:10px;
+      min-width:0;
+    }
+    .method-pill strong {
+      display:block;
+      color:#e0f2fe;
+      font-size:12px;
+      margin-bottom:5px;
+    }
+    .method-pill span {
+      display:block;
+      color:#94a3b8;
+      font-size:11px;
+      line-height:1.45;
+    }
+    .method-hint {
+      margin-top:10px;
+      min-height:38px;
+      border:1px solid rgba(56,189,248,.18);
+      border-radius:8px;
+      background:rgba(56,189,248,.055);
+      color:#b9c2d8;
+      padding:9px 10px;
+      font-size:12px;
+      line-height:1.5;
+    }
+    .command-preview {
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:8px;
+      background:#080d14;
+      padding:10px;
+    }
+    .command-preview pre {
+      margin-top:7px;
+      max-height:142px;
+      color:#cbd5e1;
+      font-size:11px;
+      white-space:pre-wrap;
+    }
+    .training-map {
+      display:grid;
+      gap:9px;
+    }
+    .map-step {
+      display:grid;
+      grid-template-columns:34px minmax(0,1fr);
+      column-gap:10px;
+      row-gap:3px;
+      align-items:start;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:#0d131d;
+      padding:11px;
+    }
+    .map-step span {
+      grid-row:1 / span 2;
+      display:grid;
+      place-items:center;
+      width:32px;
+      height:32px;
+      border-radius:8px;
+      color:#bae6fd;
+      background:rgba(56,189,248,.09);
+      border:1px solid rgba(56,189,248,.22);
+      font-size:11px;
+      font-weight:950;
+    }
+    .map-step strong {
+      color:#eef3ff;
+      font-size:13px;
+    }
+    .map-step p {
+      color:#94a3b8;
+      font-size:12px;
+      margin:0;
+    }
+    .map-step.active {
+      border-color:rgba(34,197,94,.24);
+      background:rgba(34,197,94,.045);
+    }
+    .learning-links {
+      display:grid;
+      gap:9px;
+    }
+    .learning-link {
+      width:100%;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:#0d131d;
+      color:inherit;
+      cursor:pointer;
+      padding:12px;
+      text-align:left;
+      font:inherit;
+    }
+    .learning-link:hover {
+      border-color:rgba(56,189,248,.34);
+      background:#111827;
+    }
+    .learning-link strong {
+      display:block;
+      color:#e0f2fe;
+      font-size:13px;
+      margin-bottom:5px;
+    }
+    .learning-link span {
+      display:block;
+      color:#94a3b8;
+      font-size:12px;
+      line-height:1.45;
+    }
     @media (max-width:1500px) and (min-width:1151px) {
       .layout { grid-template-columns:minmax(250px,288px) minmax(0,1fr); }
       .layout > aside.panel:last-child { grid-column:2; }
+      .studio-bar { grid-template-columns:88px 108px auto minmax(420px,1fr); }
+      .training-grid { grid-template-columns:1fr; }
+      .params-grid,
+      .advanced-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
     }
     @media (max-width:1150px) {
       .topbar { grid-template-columns:1fr; position:static; }
+      body[data-view="studio"] .topbar { grid-template-columns:1fr; }
       .status { justify-content:flex-start; white-space:normal; }
       .layout { grid-template-columns:1fr; }
+      .training-workbench,
+      .training-grid {
+        grid-template-columns:1fr;
+      }
+      .studio-bar {
+        grid-template-columns:1fr 1fr;
+        position:static;
+      }
+      .studio-bar-actions { grid-column:1 / -1; }
       .stage-grid,
       .stage-grid .model-viz,
       .scene-grid,
@@ -1380,6 +1990,26 @@
       .topbar { padding:12px; }
       .top-course-picker { grid-template-columns:1fr; }
       .toolbar { display:grid; grid-template-columns:1fr 1fr; }
+      .studio-bar,
+      .studio-bar-actions {
+        grid-template-columns:1fr;
+      }
+      .app-tabs,
+      .workbench-head,
+      .studio-row,
+      .dataset-footer,
+      .model-choice-grid,
+      .method-grid,
+      .compare-meta-grid,
+      .studio-chat-card,
+      .params-grid,
+      .advanced-grid {
+        grid-template-columns:1fr;
+      }
+      .studio-row,
+      .studio-actions,
+      .studio-actions.compact { grid-template-columns:1fr; }
+      .workbench-title { font-size:28px; }
       .button { width:100%; }
       .node,
       .node:hover { width:140px; min-height:100px; }
@@ -1396,28 +2026,361 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="studio-ui.css?v=20260504-ui3" />
 </head>
-<body>
+<body data-view="studio">
   <a class="skip-link" href="#mainContent">跳到主内容</a>
   <div class="shell">
     <header class="topbar">
-      <div class="brand"><span>LLM</span> Training Visualizer</div>
+      <div class="brand"><span>LLM</span> Study Studio</div>
       <div class="status"><span class="pulse" id="pulse"></span><span id="statusText">等待 trace...</span></div>
-      <div class="top-course-picker">
+      <nav class="app-tabs" aria-label="页面导航">
+        <button class="app-tab active" id="studioViewTab" type="button" data-view-target="studio">训练工作室</button>
+        <button class="app-tab" id="learnViewTab" type="button" data-view-target="learn">课程学习</button>
+      </nav>
+      <div class="top-course-picker course-only">
         <div class="top-course-label">Course</div>
         <select class="course-select" id="courseSelect" aria-label="选择课程">
           <option value="live">LIVE · latest course</option>
         </select>
       </div>
-      <div class="toolbar">
+      <div class="toolbar course-only">
         <button class="button active" id="followLatestCourse">跟随最新课程</button>
         <button class="button active" id="followCurrent">跟随当前步骤</button>
         <button class="button" id="toggleLive">暂停刷新</button>
         <button class="button" id="openLive">打开 live trace</button>
       </div>
     </header>
+    <main id="mainContent">
+      <section class="app-page active" id="trainingPage" aria-labelledby="trainingPageTitle">
+        <div class="training-workbench">
+          <section class="training-main panel">
+            <div class="workbench-head">
+              <div>
+                <div class="panel-title">Local Training</div>
+                <h1 class="workbench-title" id="trainingPageTitle">本地模型训练工作室</h1>
+                <p class="workbench-subtitle">选择训练方法和小模型，按方法要求接入 JSONL 数据，启动独立 Studio 训练，并用 live trace 观察每一步发生了什么。</p>
+              </div>
+              <div class="workbench-status">
+                <span class="status-dot"></span>
+                <span id="studioRunState">idle</span>
+              </div>
+            </div>
 
-    <main class="layout" id="mainContent">
+            <div class="training-grid">
+              <section class="studio-card">
+                <div class="studio-card-title">1 · 训练方法</div>
+                <label class="studio-field">
+                  <span class="studio-label">Method</span>
+                  <select class="course-select" id="studioMethod">
+                    <option value="sft-lora">SFT + LoRA · 指令微调</option>
+                    <option value="peft-lora">PEFT LoRA · Adapter 训练</option>
+                    <option value="dpo">DPO · 偏好优化</option>
+                    <option value="qlora-plan">QLoRA · 本地训练规划</option>
+                  </select>
+                </label>
+                <div class="method-grid">
+                  <div class="method-pill"><strong>SFT</strong><span>学 instruction/input/output，适合结构化输出。</span></div>
+                  <div class="method-pill"><strong>PEFT</strong><span>冻结 base，只训练小 adapter。</span></div>
+                  <div class="method-pill"><strong>DPO</strong><span>用 chosen/rejected 学偏好差异。</span></div>
+                  <div class="method-pill"><strong>QLoRA</strong><span>先估算显存、量化和硬件边界。</span></div>
+                </div>
+                <div class="method-hint" id="studioMethodHint"></div>
+              </section>
+
+              <section class="studio-card">
+                <div class="studio-card-title">2 · 模型</div>
+                <div class="studio-row">
+                  <label class="studio-field">
+                    <span class="studio-label">Model</span>
+                    <select class="course-select" id="studioModelPreset">
+                      <option value="auto">auto · 按本机选择</option>
+                      <option value="Qwen/Qwen2.5-0.5B-Instruct">Qwen/Qwen2.5-0.5B-Instruct</option>
+                      <option value="sshleifer/tiny-gpt2">sshleifer/tiny-gpt2</option>
+                      <option value="custom">自定义 Hugging Face model id</option>
+                    </select>
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">Custom Model</span>
+                    <input class="studio-input" id="studioCustomModel" placeholder="Qwen/Qwen2.5-0.5B-Instruct" />
+                  </label>
+                </div>
+                <div class="model-choice-grid">
+                  <div class="choice-note"><strong>auto</strong><span>优先选本机可承受的中文 instruct 小模型。</span></div>
+                  <div class="choice-note"><strong>tiny-gpt2</strong><span>适合快速冒烟，不适合中文效果判断。</span></div>
+                  <div class="choice-note"><strong>Qwen 0.5B</strong><span>更接近真实本地 LoRA/SFT 训练。</span></div>
+                </div>
+              </section>
+
+              <section class="studio-card">
+                <div class="studio-card-title">3 · 数据</div>
+                <div class="studio-row">
+                  <label class="studio-field">
+                    <span class="studio-label">Data Source</span>
+                    <select class="course-select" id="studioDatasetMode">
+                      <option value="paste">粘贴 JSONL</option>
+                      <option value="upload">上传 JSONL 文件</option>
+                      <option value="studioExample">使用 Studio 示例</option>
+                    </select>
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label" id="studioDatasetPathLabel">Current Data</span>
+                    <input class="studio-input dataset-pointer" id="studioDatasetPath" value="visualizer/studio/data/sft-example.jsonl" readonly title="点击查看当前数据内容" />
+                  </label>
+                </div>
+                <label class="studio-field" id="studioUploadField">
+                  <span class="studio-label">Upload JSONL</span>
+                  <input class="studio-input" id="studioDatasetFile" type="file" accept=".jsonl,.json,.txt,application/json,text/plain" />
+                </label>
+                <div class="method-hint" id="studioSchemaHint"></div>
+                <label class="studio-field">
+                  <span class="studio-label">Custom JSONL</span>
+                  <textarea class="studio-textarea dataset-editor" id="studioDatasetText" spellcheck="false"></textarea>
+                </label>
+                <div class="dataset-footer">
+                  <button class="button" id="validateDatasetButton" type="button">校验数据</button>
+                  <button class="button" id="previewDatasetButton" type="button">查看数据</button>
+                  <div class="dataset-summary" id="studioDatasetSummary">等待数据校验。</div>
+                </div>
+              </section>
+
+              <section class="studio-card">
+                <div class="studio-card-title">4 · 训练参数</div>
+                <div class="params-grid">
+                  <label class="studio-field">
+                    <span class="studio-label">Max Steps</span>
+                    <input class="studio-input" id="studioMaxSteps" type="number" min="1" step="1" value="1" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">Max Length</span>
+                    <input class="studio-input" id="studioMaxLength" type="number" min="32" step="16" value="192" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">New Tokens</span>
+                    <input class="studio-input" id="studioMaxNewTokens" type="number" min="8" step="8" value="16" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">Learning Rate</span>
+                    <input class="studio-input" id="studioLearningRate" type="number" min="0" step="0.0001" value="0.0005" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">LoRA Rank</span>
+                    <input class="studio-input" id="studioRank" type="number" min="1" step="1" value="8" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">LoRA Alpha</span>
+                    <input class="studio-input" id="studioAlpha" type="number" min="1" step="1" value="16" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">Dropout</span>
+                    <input class="studio-input" id="studioDropout" type="number" min="0" max="0.5" step="0.01" value="0.05" />
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">Delay</span>
+                    <input class="studio-input" id="studioTraceDelay" type="number" min="0" step="0.1" value="0.2" />
+                  </label>
+                </div>
+                <details class="advanced-panel">
+                  <summary>高级参数</summary>
+                  <div class="advanced-body">
+                    <div class="advanced-grid">
+                      <label class="studio-field">
+                        <span class="studio-label">Train Batch</span>
+                        <input class="studio-input" id="studioPerDeviceTrainBatchSize" type="number" min="1" step="1" value="1" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Eval Batch</span>
+                        <input class="studio-input" id="studioPerDeviceEvalBatchSize" type="number" min="1" step="1" value="1" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Grad Accum</span>
+                        <input class="studio-input" id="studioGradientAccumulationSteps" type="number" min="1" step="1" value="1" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Warmup Steps</span>
+                        <input class="studio-input" id="studioWarmupSteps" type="number" min="0" step="1" value="0" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Weight Decay</span>
+                        <input class="studio-input" id="studioWeightDecay" type="number" min="0" step="0.001" value="0" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Scheduler</span>
+                        <select class="course-select" id="studioLrSchedulerType">
+                          <option value="linear">linear</option>
+                          <option value="cosine">cosine</option>
+                          <option value="constant">constant</option>
+                          <option value="constant_with_warmup">constant_with_warmup</option>
+                        </select>
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">DPO Beta</span>
+                        <input class="studio-input" id="studioDpoBeta" type="number" min="0" step="0.01" value="0.1" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Device</span>
+                        <select class="course-select" id="studioDevice">
+                          <option value="auto">auto</option>
+                          <option value="mps">mps</option>
+                          <option value="cpu">cpu</option>
+                          <option value="cuda">cuda</option>
+                        </select>
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Target Modules</span>
+                        <input class="studio-input" id="studioTargetModules" placeholder="q_proj,v_proj" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Seq Length</span>
+                        <input class="studio-input" id="studioSeqLength" type="number" min="32" step="32" placeholder="QLoRA only" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Micro Batch</span>
+                        <input class="studio-input" id="studioPerDeviceBatchSize" type="number" min="1" step="1" placeholder="QLoRA only" />
+                      </label>
+                      <label class="studio-field">
+                        <span class="studio-label">Target Count</span>
+                        <input class="studio-input" id="studioTargetModuleCount" type="number" min="1" step="1" placeholder="QLoRA only" />
+                      </label>
+                    </div>
+                    <div class="studio-row">
+                      <label class="studio-toggle">
+                        <input id="studioQuickMode" type="checkbox" checked />
+                        <span>Quick</span>
+                      </label>
+                      <label class="studio-toggle">
+                        <input id="studioLocalFilesOnly" type="checkbox" />
+                        <span>Local files only</span>
+                      </label>
+                    </div>
+                    <div class="studio-row">
+                      <label class="studio-toggle">
+                        <input id="studioSkipHfMetadata" type="checkbox" />
+                        <span>Skip HF metadata</span>
+                      </label>
+                      <label class="studio-toggle">
+                        <input id="studioNoGradientCheckpointing" type="checkbox" />
+                        <span>No gradient checkpointing</span>
+                      </label>
+                    </div>
+                    <label class="studio-field">
+                      <span class="studio-label">Extra Engine Args JSON</span>
+                      <textarea class="studio-textarea extra-args-editor" id="studioExtraArgsJson" spellcheck="false" placeholder="{&#10;  &quot;logging-steps&quot;: 1,&#10;  &quot;save-steps&quot;: 10&#10;}"></textarea>
+                    </label>
+                  </div>
+                </details>
+              </section>
+
+              <section class="studio-card run-console">
+                <div class="studio-card-title">5 · 执行过程</div>
+                <div class="command-preview">
+                  <div class="studio-label">Command</div>
+                  <pre id="studioCommandPreview"></pre>
+                </div>
+                <div class="studio-actions">
+                  <button class="button active" id="startStudioTrainingButton" type="button">启动训练</button>
+                  <button class="button" id="openCourseLearningButton" type="button">查看课程学习</button>
+                </div>
+                <div class="job-card" id="studioJobCard"></div>
+              </section>
+
+              <section class="studio-card studio-chat-card">
+                <div class="compare-controls">
+                  <div class="studio-card-title">6 · Chat 对比</div>
+                  <label class="studio-field">
+                    <span class="studio-label">User Message</span>
+                    <textarea class="studio-textarea" id="studioChatInput">客户说付款成功但订单一直显示未支付，请帮我查一下。</textarea>
+                  </label>
+                  <label class="studio-field">
+                    <span class="studio-label">Instruction</span>
+                    <textarea class="studio-textarea" id="studioChatInstruction">把用户工单路由成严格 JSON，字段为 intent、priority、department、summary。不要输出 JSON 以外的文字。</textarea>
+                  </label>
+                  <div class="studio-row">
+                    <label class="studio-field">
+                      <span class="studio-label">Compare Model</span>
+                      <input class="studio-input" id="studioChatModel" value="auto" />
+                    </label>
+                    <label class="studio-field">
+                      <span class="studio-label">Adapter Dir</span>
+                      <input class="studio-input" id="studioChatAdapterDir" placeholder="visualizer/runtime/studio-runs/<run-id>/adapter" />
+                    </label>
+                  </div>
+                  <div class="studio-row">
+                    <label class="studio-field">
+                      <span class="studio-label">Outputs</span>
+                      <input class="studio-input" id="studioChatMode" value="base + adapter + reloaded adapter" readonly />
+                    </label>
+                    <label class="studio-field">
+                      <span class="studio-label">Tokens</span>
+                      <input class="studio-input" id="studioChatTokens" type="number" min="8" step="8" value="96" />
+                    </label>
+                  </div>
+                  <div class="studio-actions compact">
+                    <button class="button" id="useStudioLatestAdapterButton" type="button">使用最新 Studio 产物</button>
+                    <button class="button" id="studioChatRunButton" type="button">对比输出</button>
+                  </div>
+                  <div class="compare-meta-grid" id="studioCompareMeta"></div>
+                </div>
+                <div class="chat-result" id="studioChatResult">
+                  <div class="chat-meta">这里会按左侧填写的 model 和 adapter 路径执行对比。</div>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <aside class="training-side panel">
+            <div class="panel-title">Training Map</div>
+            <div class="training-map">
+              <div class="map-step active"><span>01</span><strong>JSONL</strong><p>instruction / input / output</p></div>
+              <div class="map-step"><span>02</span><strong>Tokenizer</strong><p>prompt、answer、labels</p></div>
+              <div class="map-step"><span>03</span><strong>LoRA</strong><p>冻结 base，只训练 adapter</p></div>
+              <div class="map-step"><span>04</span><strong>Eval</strong><p>before / after / loaded</p></div>
+            </div>
+            <div class="section-spacer"></div>
+            <div class="panel-title">学习入口</div>
+            <div class="learning-links">
+              <button class="learning-link" type="button" data-course-jump="07-sft-baseline">
+                <strong>Lesson 07 · SFT Baseline</strong>
+                <span>训练工作室默认承接这条真实 SFT + LoRA 链路。</span>
+              </button>
+              <button class="learning-link" type="button" data-course-jump="06-peft-lora">
+                <strong>Lesson 06 · PEFT LoRA</strong>
+                <span>拆开看 base model、adapter 和 target modules。</span>
+              </button>
+              <button class="learning-link" type="button" data-course-jump="10-qlora-engineering">
+                <strong>Lesson 10 · QLoRA Planning</strong>
+                <span>训练前评估模型、显存和硬件边界。</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="app-page" id="coursePage" aria-labelledby="lessonTitle">
+        <section class="studio-bar" aria-label="运行控制">
+          <label class="studio-field">
+            <span class="studio-label">Delay</span>
+            <input class="studio-input" id="traceDelayInput" type="number" min="0" step="0.1" value="0.2" />
+          </label>
+          <label class="studio-field">
+            <span class="studio-label">Max Steps</span>
+            <input class="studio-input" id="maxStepsInput" type="number" min="1" step="1" placeholder="default" />
+          </label>
+          <label class="studio-toggle">
+            <input id="quickRunInput" type="checkbox" checked />
+            <span>Quick</span>
+          </label>
+          <div class="studio-bar-actions">
+            <button class="button" id="runLessonButton">运行当前课程</button>
+            <button class="button" id="runAllButton">运行 01-10</button>
+            <button class="button" id="pauseJobButton">暂停</button>
+            <button class="button" id="stepJobButton">单步</button>
+            <button class="button" id="resumeJobButton">继续</button>
+            <button class="button" id="stopJobButton">停止</button>
+          </div>
+        </section>
+
+        <div class="layout">
       <aside class="panel">
         <div class="panel-title">Current Run</div>
         <h1 class="lesson-title" id="lessonTitle">读取中</h1>
@@ -1433,6 +2396,9 @@
           <div class="mono" id="traceSource">visualizer/traces/live.json</div>
           <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
         </div>
+        <div style="height:18px"></div>
+        <div class="panel-title">Job Status</div>
+        <div class="job-card" id="jobCard"></div>
         <div style="height:18px"></div>
         <div class="panel-title">Course Status</div>
         <div class="course-dashboard" id="courseDashboard"></div>
@@ -1453,9 +2419,37 @@
       </section>
 
       <aside class="panel">
+        <div class="panel-title">Chat Lab</div>
+        <div class="studio-stack">
+          <label class="studio-field">
+            <span class="studio-label">Ticket Input</span>
+            <textarea class="studio-textarea" id="chatInput">客户说付款成功但订单一直显示未支付，请帮我查一下。</textarea>
+          </label>
+          <div class="studio-row">
+            <label class="studio-field">
+              <span class="studio-label">Target</span>
+              <select class="course-select" id="chatMode">
+                <option value="both">Base + Adapter</option>
+                <option value="base">Base only</option>
+                <option value="adapter">Adapter only</option>
+              </select>
+            </label>
+            <label class="studio-field">
+              <span class="studio-label">Tokens</span>
+              <input class="studio-input" id="chatTokens" type="number" min="8" step="8" value="96" />
+            </label>
+          </div>
+          <button class="button" id="chatRunButton">对比输出</button>
+          <div class="chat-result" id="chatResult">
+            <div class="chat-meta">Lesson 07 adapter 可用后，这里显示训练前后同一输入的输出差异。</div>
+          </div>
+        </div>
+        <div class="section-spacer"></div>
         <div class="panel-title">Metrics / Model State</div>
         <div id="sideDetail"></div>
       </aside>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -1472,6 +2466,44 @@
     const repoRoot = "/Users/liangsu/dev/repo/llm-finetune-study/";
     const repoPathPrefixes = ["examples/", "lessons/", "docs/", "visualizer/", "checklists/"];
     const repoPathFiles = ["README.md", "ROADMAP.md", "LICENSE"];
+    const managedExtraArgs = new Set([
+      "method",
+      "model-name",
+      "data",
+      "trace",
+      "trace-delay",
+      "output-dir",
+      "adapter-dir",
+      "generation-dir",
+      "report",
+      "index",
+      "metrics",
+      "config",
+      "eval-prompts",
+      "max-steps",
+      "max-length",
+      "max-new-tokens",
+      "learning-rate",
+      "rank",
+      "alpha",
+      "dropout",
+      "per-device-train-batch-size",
+      "per-device-eval-batch-size",
+      "per-device-batch-size",
+      "gradient-accumulation-steps",
+      "warmup-steps",
+      "weight-decay",
+      "lr-scheduler-type",
+      "target-modules",
+      "beta",
+      "device",
+      "seq-length",
+      "target-module-count",
+      "quick",
+      "skip-hf-metadata",
+      "local-files-only",
+      "no-gradient-checkpointing",
+    ]);
     const fallbackCatalog = [
       { lesson_id: "01-datasets", title: "Lesson 01 · Datasets Pipeline", trace: "traces/01-datasets.json", outputs: "lessons/01-datasets/outputs", topic: "JSONL -> Dataset -> split -> map", expected_events: 7 },
       { lesson_id: "02-tokenizer", title: "Lesson 02 · AutoTokenizer and SFT Labels", trace: "traces/02-tokenizer.json", outputs: "lessons/02-tokenizer/outputs", topic: "text -> token ids -> labels", expected_events: 4 },
@@ -1498,6 +2530,88 @@
     let selectedField = null;
     let fileFetchToken = 0;
     let renderedOnce = false;
+    let studioState = null;
+    let pendingRun = null;
+    let studioChatSourceApplied = false;
+    let activeView = params.get("view") || ((requestedTracePath || requestedEventId) ? "learn" : "studio");
+    const defaultStudioDataset = [
+      {
+        instruction: "把用户工单路由成严格 JSON，字段为 intent、priority、department、summary。不要输出 JSON 以外的文字。",
+        input: "客户说付款成功但订单一直显示未支付，请帮我查一下。",
+        output: "{\"intent\":\"payment_issue\",\"priority\":\"high\",\"department\":\"billing\",\"summary\":\"客户已付款但订单仍显示未支付，需要核对支付回调和订单状态。\"}"
+      },
+      {
+        instruction: "把用户工单路由成严格 JSON，字段为 intent、priority、department、summary。不要输出 JSON 以外的文字。",
+        input: "我想修改收货地址，订单还没发货。",
+        output: "{\"intent\":\"change_address\",\"priority\":\"medium\",\"department\":\"logistics\",\"summary\":\"客户希望在发货前修改订单收货地址。\"}"
+      },
+      {
+        instruction: "把用户工单路由成严格 JSON，字段为 intent、priority、department、summary。不要输出 JSON 以外的文字。",
+        input: "应用一直闪退，重新安装也没用。",
+        output: "{\"intent\":\"app_crash\",\"priority\":\"high\",\"department\":\"technical_support\",\"summary\":\"客户应用持续闪退，重装后仍未恢复。\"}"
+      },
+      {
+        instruction: "把用户工单路由成严格 JSON，字段为 intent、priority、department、summary。不要输出 JSON 以外的文字。",
+        input: "请问会员自动续费在哪里取消？",
+        output: "{\"intent\":\"subscription_cancel\",\"priority\":\"medium\",\"department\":\"account\",\"summary\":\"客户询问会员自动续费取消入口。\"}"
+      }
+    ].map((row) => JSON.stringify(row)).join("\n");
+    const defaultDpoDataset = [
+      {
+        id: "pref-ui-001",
+        instruction: "你是客服助手，回复要简短、可执行、不过度承诺。",
+        input: "用户说：我已经付款两次了，订单还是显示待支付，能不能马上退款？",
+        chosen: "我会先帮你核对订单和支付流水。请提供订单号、两次扣款时间和支付渠道；确认重复扣款后，我们会按支付渠道发起退款。",
+        rejected: "肯定是系统错了，我们马上双倍退款给你，不需要任何订单信息。",
+        criteria: "chosen 先收集必要信息并避免未核实承诺。"
+      },
+      {
+        id: "pref-ui-002",
+        instruction: "你是客服助手，回复要简短、可执行、不过度承诺。",
+        input: "用户说：我的账号被封了，我没有违规，立刻给我解封。",
+        chosen: "请提供账号 ID 和最近一次登录时间，我会提交复核；复核期间不能直接承诺解封，但会同步原因和申诉路径。",
+        rejected: "没问题，我现在就帮你解封，平台规则可以先不用管。",
+        criteria: "chosen 保留审核边界。"
+      }
+    ].map((row) => JSON.stringify(row)).join("\n");
+    const methodProfiles = {
+      "sft-lora": {
+        lesson: "studio-sft-lora",
+        script: "visualizer/studio/run.py",
+        defaultData: "visualizer/studio/data/sft-example.jsonl",
+        schema: "sft",
+        supportsGeneration: true,
+        schemaHelp: "SFT/PEFT JSONL: 每行一个 object，必须包含 instruction、input、output；input 可以为空字符串，output 不能为空。",
+        hint: "SFT + LoRA 会学习 instruction/input/output 的目标回答，适合让模型稳定输出指定 JSON 或领域话术。",
+      },
+      "peft-lora": {
+        lesson: "studio-peft-lora",
+        script: "visualizer/studio/run.py",
+        defaultData: "visualizer/studio/data/sft-example.jsonl",
+        schema: "sft",
+        supportsGeneration: false,
+        schemaHelp: "PEFT LoRA 使用 SFT JSONL：instruction、input、output。Studio 只从粘贴、上传或 visualizer/studio/data 读取数据。",
+        hint: "PEFT LoRA 更偏底层训练机制观察：base 冻结，adapter 更新，适合看 target modules 和 trainable ratio。",
+      },
+      dpo: {
+        lesson: "studio-dpo-preference",
+        script: "visualizer/studio/run.py",
+        defaultData: "visualizer/studio/data/dpo-example.jsonl",
+        schema: "dpo",
+        supportsGeneration: true,
+        schemaHelp: "DPO JSONL: 每行一个 object，必须包含 instruction、input、chosen、rejected；chosen 是偏好答案，rejected 是反例。",
+        hint: "DPO 使用 chosen/rejected 偏好对，不是教模型唯一答案，而是把回答往更好的偏好方向推。",
+      },
+      "qlora-plan": {
+        lesson: "studio-qlora-plan",
+        script: "visualizer/studio/run.py",
+        defaultData: "",
+        schema: "none",
+        supportsGeneration: false,
+        schemaHelp: "QLoRA 规划不需要训练 JSONL，只使用模型和参数做本机训练预算估算。",
+        hint: "QLoRA 规划页不启动真实训练，主要估算量化、显存、rank、batch 和本机硬件边界。",
+      },
+    };
 
     const $ = (id) => document.getElementById(id);
     const json = (value) => {
@@ -1505,6 +2619,80 @@
       return rendered === undefined ? String(value) : rendered;
     };
     const kindClass = (kind) => `kind kind-${String(kind || "event").replace(/[^a-z0-9_-]/gi, "-").toLowerCase()}`;
+
+    document.querySelectorAll(".app-tab").forEach((tab) => {
+      tab.addEventListener("click", () => switchAppView(tab.dataset.viewTarget || "studio"));
+    });
+    $("studioDatasetText").value = defaultStudioDataset;
+    $("studioChatModel").value = "auto";
+    $("studioMethod").addEventListener("change", () => {
+      updateStudioMethodUi();
+      renderStudioCommandPreview();
+      renderStudioCompareMeta();
+    });
+    $("studioDatasetMode").addEventListener("change", () => {
+      updateDatasetPathForMode();
+      renderStudioCommandPreview();
+    });
+    $("studioDatasetFile").addEventListener("change", () => void readStudioDatasetFile());
+    $("studioDatasetPath").addEventListener("click", () => void openStudioDatasetWindow());
+    $("previewDatasetButton").addEventListener("click", () => void openStudioDatasetWindow());
+    [
+      "studioMethod",
+      "studioModelPreset",
+      "studioCustomModel",
+      "studioDatasetText",
+      "studioMaxSteps",
+      "studioMaxLength",
+      "studioMaxNewTokens",
+      "studioLearningRate",
+      "studioRank",
+      "studioAlpha",
+      "studioDropout",
+      "studioTraceDelay",
+      "studioPerDeviceTrainBatchSize",
+      "studioPerDeviceEvalBatchSize",
+      "studioPerDeviceBatchSize",
+      "studioGradientAccumulationSteps",
+      "studioWarmupSteps",
+      "studioWeightDecay",
+      "studioLrSchedulerType",
+      "studioDpoBeta",
+      "studioDevice",
+      "studioTargetModules",
+      "studioSeqLength",
+      "studioTargetModuleCount",
+      "studioQuickMode",
+      "studioLocalFilesOnly",
+      "studioSkipHfMetadata",
+      "studioNoGradientCheckpointing",
+      "studioExtraArgsJson",
+    ].forEach((id) => {
+      $(id).addEventListener("input", () => renderStudioCommandPreview());
+      $(id).addEventListener("change", () => renderStudioCommandPreview());
+    });
+    ["studioModelPreset", "studioCustomModel"].forEach((id) => {
+      $(id).addEventListener("input", () => {
+        syncStudioChatModel();
+        renderStudioCompareMeta();
+      });
+      $(id).addEventListener("change", () => {
+        syncStudioChatModel();
+        renderStudioCompareMeta();
+      });
+    });
+    ["studioChatModel", "studioChatAdapterDir", "studioChatInstruction", "studioChatMode", "studioChatTokens"].forEach((id) => {
+      $(id).addEventListener("input", () => renderStudioCompareMeta());
+      $(id).addEventListener("change", () => renderStudioCompareMeta());
+    });
+    $("validateDatasetButton").addEventListener("click", () => void validateStudioDataset());
+    $("startStudioTrainingButton").addEventListener("click", () => void startStudioTraining());
+    $("openCourseLearningButton").addEventListener("click", () => switchAppView("learn"));
+    $("useStudioLatestAdapterButton").addEventListener("click", () => applyStudioProfileToChat(latestStudioProfile()));
+    $("studioChatRunButton").addEventListener("click", () => void runStudioChatCompare());
+    document.querySelectorAll("[data-course-jump]").forEach((button) => {
+      button.addEventListener("click", () => void jumpToCourse(button.dataset.courseJump));
+    });
 
     $("followLatestCourse").addEventListener("click", () => {
       followLatestCourse = true;
@@ -1536,11 +2724,569 @@
       const option = event.target.selectedOptions[0];
       void selectCourse(event.target.value, option ? option.dataset.trace : liveTracePath);
     });
+    $("runLessonButton").addEventListener("click", () => void startLessonJob());
+    $("runAllButton").addEventListener("click", () => void startAllJob());
+    $("pauseJobButton").addEventListener("click", () => void sendControl("pause"));
+    $("stepJobButton").addEventListener("click", () => void sendControl("step"));
+    $("resumeJobButton").addEventListener("click", () => void sendControl("resume"));
+    $("stopJobButton").addEventListener("click", () => void sendControl("stop"));
+    $("chatRunButton").addEventListener("click", () => void runChatCompare());
 
     async function fetchJson(path) {
       const response = await fetch(`${path}?ts=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`${path} ${response.status}`);
       return response.json();
+    }
+
+    async function postJson(path, payload) {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {}),
+      });
+      const text = await response.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (error) {
+        data = { error: text || error.message };
+      }
+      if (!response.ok) throw new Error(data.error || `${path} ${response.status}`);
+      return data;
+    }
+
+    function switchAppView(view) {
+      activeView = view === "learn" ? "learn" : "studio";
+      document.body.dataset.view = activeView;
+      $("trainingPage").classList.toggle("active", activeView === "studio");
+      $("coursePage").classList.toggle("active", activeView === "learn");
+      document.querySelectorAll(".app-tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.viewTarget === activeView);
+      });
+      if (activeView === "learn" && lastTrace) {
+        render(lastTrace, { forceScroll: true });
+      }
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", activeView);
+      window.history.replaceState({}, "", url);
+    }
+
+    async function jumpToCourse(courseId) {
+      switchAppView("learn");
+      const course = catalog.find((item) => item.lesson_id === courseId) || fallbackCatalog.find((item) => item.lesson_id === courseId);
+      if (course) await selectCourse(course.lesson_id, course.trace);
+    }
+
+    function currentMethodProfile() {
+      return methodProfiles[$("studioMethod").value] || methodProfiles["sft-lora"];
+    }
+
+    function updateStudioMethodUi() {
+      const profile = currentMethodProfile();
+      $("studioMethodHint").textContent = profile.hint;
+      $("studioSchemaHint").textContent = profile.schemaHelp;
+      const noData = profile.schema === "none";
+      $("studioDatasetMode").disabled = noData;
+      $("studioDatasetFile").disabled = noData || $("studioDatasetMode").value !== "upload";
+      $("studioDatasetText").disabled = noData || $("studioDatasetMode").value === "studioExample";
+      $("validateDatasetButton").disabled = noData;
+      if (noData) {
+        $("studioDatasetSummary").className = "dataset-summary ok";
+        $("studioDatasetSummary").textContent = "QLoRA 规划不需要训练 JSONL。";
+      } else {
+        $("studioDatasetSummary").className = "dataset-summary";
+        $("studioDatasetSummary").textContent = "等待数据校验。";
+      }
+      updateAdvancedParamAvailability(profile);
+      updateDatasetPathForMode();
+      updateTrainingMap(profile);
+    }
+
+    function updateAdvancedParamAvailability(profile) {
+      const isDpo = profile.lesson === "studio-dpo-preference";
+      const isQlora = profile.lesson === "studio-qlora-plan";
+      [
+        "studioPerDeviceTrainBatchSize",
+        "studioPerDeviceEvalBatchSize",
+        "studioWarmupSteps",
+        "studioLrSchedulerType",
+      ].forEach((id) => { $(id).disabled = isDpo || isQlora; });
+      [
+        "studioDpoBeta",
+        "studioDevice",
+      ].forEach((id) => { $(id).disabled = !isDpo; });
+      [
+        "studioSeqLength",
+        "studioPerDeviceBatchSize",
+        "studioTargetModuleCount",
+        "studioLocalFilesOnly",
+        "studioSkipHfMetadata",
+        "studioNoGradientCheckpointing",
+      ].forEach((id) => { $(id).disabled = !isQlora; });
+      $("studioQuickMode").disabled = !(isDpo || isQlora);
+      $("studioTargetModules").disabled = isQlora;
+      $("studioExtraArgsJson").placeholder = isDpo
+        ? "{\n  \"clip-grad-norm\": 1.0,\n  \"adam-beta1\": 0.9\n}"
+        : isQlora
+          ? "{\n  \"safety-margin-gb\": 2.5,\n  \"activation-multiplier\": 5\n}"
+          : "{\n  \"logging-steps\": 1,\n  \"save-steps\": 10\n}";
+    }
+
+    function updateTrainingMap(profile) {
+      const labels = profile.schema === "dpo"
+        ? [["01", "Preference", "instruction / input / chosen / rejected"], ["02", "Policy", "policy vs reference"], ["03", "DPO Loss", "chosen logp > rejected logp"], ["04", "Eval", "before / after generations"]]
+        : profile.schema === "none"
+          ? [["01", "Profile", "本机硬件和模型候选"], ["02", "Memory", "显存/内存预算"], ["03", "Quant", "4-bit / adapter 估算"], ["04", "Boundary", "Mac/CUDA 工程边界"]]
+          : [["01", "JSONL", "instruction / input / output"], ["02", "Tokenizer", "prompt、answer、labels"], ["03", "LoRA", "冻结 base，只训练 adapter"], ["04", "Eval", "before / after / loaded"]];
+      document.querySelector(".training-map").innerHTML = labels.map(([id, title, body], index) => `
+        <div class="map-step ${index === 0 ? "active" : ""}"><span>${escapeHtml(id)}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></div>
+      `).join("");
+    }
+
+    function updateDatasetPathForMode() {
+      const mode = $("studioDatasetMode").value;
+      const profile = currentMethodProfile();
+      syncDatasetDisplayPath();
+      $("studioDatasetFile").disabled = profile.schema === "none" || mode !== "upload";
+      $("studioDatasetText").disabled = profile.schema === "none" || mode === "studioExample";
+      $("studioUploadField").style.display = mode === "upload" ? "grid" : "none";
+      $("studioDatasetText").style.opacity = mode === "studioExample" ? ".72" : "1";
+      if (mode === "paste") {
+        $("studioDatasetText").value = profile.schema === "dpo" ? defaultDpoDataset : defaultStudioDataset;
+      }
+      if (mode === "studioExample") {
+        void loadStudioExampleDataset(profile.defaultData);
+      }
+    }
+
+    function currentDatasetDescriptor() {
+      const profile = currentMethodProfile();
+      const mode = $("studioDatasetMode").value;
+      if (profile.schema === "none") {
+        return { label: "Current Data", value: "QLoRA 规划不需要训练数据", mode, source: "none" };
+      }
+      if (mode === "paste") {
+        return { label: "Current Data", value: "粘贴 JSONL 内容", mode, source: "paste" };
+      }
+      if (mode === "upload") {
+        const file = $("studioDatasetFile").files && $("studioDatasetFile").files[0];
+        return { label: "Uploaded File", value: file ? file.name : "尚未选择文件", mode, source: "upload" };
+      }
+      return { label: "Studio File", value: profile.defaultData || "-", mode, source: "studioExample" };
+    }
+
+    function syncDatasetDisplayPath() {
+      const descriptor = currentDatasetDescriptor();
+      $("studioDatasetPathLabel").textContent = descriptor.label;
+      $("studioDatasetPath").value = descriptor.value;
+      $("studioDatasetPath").title = "点击查看当前数据内容";
+    }
+
+    async function loadStudioExampleDataset(path) {
+      if (!path) {
+        $("studioDatasetText").value = "";
+        return;
+      }
+      try {
+        const response = await fetch(`${toRepoUrl(path)}?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`${path} ${response.status}`);
+        $("studioDatasetText").value = await response.text();
+      } catch (error) {
+        $("studioDatasetText").value = "";
+        $("studioDatasetSummary").className = "dataset-summary error";
+        $("studioDatasetSummary").textContent = error.message;
+      }
+    }
+
+    async function readStudioDatasetFile() {
+      const file = $("studioDatasetFile").files && $("studioDatasetFile").files[0];
+      if (!file) return;
+      $("studioDatasetMode").value = "upload";
+      try {
+        $("studioDatasetText").value = await file.text();
+        syncDatasetDisplayPath();
+        renderStudioCommandPreview();
+        await validateStudioDataset();
+      } catch (error) {
+        $("studioDatasetSummary").className = "dataset-summary error";
+        $("studioDatasetSummary").textContent = error.message;
+      }
+    }
+
+    async function currentDatasetPreviewText() {
+      const profile = currentMethodProfile();
+      if (profile.schema === "none") return "";
+      const mode = $("studioDatasetMode").value;
+      if (mode === "studioExample" && !$("studioDatasetText").value.trim()) {
+        const path = profile.defaultData;
+        if (!path) return "";
+        const response = await fetch(`${toRepoUrl(path)}?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`${path} ${response.status}`);
+        $("studioDatasetText").value = await response.text();
+      }
+      return $("studioDatasetText").value;
+    }
+
+    function datasetTextMeta(text) {
+      const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const fields = new Set();
+      let parseError = "";
+      lines.forEach((line, index) => {
+        if (parseError) return;
+        try {
+          const row = JSON.parse(line);
+          if (row && typeof row === "object" && !Array.isArray(row)) {
+            Object.keys(row).forEach((field) => fields.add(field));
+          }
+        } catch (error) {
+          parseError = `line ${index + 1}: ${error.message}`;
+        }
+      });
+      return {
+        rows: lines.length,
+        fields: [...fields].sort(),
+        parseError,
+      };
+    }
+
+    function datasetViewerHtml(title, source, text, meta) {
+      return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(title)}</title>
+  <style>
+    :root { color-scheme:dark; --bg:#070b12; --panel:#0d131d; --line:rgba(148,163,184,.18); --ink:#e5edf9; --muted:#93a4ba; --accent:#38bdf8; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; }
+    header { position:sticky; top:0; z-index:2; padding:16px 18px; border-bottom:1px solid var(--line); background:rgba(7,11,18,.94); backdrop-filter:blur(12px); }
+    h1 { margin:0 0 8px; font-size:18px; line-height:1.25; overflow-wrap:anywhere; }
+    .meta { color:var(--muted); font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
+    .meta strong { color:#dbeafe; }
+    main { padding:18px; }
+    pre { margin:0; min-height:calc(100vh - 118px); padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:#dbeafe; font:12px/1.65 "Fira Code","SF Mono",Menlo,Consolas,monospace; white-space:pre-wrap; overflow:auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${escapeHtml(title)}</h1>
+    <div class="meta"><strong>${escapeHtml(source)}</strong> · ${escapeHtml(meta.rows)} rows · fields ${escapeHtml(meta.fields.join(", ") || "-")}${meta.parseError ? ` · parse warning ${escapeHtml(meta.parseError)}` : ""}</div>
+  </header>
+  <main><pre>${escapeHtml(text || "(empty)")}</pre></main>
+</body>
+</html>`;
+    }
+
+    async function openStudioDatasetWindow() {
+      const descriptor = currentDatasetDescriptor();
+      const profile = currentMethodProfile();
+      const viewer = window.open("about:blank", "_blank");
+      if (!viewer) {
+        $("studioDatasetSummary").className = "dataset-summary error";
+        $("studioDatasetSummary").textContent = "浏览器阻止了数据查看窗口。";
+        return;
+      }
+      viewer.opener = null;
+      viewer.document.write("<!DOCTYPE html><title>Loading dataset...</title><body style='background:#070b12;color:#e5edf9;font-family:sans-serif;padding:18px'>Loading dataset...</body>");
+      if (profile.schema === "none") {
+        const text = "QLoRA 规划只使用模型和训练参数做预算估算，不读取训练 JSONL。";
+        viewer.document.open();
+        viewer.document.write(datasetViewerHtml(descriptor.value, descriptor.source, text, { rows: 0, fields: [], parseError: "" }));
+        viewer.document.close();
+        return;
+      }
+      try {
+        const text = await currentDatasetPreviewText();
+        const meta = datasetTextMeta(text);
+        viewer.document.open();
+        viewer.document.write(datasetViewerHtml(descriptor.value, descriptor.source, text, meta));
+        viewer.document.close();
+      } catch (error) {
+        viewer.document.open();
+        viewer.document.write(datasetViewerHtml(descriptor.value, "error", error.message, { rows: 0, fields: [], parseError: error.message }));
+        viewer.document.close();
+      }
+    }
+
+    function studioModelName() {
+      const preset = $("studioModelPreset").value;
+      if (preset === "custom") return $("studioCustomModel").value.trim();
+      return preset;
+    }
+
+    function latestStudioProfile() {
+      return studioState && studioState.studio_profile ? studioState.studio_profile : {};
+    }
+
+    function syncStudioChatModel() {
+      const current = $("studioChatModel").value.trim();
+      if (!current || current === "auto") {
+        $("studioChatModel").value = studioModelName() || "auto";
+      }
+    }
+
+    function applyStudioProfileToChat(profile) {
+      const data = profile || {};
+      $("studioChatModel").value = data.model_name || studioModelName() || "auto";
+      if (data.adapter_expected && data.adapter_dir) {
+        $("studioChatAdapterDir").value = data.adapter_dir;
+      }
+      studioChatSourceApplied = Boolean(data.adapter_dir);
+      renderStudioCompareMeta(data);
+    }
+
+    function renderStudioCompareMeta(profile = latestStudioProfile()) {
+      const model = $("studioChatModel").value.trim() || studioModelName() || profile.model_name || "auto";
+      const adapter = $("studioChatAdapterDir").value.trim() || profile.adapter_dir || "";
+      const profileMatches = profile && profile.adapter_dir && profile.adapter_dir === adapter;
+      const source = profileMatches ? `${profile.method || "studio"} · ${profile.status || "-"}` : "manual path";
+      const adapterState = profileMatches
+        ? profile.adapter_available ? "ready" : profile.adapter_expected ? "pending / missing" : "not expected"
+        : adapter ? "unchecked" : "not selected";
+      $("studioCompareMeta").innerHTML = [
+        ["model", model],
+        ["adapter", adapter || "未选择 adapter"],
+        ["source", `${source} · ${adapterState}`],
+      ].map(([label, value]) => `
+        <div class="compare-meta-item">
+          <span>${escapeHtml(label)}</span>
+          <strong title="${escapeAttr(value)}">${escapeHtml(value)}</strong>
+        </div>
+      `).join("");
+    }
+
+    function resetStudioRunOutputs() {
+      const model = studioModelName() || "auto";
+      studioChatSourceApplied = false;
+      if (studioState && studioState.studio_profile) {
+        studioState = {
+          ...studioState,
+          studio_profile: {
+            method: $("studioMethod").value,
+            model_name: model,
+            status: "starting",
+            adapter_expected: currentMethodProfile().schema !== "none",
+            adapter_available: false,
+            adapter_dir: "",
+            source: "studio",
+          },
+        };
+      }
+      $("studioRunState").textContent = "starting";
+      $("studioChatModel").value = model;
+      $("studioChatAdapterDir").value = "";
+      $("studioChatResult").innerHTML = `<div class="chat-meta">新训练已启动。等待本次 Studio adapter ready 后再对比。</div>`;
+      renderStudioCompareMeta({});
+      setStudioJobBusy("starting studio training...");
+      setCourseJobCardHtml(`
+        <div class="job-line"><span class="job-state">idle</span></div>
+        <div class="job-meta">No active course process. Studio runs are isolated.</div>
+      `);
+    }
+
+    function studioTrainingOptions() {
+      return {
+        method: $("studioMethod").value,
+        model_name: studioModelName(),
+        dataset_mode: $("studioDatasetMode").value,
+        data_path: $("studioDatasetPath").value.trim(),
+        custom_dataset_text: $("studioDatasetText").value,
+        source_filename: $("studioDatasetFile").files && $("studioDatasetFile").files[0] ? $("studioDatasetFile").files[0].name : "",
+        max_steps: numberValue("studioMaxSteps"),
+        max_length: numberValue("studioMaxLength"),
+        max_new_tokens: numberValue("studioMaxNewTokens"),
+        learning_rate: numberValue("studioLearningRate"),
+        rank: numberValue("studioRank"),
+        alpha: numberValue("studioAlpha"),
+        dropout: numberValue("studioDropout"),
+        trace_delay: numberValue("studioTraceDelay"),
+        per_device_train_batch_size: numberValue("studioPerDeviceTrainBatchSize"),
+        per_device_eval_batch_size: numberValue("studioPerDeviceEvalBatchSize"),
+        per_device_batch_size: numberValue("studioPerDeviceBatchSize"),
+        gradient_accumulation_steps: numberValue("studioGradientAccumulationSteps"),
+        warmup_steps: numberValue("studioWarmupSteps"),
+        weight_decay: numberValue("studioWeightDecay"),
+        lr_scheduler_type: $("studioLrSchedulerType").value,
+        beta: numberValue("studioDpoBeta"),
+        device: $("studioDevice").value,
+        target_modules: $("studioTargetModules").value.trim(),
+        seq_length: numberValue("studioSeqLength"),
+        target_module_count: numberValue("studioTargetModuleCount"),
+        quick: $("studioQuickMode").checked,
+        local_files_only: $("studioLocalFilesOnly").checked,
+        skip_hf_metadata: $("studioSkipHfMetadata").checked,
+        no_gradient_checkpointing: $("studioNoGradientCheckpointing").checked,
+        extra_args_json: $("studioExtraArgsJson").value.trim(),
+      };
+    }
+
+    function parseExtraArgsConfig() {
+      const raw = $("studioExtraArgsJson").value.trim();
+      if (!raw) return {};
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (error) {
+        throw new Error(`Extra Engine Args JSON: ${error.message}`);
+      }
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("Extra Engine Args JSON 必须是 object。");
+      }
+      for (const key of Object.keys(parsed)) {
+        const normalized = String(key).trim().replaceAll("_", "-");
+        if (managedExtraArgs.has(normalized)) {
+          throw new Error(`Extra Engine Args JSON 不能覆盖页面已管理参数：${normalized}`);
+        }
+      }
+      return parsed;
+    }
+
+    function renderStudioCommandPreview() {
+      const options = studioTrainingOptions();
+      const profile = currentMethodProfile();
+      const dataArg = profile.schema === "none"
+        ? ""
+        : options.dataset_mode === "paste" || options.dataset_mode === "upload"
+        ? "visualizer/runtime/custom-data/<generated>.jsonl"
+        : profile.defaultData;
+      const command = [
+        `.venv/bin/python ${profile.script}`,
+        "--method", $("studioMethod").value,
+        "--model-name", shellToken(options.model_name || "auto"),
+      ];
+      if (profile.schema !== "none") command.push("--data", shellToken(dataArg || profile.defaultData));
+      const artifactRoot = `visualizer/runtime/studio-runs/<run>`;
+      command.push("--output-dir", `${artifactRoot}/trainer`);
+      command.push("--adapter-dir", `${artifactRoot}/adapter`);
+      command.push("--generation-dir", `${artifactRoot}/generations`);
+      command.push("--report", `${artifactRoot}/report.md`);
+      command.push("--index", `${artifactRoot}/index.html`);
+      command.push("--metrics", `${artifactRoot}/metrics.json`);
+      if (profile.schema !== "none") {
+        command.push("--max-steps", options.max_steps || 1, "--max-length", options.max_length || 192);
+      }
+      if (profile.supportsGeneration) {
+        command.push("--max-new-tokens", options.max_new_tokens || 16);
+      }
+      if (profile.schema !== "none") {
+        command.push("--learning-rate", options.learning_rate || 0.0005, "--alpha", options.alpha || 16, "--dropout", options.dropout ?? 0.05);
+      }
+      command.push("--rank", options.rank || 8, "--trace", `${artifactRoot}/trace.json`, "--trace-delay", options.trace_delay ?? 0.2);
+      if (profile.schema !== "none" && profile.lesson !== "studio-dpo-preference") {
+        command.push("--per-device-train-batch-size", options.per_device_train_batch_size || 1);
+        command.push("--per-device-eval-batch-size", options.per_device_eval_batch_size || 1);
+        command.push("--gradient-accumulation-steps", options.gradient_accumulation_steps || 1);
+        command.push("--warmup-steps", options.warmup_steps || 0);
+        command.push("--weight-decay", options.weight_decay ?? 0);
+        command.push("--lr-scheduler-type", options.lr_scheduler_type || "linear");
+      }
+      if (options.target_modules) command.push("--target-modules", shellToken(options.target_modules));
+      if (profile.lesson === "studio-dpo-preference") {
+        command.push("--beta", options.beta ?? 0.1, "--device", options.device || "auto");
+        if (options.quick) command.push("--quick");
+      }
+      if (profile.lesson === "studio-qlora-plan") {
+        if (options.seq_length) command.push("--seq-length", options.seq_length);
+        if (options.per_device_batch_size) command.push("--per-device-batch-size", options.per_device_batch_size);
+        if (options.gradient_accumulation_steps) command.push("--gradient-accumulation-steps", options.gradient_accumulation_steps);
+        if (options.target_module_count) command.push("--target-module-count", options.target_module_count);
+        if (options.quick) command.push("--quick");
+        if (options.local_files_only) command.push("--local-files-only");
+        if (options.skip_hf_metadata) command.push("--skip-hf-metadata");
+        if (options.no_gradient_checkpointing) command.push("--no-gradient-checkpointing");
+      }
+      if (options.extra_args_json) {
+        try {
+          command.push("--extra-args-json", shellToken(JSON.stringify(parseExtraArgsConfig())));
+        } catch (error) {
+          command.push(`# ${error.message}`);
+        }
+      }
+      $("studioCommandPreview").textContent = command.join(" ");
+    }
+
+    async function validateStudioDataset() {
+      const mode = $("studioDatasetMode").value;
+      const profile = currentMethodProfile();
+      if (profile.schema === "none") {
+        $("studioDatasetSummary").className = "dataset-summary ok";
+        $("studioDatasetSummary").textContent = "当前训练方法不需要数据文件。";
+        return true;
+      }
+      try {
+        let text = "";
+        if (mode === "paste" || mode === "upload") {
+          text = $("studioDatasetText").value;
+        } else {
+          const path = profile.defaultData;
+          const response = await fetch(`${toRepoUrl(path)}?ts=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`${path} ${response.status}`);
+          text = await response.text();
+        }
+        const summary = summarizeJsonlDataset(text, profile.schema);
+        $("studioDatasetSummary").className = "dataset-summary ok";
+        $("studioDatasetSummary").textContent = `${summary.rows} rows · fields ${summary.fields.join(", ")} · avg input ${summary.avgInput} chars · avg output ${summary.avgOutput} chars`;
+        return true;
+      } catch (error) {
+        $("studioDatasetSummary").className = "dataset-summary error";
+        $("studioDatasetSummary").textContent = error.message;
+        return false;
+      }
+    }
+
+    function summarizeJsonlDataset(text, schemaName = "sft") {
+      const schema = schemaName === "dpo"
+        ? { required: ["instruction", "input", "chosen", "rejected"], minRows: 2, outputField: "chosen" }
+        : { required: ["instruction", "input", "output"], minRows: 4, outputField: "output" };
+      const rows = text.split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line, index) => {
+          try {
+            return JSON.parse(line);
+          } catch (error) {
+            throw new Error(`line ${index + 1}: ${error.message}`);
+          }
+        });
+      if (!rows.length) throw new Error("JSONL is empty.");
+      if (rows.length < schema.minRows) throw new Error(`至少需要 ${schema.minRows} 行。`);
+      rows.forEach((row, index) => {
+        schema.required.forEach((key) => {
+          if (typeof row[key] !== "string" || (key !== "input" && !row[key].trim())) {
+            throw new Error(`line ${index + 1}: missing string field "${key}"`);
+          }
+        });
+      });
+      const fields = [...new Set(rows.flatMap((row) => Object.keys(row)))].sort();
+      const avgInput = Math.round(rows.reduce((sum, row) => sum + row.input.length, 0) / rows.length);
+      const avgOutput = Math.round(rows.reduce((sum, row) => sum + row[schema.outputField].length, 0) / rows.length);
+      return { rows: rows.length, fields, avgInput, avgOutput };
+    }
+
+    async function startStudioTraining() {
+      const options = studioTrainingOptions();
+      if (!options.model_name) {
+        $("studioDatasetSummary").className = "dataset-summary error";
+        $("studioDatasetSummary").textContent = "Model id is required.";
+        return;
+      }
+      const profile = currentMethodProfile();
+      if (profile.schema !== "none" && !(await validateStudioDataset())) return;
+      try {
+        parseExtraArgsConfig();
+      } catch (error) {
+        renderStudioError(error.message);
+        return;
+      }
+      resetStudioRunOutputs();
+      try {
+        studioState = await postJson("/api/studio/run", options);
+        renderStudioState(studioState);
+        applyStudioProfileToChat(studioState.studio_profile);
+      } catch (error) {
+        renderStudioError(error.message);
+      }
     }
 
     async function loadCatalog() {
@@ -1611,8 +3357,16 @@
       if (followLatestCourse || selectedCourseId === "live") {
         try {
           usingDemo = false;
-          return await fetchJson(liveTracePath);
+          const trace = await fetchJson(liveTracePath);
+          if (pendingRun && !traceMatchesPendingRun(trace)) {
+            return pendingTrace();
+          }
+          if (pendingRun && traceMatchesPendingRun(trace)) {
+            pendingRun = null;
+          }
+          return trace;
         } catch (error) {
+          if (pendingRun) return pendingTrace();
           usingDemo = true;
           return await fetchJson(demoTracePath);
         }
@@ -1683,6 +3437,327 @@
       } catch (error) {
         $("statusText").textContent = `读取课程 trace 失败: ${error.message}`;
       }
+    }
+
+    function studioRunOptions() {
+      const traceDelay = Number($("traceDelayInput").value || 0);
+      const maxSteps = Number($("maxStepsInput").value || 0);
+      return {
+        trace_delay: Number.isFinite(traceDelay) ? traceDelay : 0,
+        quick: $("quickRunInput").checked,
+        max_steps: Number.isFinite(maxSteps) && maxSteps > 0 ? maxSteps : null,
+      };
+    }
+
+    function selectedRunLessonId() {
+      const catalogIds = new Set(catalog.map((course) => course.lesson_id));
+      if (selectedCourseId && selectedCourseId !== "live" && catalogIds.has(selectedCourseId)) {
+        return selectedCourseId;
+      }
+      if (liveSummary && catalogIds.has(liveSummary.lesson_id)) {
+        return liveSummary.lesson_id;
+      }
+      if (lastTrace && catalogIds.has(lastTrace.lesson_id)) {
+        return lastTrace.lesson_id;
+      }
+      return catalog.length ? catalog[0].lesson_id : "";
+    }
+
+    async function startLessonJob() {
+      const lessonId = selectedRunLessonId();
+      if (!lessonId) {
+        renderStudioError("No lesson selected.");
+        return;
+      }
+      setPendingRun(lessonId, "starting");
+      setJobCardBusy("starting lesson...");
+      try {
+        studioState = await postJson("/api/run", {
+          lesson_id: lessonId,
+          ...studioRunOptions(),
+        });
+        adoptPendingJob(studioState.job);
+        renderStudioState(studioState);
+        followLatestCourse = true;
+        selectedCourseId = "live";
+        selectedTracePath = liveTracePath;
+        updateControls();
+      } catch (error) {
+        pendingRun = null;
+        if (lastTrace) render(lastTrace);
+        renderStudioError(error.message);
+      }
+    }
+
+    async function startAllJob() {
+      setPendingRun("all", "starting");
+      setJobCardBusy("starting 01-10...");
+      try {
+        studioState = await postJson("/api/run-all", studioRunOptions());
+        adoptPendingJob(studioState.job);
+        renderStudioState(studioState);
+        followLatestCourse = true;
+        selectedCourseId = "live";
+        selectedTracePath = liveTracePath;
+        updateControls();
+      } catch (error) {
+        pendingRun = null;
+        if (lastTrace) render(lastTrace);
+        renderStudioError(error.message);
+      }
+    }
+
+    function setPendingRun(lessonId, status) {
+      const course = catalog.find((item) => item.lesson_id === lessonId);
+      pendingRun = {
+        id: null,
+        lessonId,
+        status,
+        startedAt: new Date().toISOString(),
+        title: lessonId === "all" ? "Run 01-10" : course ? course.title : lessonId,
+      };
+      followLatestCourse = true;
+      selectedCourseId = "live";
+      selectedTracePath = liveTracePath;
+      followCurrent = true;
+      activeEventId = null;
+      selectedField = null;
+      renderedOnce = false;
+      render(pendingTrace(), { forceScroll: true });
+    }
+
+    function adoptPendingJob(job) {
+      if (!pendingRun || !job) return;
+      pendingRun = {
+        ...pendingRun,
+        id: job.id || pendingRun.id,
+        lessonId: job.lesson_id || pendingRun.lessonId,
+        status: job.status || pendingRun.status,
+        startedAt: job.started_at || pendingRun.startedAt,
+      };
+    }
+
+    function pendingTrace() {
+      return {
+        schema_version: 1,
+        lesson_id: pendingRun ? pendingRun.lessonId : "starting",
+        title: pendingRun ? pendingRun.title : "Starting",
+        status: pendingRun ? pendingRun.status : "starting",
+        started_at: pendingRun ? pendingRun.startedAt : "-",
+        updated_at: pendingRun ? pendingRun.startedAt : "-",
+        current_event_id: null,
+        events: [],
+        pending_run: true,
+      };
+    }
+
+    function traceMatchesPendingRun(trace) {
+      if (!pendingRun || !trace) return true;
+      const traceStartedAt = Date.parse(trace.started_at || trace.updated_at || "");
+      const pendingStartedAt = Date.parse(pendingRun.startedAt || "");
+      const isFresh = Number.isFinite(traceStartedAt) && Number.isFinite(pendingStartedAt)
+        ? traceStartedAt >= pendingStartedAt - 3000
+        : trace.status === "running";
+      if (pendingRun.lessonId === "all") return isFresh;
+      return trace.lesson_id === pendingRun.lessonId && isFresh;
+    }
+
+    async function sendControl(action) {
+      setJobCardBusy(`${action}...`);
+      try {
+        studioState = await postJson("/api/control", { action });
+        renderStudioState(studioState);
+      } catch (error) {
+        renderStudioError(error.message);
+      }
+    }
+
+    async function refreshStudioState() {
+      try {
+        studioState = await fetchJson("/api/state");
+        renderStudioState(studioState);
+      } catch (error) {
+        renderStudioError(error.message);
+      }
+    }
+
+    function setJobCardBusy(text) {
+      setJobCardHtml(`<div class="job-line"><span class="job-state">${escapeHtml(text)}</span></div>`);
+    }
+
+    function setStudioJobBusy(text) {
+      const card = $("studioJobCard");
+      if (card) card.innerHTML = `<div class="job-line"><span class="job-state">${escapeHtml(text)}</span></div>`;
+    }
+
+    function scrollJobLogsToBottom(...rootIds) {
+      const roots = rootIds.length ? rootIds.map((id) => $(id)).filter(Boolean) : [document];
+      roots.forEach((root) => {
+        root.querySelectorAll(".job-log").forEach((log) => {
+          log.scrollTop = log.scrollHeight;
+        });
+      });
+    }
+
+    function renderStudioError(message) {
+      $("studioRunState").textContent = "error";
+      const html = `
+        <div class="job-line"><span class="job-state" style="color:#fecaca;">error</span></div>
+        <div class="job-meta">${escapeHtml(message)}</div>
+      `;
+      setJobCardHtml(html);
+    }
+
+    function setJobCardHtml(html) {
+      ["jobCard", "studioJobCard"].forEach((id) => {
+        const node = $(id);
+        if (node) node.innerHTML = html;
+      });
+      scrollJobLogsToBottom("jobCard", "studioJobCard");
+    }
+
+    function setCourseJobCardHtml(html) {
+      const node = $("jobCard");
+      if (node) node.innerHTML = html;
+      scrollJobLogsToBottom("jobCard");
+    }
+
+    function jobCardHtml(job, control) {
+      const log = job.log_tail || "";
+      return `
+        <div class="job-line">
+          <span class="job-state">${escapeHtml(job.status || "-")}</span>
+          <span class="job-meta">pid ${escapeHtml(job.pid || "-")} · ${escapeHtml(control.mode || "-")}</span>
+        </div>
+        <div class="job-meta">${escapeHtml(job.lesson_id || "-")} · started ${escapeHtml(job.started_at || "-")}</div>
+        <div class="job-meta" style="margin-top:5px;">${escapeHtml(job.command_text || "")}</div>
+        ${log ? `<pre class="job-log">${escapeHtml(log)}</pre>` : ""}
+      `;
+    }
+
+    function renderStudioState(state) {
+      const job = state && state.job;
+      const control = state && state.control ? state.control : {};
+      const running = job && ["running", "paused", "step"].includes(job.status);
+      const isStudioJob = job && String(job.type || "").startsWith("studio");
+      const courseRunning = running && !isStudioJob;
+      const profile = state && state.studio_profile ? state.studio_profile : latestStudioProfile();
+      if (!studioChatSourceApplied && profile.adapter_expected && profile.adapter_dir) {
+        applyStudioProfileToChat(profile);
+        studioChatSourceApplied = true;
+      } else {
+        renderStudioCompareMeta(profile);
+      }
+      if (pendingRun && job && job.id === pendingRun.id) {
+        pendingRun.status = job.status || pendingRun.status;
+      }
+      $("runLessonButton").disabled = Boolean(running);
+      $("runAllButton").disabled = Boolean(running);
+      $("pauseJobButton").disabled = !courseRunning || control.mode === "paused";
+      $("stepJobButton").disabled = !courseRunning;
+      $("resumeJobButton").disabled = !courseRunning || control.mode === "running";
+      $("stopJobButton").disabled = !courseRunning;
+      $("startStudioTrainingButton").disabled = Boolean(running);
+      $("studioRunState").textContent = job ? `${job.lesson_id || "-"} · ${job.status || "-"}` : "idle";
+      if (!job) {
+        setJobCardHtml(`
+          <div class="job-line"><span class="job-state">idle</span><span class="job-meta">${escapeHtml(control.mode || "running")}</span></div>
+          <div class="job-meta">No active lesson process.</div>
+        `);
+        return;
+      }
+      if (isStudioJob) {
+        $("studioJobCard").innerHTML = jobCardHtml(job, control);
+        scrollJobLogsToBottom("studioJobCard");
+        setCourseJobCardHtml(`
+          <div class="job-line"><span class="job-state">idle</span><span class="job-meta">${escapeHtml(control.mode || "running")}</span></div>
+          <div class="job-meta">No active course process. Studio runs are isolated.</div>
+        `);
+        return;
+      }
+      setJobCardHtml(jobCardHtml(job, control));
+    }
+
+    async function runChatCompare() {
+      const input = $("chatInput").value.trim();
+      if (!input) {
+        $("chatResult").innerHTML = `<div class="chat-meta">Input is required.</div>`;
+        return;
+      }
+      $("chatRunButton").disabled = true;
+      $("chatResult").innerHTML = `<div class="chat-meta">loading model...</div>`;
+      try {
+        const result = await postJson("/api/chat", {
+          lesson_id: "07-sft-baseline",
+          input,
+          mode: $("chatMode").value,
+          max_new_tokens: Number($("chatTokens").value || 96),
+        });
+        renderChatResult(result);
+      } catch (error) {
+        $("chatResult").innerHTML = `<div class="chat-answer error"><div class="chat-answer-title">error</div><div class="chat-meta">${escapeHtml(error.message)}</div></div>`;
+      } finally {
+        $("chatRunButton").disabled = false;
+      }
+    }
+
+    async function runStudioChatCompare() {
+      const input = $("studioChatInput").value.trim();
+      if (!input) {
+        $("studioChatResult").innerHTML = `<div class="chat-meta">Input is required.</div>`;
+        return;
+      }
+      if (!$("studioChatAdapterDir").value.trim()) {
+        $("studioChatResult").innerHTML = `<div class="chat-meta">请先使用最新 Studio 产物，或填写一个 Studio adapter dir。</div>`;
+        return;
+      }
+      $("studioChatRunButton").disabled = true;
+      $("studioChatResult").innerHTML = `<div class="chat-meta">loading model...</div>`;
+      try {
+        const result = await postJson("/api/chat", {
+          lesson_id: latestStudioProfile().lesson_id || "studio",
+          source: "studio",
+          input,
+          mode: "triple",
+          model_name: $("studioChatModel").value.trim() || studioModelName() || "auto",
+          adapter_dir: $("studioChatAdapterDir").value.trim(),
+          instruction: $("studioChatInstruction").value.trim(),
+          max_new_tokens: Number($("studioChatTokens").value || 96),
+        });
+        renderChatResult(result, "studioChatResult");
+      } catch (error) {
+        $("studioChatResult").innerHTML = `<div class="chat-answer error"><div class="chat-answer-title">error</div><div class="chat-meta">${escapeHtml(error.message)}</div></div>`;
+      } finally {
+        $("studioChatRunButton").disabled = false;
+      }
+    }
+
+    function renderChatResult(result, targetId = "chatResult") {
+      const rows = (result.results || []).map((item) => {
+        const cls = item.error ? "error" : item.target === "adapter" ? "adapter" : "";
+        const score = item.score && Object.keys(item.score).length
+          ? Object.entries(item.score)
+              .filter(([key, value]) => typeof value === "boolean" && value)
+              .map(([key]) => key)
+              .slice(0, 3)
+              .join(" · ")
+          : "";
+        return `
+          <div class="chat-answer ${cls}">
+            <div class="chat-answer-title">
+              <span>${escapeHtml(item.target || "-")}</span>
+              <span class="chat-meta">${escapeHtml(score || (item.error ? "not available" : "generated"))}</span>
+            </div>
+            ${item.error ? `<div class="chat-meta">${escapeHtml(item.error)}</div>` : `<pre>${escapeHtml(item.answer || item.generated || "")}</pre>`}
+          </div>
+        `;
+      }).join("");
+      const adapterLabel = result.adapter_dir ? ` · adapter ${result.adapter_available ? "ready" : "missing"} · ${result.adapter_dir}` : "";
+      const sourceLabel = result.compare_source ? ` · ${result.compare_source}` : "";
+      $(targetId).innerHTML = `
+        <div class="chat-meta">${escapeHtml(result.model_name || "-")} · ${escapeHtml(result.duration_seconds || "-")}s${escapeHtml(adapterLabel)}${escapeHtml(sourceLabel)}</div>
+        ${rows || `<div class="chat-meta">No result.</div>`}
+      `;
     }
 
     function courseOptionLabel(course) {
@@ -1789,6 +3864,7 @@
     function courseProgressPercent(trace) {
       if (!trace || !trace.lesson_id) return 0;
       const events = trace.events || [];
+      if (!events.length) return trace.status === "done" ? 100 : 0;
       const expected = expectedEventCount(trace);
       const currentIndex = Math.max(0, getCurrentEventIndex(trace, events));
       return trace.status === "done" ? 100 : clamp(((currentIndex + 1) / expected) * 100, 0, 100);
@@ -1806,6 +3882,7 @@
     function courseRowPercent(course, activeTrace) {
       if (activeTrace && activeTrace.lesson_id === course.lesson_id) {
         const events = activeTrace.events || [];
+        if (!events.length) return activeTrace.status === "done" ? 100 : 0;
         const expected = Math.max(course.expected_events || 1, events.length || 1);
         const currentIndex = getCurrentEventIndex(activeTrace, events);
         return activeTrace.status === "done" ? 100 : clamp(((currentIndex + 1) / expected) * 100, 0, 100);
@@ -3586,6 +5663,16 @@
       return Math.min(max, Math.max(min, value));
     }
 
+    function numberValue(id) {
+      const value = Number($(id).value);
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function shellToken(value) {
+      const text = String(value || "");
+      return /^[A-Za-z0-9_./:@+-]+$/.test(text) ? text : `"${text.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+    }
+
     function compactText(value, limit) {
       const text = String(value || "").replace(/\s+/g, " ").trim();
       return text.length > limit ? `${text.slice(0, Math.max(0, limit - 3))}...` : text;
@@ -3605,7 +5692,8 @@
     }
 
     async function tick() {
-      if (live) {
+      await refreshStudioState();
+      if (live && activeView === "learn") {
         try {
           await refreshCourseStates();
           render(await loadTrace());
@@ -3617,6 +5705,11 @@
     }
 
     async function init() {
+      updateStudioMethodUi();
+      updateDatasetPathForMode();
+      renderStudioCommandPreview();
+      renderStudioCompareMeta();
+      switchAppView(activeView);
       await loadCatalog();
       renderCourseControls();
       tick();

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lesson 08: manual DPO preference optimization without TRL."""
+"""Studio DPO preference-optimization engine without TRL."""
 
 from __future__ import annotations
 
@@ -15,15 +15,16 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-LESSON_DIR = Path(__file__).resolve().parent
-LESSON_OUTPUTS = LESSON_DIR / "outputs"
-os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
-os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
-os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
+ENGINE_DIR = Path(__file__).resolve().parent
+DEFAULT_OUTPUTS = ENGINE_DIR / "outputs"
+os.environ["HF_HOME"] = str(DEFAULT_OUTPUTS / "hf-cache")
+os.environ["HF_DATASETS_CACHE"] = str(DEFAULT_OUTPUTS / "hf-cache" / "datasets")
+os.environ["HF_XET_CACHE"] = str(DEFAULT_OUTPUTS / "hf-cache" / "xet")
 
-from lessons.common.hf_model_policy import detect_local_config, infer_lora_target_modules, resolve_model_name
-from lessons.common.lesson_common import build_prompt, pad, resolve_project_path
-from lessons.common.visual_trace import VisualTrace
+from training.common.extra_args import known_extra_args
+from training.common.hf_model_policy import detect_local_config, infer_lora_target_modules, resolve_model_name
+from training.common.run_common import build_prompt, pad, resolve_project_path
+from training.common.visual_trace import VisualTrace
 
 
 def require_training_stack():
@@ -34,8 +35,8 @@ def require_training_stack():
         from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
     except ImportError as exc:
         raise SystemExit(
-            "Lesson 08 requires torch, transformers, accelerate, and peft. "
-            "Install the repository requirements in .venv before running this lesson."
+            "Studio DPO requires torch, transformers, accelerate, and peft. "
+            "Install the repository requirements in .venv before running this engine."
         ) from exc
 
     return torch, F, LoraConfig, TaskType, get_peft_model, AutoModelForCausalLM, AutoTokenizer, set_seed
@@ -59,6 +60,10 @@ def display_path(path: Path) -> Path | str:
         return path.relative_to(resolve_project_path("."))
     except ValueError:
         return str(path)
+
+
+def parse_target_modules(value: str) -> list[str]:
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 def clean_text(value: Any) -> str:
@@ -332,11 +337,11 @@ def write_report(
     last_step = step_logs[-1] if step_logs else {}
     report = dedent(
         f"""
-        # Lesson 08: DPO Preference Optimization
+        # Studio: DPO Preference Optimization
 
-        ## 本课目标
+        ## 训练目标
 
-        本课用客服回复偏好对实现一个最小 DPO。它不依赖 `trl`，只用 `transformers`、`torch` 和 `peft`：
+        本次 Studio 运行用客服回复偏好对实现一个最小 DPO。它不依赖 `trl`，只用 `transformers`、`torch` 和 `peft`：
 
         - policy = base model + LoRA adapter
         - reference = 同一个 base model 禁用 adapter
@@ -351,7 +356,7 @@ def write_report(
         - MPS available: {machine["mps_available"]}
         - selected model: `{model_name}`
         - device: `{device}`
-        - HF cache: `lessons/08-dpo-preference/outputs/hf-cache`
+        - HF cache: `{os.environ.get("HF_HOME", "-")}`
 
         ## 数据和训练配置
 
@@ -433,7 +438,7 @@ def write_report(
         - `outputs/preference_scores_after.jsonl`
         - `outputs/metrics.json`
         - `outputs/adapter/`
-        - `visualizer/traces/08-dpo-preference.json`
+        - run-local `trace.json`
         """
     ).strip()
     report = "\n".join(line[8:] if line.startswith("        ") else line for line in report.splitlines())
@@ -446,7 +451,7 @@ def write_index(index_path: Path) -> None:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 08 · DPO Preference Optimization</title>
+  <title>Studio · DPO Preference Optimization</title>
   <style>
     body { margin:0; background:#0a0c10; color:#f4f7fb; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; line-height:1.65; }
     main { max-width:1120px; margin:0 auto; padding:48px 22px 80px; }
@@ -466,7 +471,7 @@ def write_index(index_path: Path) -> None:
 </head>
 <body>
   <main>
-    <h1>Lesson 08 · DPO Preference Optimization</h1>
+    <h1>Studio · DPO Preference Optimization</h1>
     <p>目标：不用 TRL，在本地用 transformers + torch + PEFT 手写一个最小 DPO 偏好优化循环。</p>
     <div class="grid">
       <div class="card"><strong>偏好数据</strong><code>data/preferences.jsonl</code><br>chosen / rejected 成对回答。</div>
@@ -475,7 +480,7 @@ def write_index(index_path: Path) -> None:
       <div class="card"><strong>产物</strong><code>outputs/</code><br>adapter、metrics、generations。</div>
     </div>
     <h2>执行命令</h2>
-    <pre>.venv/bin/python lessons/08-dpo-preference/run.py --quick --trace-delay 0.2</pre>
+    <pre>.venv/bin/python visualizer/studio/run.py --method dpo ...</pre>
     <h2>DPO 流程</h2>
     <div class="flow">
       <div class="step"><span>01</span>选择 HF 模型</div>
@@ -491,7 +496,7 @@ def write_index(index_path: Path) -> None:
     <ul>
       <li>打开 <a href="report.md">report.md</a> 看 reward margin 和 preference accuracy。</li>
       <li>对比 <a href="outputs/generations/before.jsonl">before.jsonl</a> 与 <a href="outputs/generations/after.jsonl">after.jsonl</a>。</li>
-      <li>用 visualizer 查看 <code>visualizer/traces/08-dpo-preference.json</code> 的 DPO step 事件。</li>
+      <li>用 visualizer 查看本次 run 目录里的 <code>trace.json</code> DPO step 事件。</li>
     </ul>
   </main>
 </body>
@@ -503,13 +508,13 @@ def write_index(index_path: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", default="auto")
-    parser.add_argument("--data", default="lessons/08-dpo-preference/data/preferences.jsonl")
-    parser.add_argument("--eval-prompts", default="lessons/08-dpo-preference/data/eval_prompts.jsonl")
-    parser.add_argument("--report", default="lessons/08-dpo-preference/report.md")
-    parser.add_argument("--index", default="lessons/08-dpo-preference/index.html")
-    parser.add_argument("--output-dir", default="lessons/08-dpo-preference/outputs")
-    parser.add_argument("--adapter-dir", default="lessons/08-dpo-preference/outputs/adapter")
-    parser.add_argument("--generation-dir", default="lessons/08-dpo-preference/outputs/generations")
+    parser.add_argument("--data", default="visualizer/studio/data/dpo-example.jsonl")
+    parser.add_argument("--eval-prompts", default="visualizer/studio/data/dpo-eval-prompts.jsonl")
+    parser.add_argument("--report", default="visualizer/runtime/studio-manual/dpo-report.md")
+    parser.add_argument("--index", default="visualizer/runtime/studio-manual/dpo-index.html")
+    parser.add_argument("--output-dir", default="visualizer/runtime/studio-manual/dpo-outputs")
+    parser.add_argument("--adapter-dir", default="visualizer/runtime/studio-manual/dpo-adapter")
+    parser.add_argument("--generation-dir", default="visualizer/runtime/studio-manual/dpo-generations")
     parser.add_argument("--max-length", type=int, default=160)
     parser.add_argument("--max-new-tokens", type=int, default=80)
     parser.add_argument("--max-steps", type=int, default=10)
@@ -518,11 +523,28 @@ def main() -> None:
     parser.add_argument("--rank", type=int, default=8)
     parser.add_argument("--alpha", type=int, default=16)
     parser.add_argument("--dropout", type=float, default=0.0)
+    parser.add_argument("--weight-decay", type=float, default=0.0)
+    parser.add_argument("--target-modules", default="")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--quick", action="store_true")
-    parser.add_argument("--trace", default="visualizer/traces/live.json")
+    parser.add_argument("--trace", default="visualizer/runtime/studio-manual/trace.json")
     parser.add_argument("--trace-delay", type=float, default=0.0)
+    parser.add_argument("--extra-args-json", default="")
     args = parser.parse_args()
+
+    extra_args = known_extra_args(
+        args.extra_args_json,
+        {
+            "seed": int,
+            "adam_beta1": float,
+            "adam_beta2": float,
+            "adam_epsilon": float,
+            "adamw_epsilon": float,
+            "clip_grad_norm": float,
+            "max_grad_norm": float,
+        },
+        context="Studio DPO engine",
+    )
 
     if args.quick:
         args.max_steps = min(args.max_steps, 2)
@@ -535,7 +557,7 @@ def main() -> None:
     os.environ["HF_XET_CACHE"] = str(output_dir / "hf-cache" / "xet")
 
     torch, F, LoraConfig, TaskType, get_peft_model, AutoModelForCausalLM, AutoTokenizer, set_seed = require_training_stack()
-    set_seed(42)
+    set_seed(int(extra_args.get("seed", 42)))
 
     report_path = resolve_project_path(args.report)
     index_path = resolve_project_path(args.index)
@@ -547,13 +569,13 @@ def main() -> None:
     machine = detect_local_config(torch)
     model_name = resolve_model_name(args.model_name, machine)
     device = choose_device(torch, args.device)
-    trace = VisualTrace("08-dpo-preference", "Lesson 08 · DPO Preference Optimization", args.trace, args.trace_delay)
+    trace = VisualTrace("studio-dpo-preference", "Studio · DPO Preference Optimization", args.trace, args.trace_delay)
 
     trace.event(
         "select model",
         "setup",
         "根据本机配置选择真实 Hugging Face causal LM；默认 auto 在当前 Mac 上选择 Qwen 0.5B。",
-        inputs={"requested_model": args.model_name, "machine": machine, "quick": args.quick},
+        inputs={"requested_model": args.model_name, "machine": machine, "quick": args.quick, "extra_args": extra_args},
         outputs={"model_name": model_name, "device": str(device), "hf_cache": os.environ["HF_HOME"]},
     )
 
@@ -571,7 +593,7 @@ def main() -> None:
     )
 
     print("Step 2: attach LoRA policy")
-    target_modules = infer_lora_target_modules(model_name)
+    target_modules = parse_target_modules(args.target_modules) or infer_lora_target_modules(model_name)
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=args.rank,
@@ -583,7 +605,14 @@ def main() -> None:
     model = get_peft_model(base_model, lora_config)
     model.config.use_cache = False
     trainable_params, total_params = count_trainable_parameters(model)
-    optimizer = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=args.learning_rate)
+    optimizer = torch.optim.AdamW(
+        (p for p in model.parameters() if p.requires_grad),
+        lr=args.learning_rate,
+        weight_decay=args.weight_decay,
+        betas=(float(extra_args.get("adam_beta1", 0.9)), float(extra_args.get("adam_beta2", 0.999))),
+        eps=float(extra_args.get("adam_epsilon", extra_args.get("adamw_epsilon", 1e-8))),
+    )
+    clip_grad_norm = float(extra_args.get("clip_grad_norm", extra_args.get("max_grad_norm", 1.0)))
     trace.event(
         "attach LoRA policy",
         "model",
@@ -652,7 +681,8 @@ def main() -> None:
         optimizer.zero_grad(set_to_none=True)
         result = dpo_step(torch, F, model, batch, args.beta)
         result["loss"].backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        if clip_grad_norm > 0:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad_norm)
         optimizer.step()
         log = {
             "step": step + 1,
@@ -720,6 +750,7 @@ def main() -> None:
         "max_length": args.max_length,
         "max_new_tokens": args.max_new_tokens,
         "learning_rate": args.learning_rate,
+        "weight_decay": args.weight_decay,
         "beta": args.beta,
         "target_modules": target_modules,
         "trainable_params": trainable_params,
@@ -769,7 +800,7 @@ def main() -> None:
         model={"adapter_saved": True, "base_saved": False},
     )
     trace.finish(
-        "Lesson 08 完成：manual DPO objective、偏好指标、固定 prompt 生成和 adapter 保存都已写出。",
+        "Studio DPO 完成：manual DPO objective、偏好指标、固定 prompt 生成和 adapter 保存都已写出。",
         metrics={
             "loss_after": after_eval["loss"],
             "reward_margin_after": after_eval["reward_margin"],
