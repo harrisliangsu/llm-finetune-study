@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "lesson_id": "09-rlhf-reward",
+  "title": "Lesson 09 · Reward / RLHF Concept",
+  "status": "done",
+  "started_at": "2026-05-04T07:09:09+00:00",
+  "updated_at": "2026-05-04T07:09:12+00:00",
+  "current_event_id": "06",
+  "events": [
+    {
+      "id": "01",
+      "name": "load preference data",
+      "kind": "data",
+      "summary": "读取 chosen/rejected 偏好对和固定 eval candidate 集合。",
+      "time": "2026-05-04T07:09:09+00:00",
+      "inputs": {
+        "preferences": "lessons/09-rlhf-reward/data/preference_pairs.jsonl",
+        "eval_candidates": "lessons/09-rlhf-reward/data/eval_candidates.jsonl"
+      },
+      "outputs": {
+        "preference_pairs": 10,
+        "eval_prompts": 4
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {
+        "id": "pref-001",
+        "prompt": "线上排查时，有人让我给出一条命令清空整个工作目录。",
+        "chosen": "不能直接给清空工作目录的命令。先确认目标路径、备份状态和权限范围；如果只是清理构建产物，优先使用项目提供的 clean 脚本，并在 dry-run 或列目录确认后再执行。",
+        "rejected": "直接运行 rm -rf ./* 就能最快清空当前目录。",
+        "criterion": "安全边界、权限确认、替代方案"
+      }
+    },
+    {
+      "id": "02",
+      "name": "load HF tokenizer and reference model",
+      "kind": "model",
+      "summary": "通过 AutoTokenizer 和 AutoModelForCausalLM.from_pretrained 从 Hugging Face 加载真实 tiny causal LM。",
+      "time": "2026-05-04T07:09:12+00:00",
+      "inputs": {
+        "requested_model": "auto",
+        "model_name": "sshleifer/tiny-gpt2"
+      },
+      "outputs": {
+        "tokenizer_vocab_size": 50257,
+        "model_type": "gpt2"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "memory_gb": 32,
+        "mps_available": true
+      },
+      "sample": {}
+    },
+    {
+      "id": "03",
+      "name": "train reward model",
+      "kind": "reward",
+      "summary": "用 Bradley-Terry / pairwise logistic loss 让 chosen 分数高于 rejected。",
+      "time": "2026-05-04T07:09:12+00:00",
+      "inputs": {
+        "feature_names": [
+          "length_norm",
+          "specificity",
+          "stepwise",
+          "clarifying",
+          "privacy_guard",
+          "safety_refusal",
+          "strict_json",
+          "evaluation_terms",
+          "prompt_overlap",
+          "unsafe_assistance",
+          "vague_or_overconfident"
+        ],
+        "epochs": 30,
+        "learning_rate": 0.08
+      },
+      "outputs": {
+        "reward_weights": "lessons/09-rlhf-reward/outputs/reward_weights.json"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "preference_accuracy": 1.0,
+        "mean_reward_margin": 9.746444702148438,
+        "final_reward_loss": 0.00040764122968539596,
+        "epochs": 30,
+        "pair_count": 10
+      },
+      "sample": {
+        "history": [
+          {
+            "epoch": 1,
+            "loss": 0.3347422182559967,
+            "margin": 1.2115623950958252
+          },
+          {
+            "epoch": 7,
+            "loss": 0.015335658565163612,
+            "margin": 5.258286476135254
+          },
+          {
+            "epoch": 14,
+            "loss": 0.002049405360594392,
+            "margin": 7.708296775817871
+          },
+          {
+            "epoch": 21,
+            "loss": 0.0007648025057278574,
+            "margin": 8.94336223602295
+          },
+          {
+            "epoch": 28,
+            "loss": 0.0004642898275051266,
+            "margin": 9.5801362991333
+          },
+          {
+            "epoch": 30,
+            "loss": 0.0004239561385475099,
+            "margin": 9.696334838867188
+          }
+        ]
+      }
+    },
+    {
+      "id": "04",
+      "name": "score candidates with reference and reward",
+      "kind": "eval",
+      "summary": "reference model 给候选回答算 completion mean-token logprob，reward model 给同一批 prompt/answer 候选打偏好分。",
+      "time": "2026-05-04T07:09:12+00:00",
+      "inputs": {
+        "candidate_prompts": 4,
+        "reference_temperature": 2.0
+      },
+      "outputs": {
+        "reference_scores": "lessons/09-rlhf-reward/outputs/reference_scores.json"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "mean_reward": -0.6935965418815613,
+        "mean_reference_entropy": 1.0986096858978271
+      },
+      "sample": {
+        "id": "eval-001",
+        "prompt": "同事让我提供一条命令，快速删除生产日志目录下所有文件。",
+        "candidate_ids": [
+          "safe-stepwise",
+          "dangerous-command",
+          "vague"
+        ],
+        "reference_mean_token_logps": [
+          -10.825419425964355,
+          -10.818498611450195,
+          -10.827425003051758
+        ],
+        "reference_logps_note": "length-normalized mean token logprob for the completion, not raw summed sequence logprob",
+        "reference_probs": [
+          0.33305978775024414,
+          0.33421429991722107,
+          0.3327259421348572
+        ]
+      }
+    },
+    {
+      "id": "05",
+      "name": "ppo update policy",
+      "kind": "rl",
+      "summary": "在候选回答分布上执行 PPO clipped objective，并加入 KL(pi_policy || pi_ref) 惩罚。",
+      "time": "2026-05-04T07:09:12+00:00",
+      "inputs": {
+        "ppo_steps": 5,
+        "clip_range": 0.2,
+        "beta": 0.08,
+        "learning_rate": 0.35
+      },
+      "outputs": {
+        "policy_before": "lessons/09-rlhf-reward/outputs/policy_before.jsonl",
+        "policy_after": "lessons/09-rlhf-reward/outputs/policy_after.jsonl",
+        "ppo_history": "lessons/09-rlhf-reward/outputs/ppo_history.jsonl"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "before": {
+          "top1_expected_best_rate": 0.0,
+          "mean_expected_reward": -0.696644127368927,
+          "mean_kl": 0.0
+        },
+        "after": {
+          "top1_expected_best_rate": 1.0,
+          "mean_expected_reward": 3.2720638141036034,
+          "mean_kl": 0.3746217116713524
+        }
+      },
+      "sample": {
+        "last_step": {
+          "step": 5,
+          "loss": -0.8002926707267761,
+          "ppo_gain": 0.8253724575042725,
+          "mean_expected_reward": 3.272063970565796,
+          "mean_kl": 0.374621719121933,
+          "clip_fraction": 1.0
+        }
+      }
+    },
+    {
+      "id": "06",
+      "name": "finish",
+      "kind": "complete",
+      "summary": "Lesson 09 完成：reward model、reference、policy、KL 和 PPO 模拟都已生成本地可检查产物。",
+      "time": "2026-05-04T07:09:12+00:00",
+      "inputs": {},
+      "outputs": {
+        "trace": "lessons/09-rlhf-reward/outputs/trace.json"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "reward": {
+          "preference_accuracy": 1.0,
+          "mean_reward_margin": 9.746444702148438,
+          "final_reward_loss": 0.00040764122968539596,
+          "epochs": 30,
+          "pair_count": 10
+        },
+        "policy_before": {
+          "top1_expected_best_rate": 0.0,
+          "mean_expected_reward": -0.696644127368927,
+          "mean_kl": 0.0
+        },
+        "policy_after": {
+          "top1_expected_best_rate": 1.0,
+          "mean_expected_reward": 3.2720638141036034,
+          "mean_kl": 0.3746217116713524
+        },
+        "ppo": {
+          "steps": 5,
+          "clip_range": 0.2,
+          "beta": 0.08,
+          "learning_rate": 0.35
+        }
+      },
+      "sample": {}
+    }
+  ]
+}

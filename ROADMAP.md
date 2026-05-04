@@ -126,13 +126,10 @@
 
 ## 继续学习
 
-完成 6 周后再进入：
+完成 6 周后，本仓库把进阶主题继续拆成 08-10 三节可执行课程：
 
-- QLoRA
-- DPO
-- PPO / RLHF
-- DeepSpeed
-- 多模态微调
-- diffusion 微调
+- [lessons/08-dpo-preference](lessons/08-dpo-preference): DPO，用 `prompt/chosen/rejected` 学偏好优化。
+- [lessons/09-rlhf-reward](lessons/09-rlhf-reward): Reward / RLHF 概念，理解 reward model、reference model、KL 和 PPO 信号。
+- [lessons/10-qlora-engineering](lessons/10-qlora-engineering): QLoRA / Training Engineering，理解量化、显存、CUDA/bitsandbytes 和 Mac/MPS 边界。
 
-这些主题不是第一阶段的目标。先把小模型 SFT + LoRA 跑扎实。进入进阶前，先用 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 判断你是在解决数据格式、参数更新、偏好优化、显存约束，还是部署压缩问题。
+DeepSpeed、多模态微调、diffusion 微调暂时不作为本地第一阶段主线。先把小模型 SFT + LoRA + DPO 跑扎实。进入更大训练前，先用 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 判断你是在解决数据格式、参数更新、偏好优化、显存约束，还是部署压缩问题。

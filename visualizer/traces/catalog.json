@@ -56,6 +56,30 @@
       "outputs": "lessons/07-sft-baseline/outputs",
       "topic": "ticket text -> strict JSON",
       "expected_events": 35
+    },
+    {
+      "lesson_id": "08-dpo-preference",
+      "title": "Lesson 08 · DPO Preference Optimization",
+      "trace": "traces/08-dpo-preference.json",
+      "outputs": "lessons/08-dpo-preference/outputs",
+      "topic": "prompt + chosen/rejected -> preference margin",
+      "expected_events": 9
+    },
+    {
+      "lesson_id": "09-rlhf-reward",
+      "title": "Lesson 09 · Reward / RLHF Concept",
+      "trace": "traces/09-rlhf-reward.json",
+      "outputs": "lessons/09-rlhf-reward/outputs",
+      "topic": "reward score + KL + PPO signals",
+      "expected_events": 6
+    },
+    {
+      "lesson_id": "10-qlora-engineering",
+      "title": "Lesson 10 · QLoRA / Training Engineering",
+      "trace": "traces/10-qlora-engineering.json",
+      "outputs": "lessons/10-qlora-engineering/outputs",
+      "topic": "quantization + memory budget + hardware boundary",
+      "expected_events": 7
     }
   ]
 }

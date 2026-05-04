@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "lesson_id": "10-qlora-engineering",
+  "title": "Lesson 10 · QLoRA / Training Engineering",
+  "status": "done",
+  "started_at": "2026-05-04T07:09:13+00:00",
+  "updated_at": "2026-05-04T07:09:14+00:00",
+  "current_event_id": "07",
+  "events": [
+    {
+      "id": "01",
+      "name": "load planning config",
+      "kind": "setup",
+      "summary": "读取 Lesson 10 的训练工程配置。配置只包含规划参数，不包含 CUDA 训练入口。",
+      "time": "2026-05-04T07:09:13+00:00",
+      "inputs": {
+        "config": "lessons/10-qlora-engineering/data/planning_config.json"
+      },
+      "outputs": {
+        "profiles": [
+          "mac_mps_lora_planning",
+          "single_cuda_qlora_24gb",
+          "single_cuda_lora_24gb",
+          "multi_cuda_deepspeed_zero3"
+        ],
+        "quick": true
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "02",
+      "name": "detect local hardware and model policy",
+      "kind": "setup",
+      "summary": "用课程已有 hf_model_policy helper 检测本机并解析 --model-name auto。",
+      "time": "2026-05-04T07:09:14+00:00",
+      "inputs": {
+        "requested_model": "auto"
+      },
+      "outputs": {
+        "selected_model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "target_modules": [
+          "q_proj",
+          "v_proj"
+        ]
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "memory_gb": 32,
+        "mps_available": true
+      },
+      "sample": {}
+    },
+    {
+      "id": "03",
+      "name": "optional HF metadata probe",
+      "kind": "metadata",
+      "summary": "尝试读取 Hugging Face config/tokenizer 元数据；这一步不下载模型权重，失败也不影响本课执行。",
+      "time": "2026-05-04T07:09:14+00:00",
+      "inputs": {
+        "models": [
+          "Qwen/Qwen2.5-0.5B-Instruct"
+        ],
+        "local_files_only": false,
+        "skipped": true
+      },
+      "outputs": {
+        "metadata_file": "lessons/10-qlora-engineering/outputs/hf_metadata.json",
+        "available_count": 0
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "04",
+      "name": "estimate memory budget",
+      "kind": "planning",
+      "summary": "估算 base 权重、LoRA 训练状态、activation 和 safety margin，比较 Mac/MPS、CUDA QLoRA、DeepSpeed profiles。",
+      "time": "2026-05-04T07:09:14+00:00",
+      "inputs": {
+        "seq_length": 512,
+        "per_device_batch_size": 1,
+        "gradient_accumulation_steps": 4,
+        "rank": 16,
+        "gradient_checkpointing": true
+      },
+      "outputs": {
+        "plan_json": "lessons/10-qlora-engineering/outputs/plans.json",
+        "plan_csv": "lessons/10-qlora-engineering/outputs/memory_budget.csv",
+        "rows": 8
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "min_peak_gb": 2.154,
+        "max_peak_gb": 15.804
+      },
+      "sample": {}
+    },
+    {
+      "id": "05",
+      "name": "explain execution boundaries",
+      "kind": "lesson",
+      "summary": "输出 QLoRA、量化、CUDA/bitsandbytes、Mac/MPS、梯度检查点、梯度累积和 DeepSpeed 的边界说明。",
+      "time": "2026-05-04T07:09:14+00:00",
+      "inputs": {},
+      "outputs": {
+        "qlora": "QLoRA = frozen base model loaded in 4-bit NF4 + small trainable LoRA adapters + paged optimizers.",
+        "quantization": "Quantization reduces storage/compute dtype for frozen weights; it does not make optimizer or activations free.",
+        "mac_mps": "MPS is available, but this lesson does not present bitsandbytes 4-bit QLoRA as native on Mac.",
+        "cuda_bitsandbytes": "The common HF QLoRA path depends on CUDA-oriented bitsandbytes 4-bit kernels.",
+        "gradient_checkpointing": "Checkpointing lowers activation memory by recomputing forward segments during backward.",
+        "gradient_accumulation": "Accumulation raises effective batch size across microbatches but does not multiply peak activation memory.",
+        "deepspeed": "DeepSpeed is a distributed training boundary for sharding states; it is not a Mac substitute for CUDA QLoRA kernels."
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "06",
+      "name": "write lesson artifacts",
+      "kind": "artifact",
+      "summary": "生成本课报告和静态学习页，所有运行产物保存在 Lesson 10 outputs。",
+      "time": "2026-05-04T07:09:14+00:00",
+      "inputs": {},
+      "outputs": {
+        "report": "lessons/10-qlora-engineering/report.md",
+        "index": "lessons/10-qlora-engineering/index.html",
+        "plan_json": "lessons/10-qlora-engineering/outputs/plans.json",
+        "plan_csv": "lessons/10-qlora-engineering/outputs/memory_budget.csv",
+        "metadata_json": "lessons/10-qlora-engineering/outputs/hf_metadata.json",
+        "trace_json": "lessons/10-qlora-engineering/outputs/trace.json"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "07",
+      "name": "finish",
+      "kind": "complete",
+      "summary": "QLoRA planning lesson completed without requiring bitsandbytes, CUDA, or model-weight downloads.",
+      "time": "2026-05-04T07:09:14+00:00",
+      "inputs": {},
+      "outputs": {
+        "trace": "lessons/10-qlora-engineering/outputs/trace.json"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "plan_rows": 8,
+        "metadata_models": 1
+      },
+      "sample": {}
+    }
+  ]
+}

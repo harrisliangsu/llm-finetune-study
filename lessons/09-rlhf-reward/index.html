@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 09 · Reward / RLHF Concept</title>
+  <style>
+    body { margin:0; background:#0b0d12; color:#eef2ff; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; line-height:1.65; }
+    main { max-width:1120px; margin:0 auto; padding:44px 22px 80px; }
+    h1 { font-size:40px; margin:0 0 10px; }
+    h2 { margin-top:34px; color:#a7f3d0; }
+    p, li { color:#aeb9cc; }
+    code, pre { font-family:"SF Mono",Menlo,Consolas,monospace; }
+    pre { overflow:auto; padding:16px; border:1px solid rgba(148,163,184,.2); border-radius:8px; background:#10151f; color:#e0f2fe; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:22px 0; }
+    .card { border:1px solid rgba(148,163,184,.2); border-radius:8px; background:#111827; padding:16px; }
+    .card strong { display:block; color:#f8fafc; margin-bottom:6px; }
+    .flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; }
+    .step { border:1px solid rgba(16,185,129,.28); border-radius:8px; background:#0f1b17; padding:12px; }
+    .step span { display:block; color:#34d399; font-size:12px; font-weight:800; }
+    a { color:#67e8f9; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lesson 09 · Reward / RLHF Concept</h1>
+    <p>用一个小而完整的候选回答模拟，把 reward model、reference model、policy、KL 和 PPO 放到同一条可执行链路里。</p>
+    <div class="grid">
+      <div class="card"><strong>偏好数据</strong><code>data/preference_pairs.jsonl</code><br>chosen/rejected 训练 reward model。</div>
+      <div class="card"><strong>评估候选</strong><code>data/eval_candidates.jsonl</code><br>每个 prompt 三个候选回答。</div>
+      <div class="card"><strong>HF 加载</strong><code>sshleifer/tiny-gpt2</code><br>真实 Hugging Face tiny causal LM。</div>
+      <div class="card"><strong>产物</strong><code>outputs/</code><br>reward、policy、PPO history、trace。</div>
+    </div>
+    <h2>执行命令</h2>
+    <pre>.venv/bin/python lessons/09-rlhf-reward/run.py --quick
+.venv/bin/python lessons/09-rlhf-reward/run.py --trace-delay 0.5</pre>
+    <h2>流程</h2>
+    <div class="flow">
+      <div class="step"><span>01</span>加载偏好对</div>
+      <div class="step"><span>02</span>加载 HF tokenizer/model</div>
+      <div class="step"><span>03</span>训练 reward model</div>
+      <div class="step"><span>04</span>计算 reference 分布</div>
+      <div class="step"><span>05</span>初始化 policy</div>
+      <div class="step"><span>06</span>PPO + KL 更新</div>
+      <div class="step"><span>07</span>输出评估报告</div>
+    </div>
+    <h2>关键概念</h2>
+    <ul>
+      <li><strong>Reward model</strong>: 把同一 prompt 下的偏好对压缩成回答分数；本课用 prompt + response 规则特征做教学模型。</li>
+      <li><strong>Reference model</strong>: 冻结基线，提供 KL 约束的锚点。</li>
+      <li><strong>Policy</strong>: 当前被优化的回答分布。</li>
+      <li><strong>KL</strong>: 控制 policy 不要为了刷 reward 过度偏离 reference。</li>
+      <li><strong>PPO</strong>: 用 clipped ratio 控制每次策略更新幅度；本课固定更新前候选分布作为 pi_old。</li>
+    </ul>
+    <h2>看什么结果</h2>
+    <ul>
+      <li>打开 <a href="report.md">report.md</a> 看 PPO 前后指标。</li>
+      <li>打开 <a href="outputs/policy_before.jsonl">policy_before.jsonl</a> 和 <a href="outputs/policy_after.jsonl">policy_after.jsonl</a> 看候选概率变化。</li>
+      <li>打开 <a href="outputs/trace.json">outputs/trace.json</a> 看每一步 trace event。</li>
+    </ul>
+  </main>
+</body>
+</html>

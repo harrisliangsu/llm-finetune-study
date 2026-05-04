@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 10 · QLoRA / Training Engineering</title>
+  <style>
+    :root { --bg:#09100f; --panel:#111a18; --panel2:#15211f; --ink:#eef8f4; --muted:#9bb0aa; --line:rgba(238,248,244,.12); --green:#2dd4bf; --blue:#60a5fa; --gold:#fbbf24; --red:#fb7185; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; line-height:1.65; }
+    code, pre, .mono { font-family:"SF Mono",Menlo,Consolas,monospace; }
+    .nav { position:sticky; top:0; display:flex; justify-content:space-between; align-items:center; min-height:54px; padding:0 22px; background:rgba(9,16,15,.88); border-bottom:1px solid var(--line); backdrop-filter:blur(16px); z-index:2; }
+    .brand { font-weight:900; } .brand span { color:var(--green); }
+    .nav a { color:var(--muted); text-decoration:none; margin-left:16px; font-size:13px; font-weight:800; }
+    main { max-width:1120px; margin:0 auto; padding:58px 22px 82px; }
+    h1 { margin:0 0 14px; font-size:48px; line-height:1.08; letter-spacing:0; } h1 span, h2 span { color:var(--green); }
+    h2 { margin:0 0 12px; font-size:28px; line-height:1.2; }
+    p, li { color:var(--muted); }
+    .lead { font-size:17px; max-width:880px; }
+    .badge { display:inline-flex; gap:8px; align-items:center; padding:6px 12px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px; font-weight:900; margin-bottom:20px; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+    section { padding:34px 0; }
+    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px; min-height:132px; }
+    .card strong { display:block; color:var(--ink); margin-bottom:7px; font-size:16px; }
+    .metric strong { font-size:30px; line-height:1; color:var(--green); }
+    .rail { display:grid; grid-template-columns:1fr 44px 1fr 44px 1fr; gap:12px; align-items:stretch; }
+    .node { background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:16px; }
+    .node b { display:block; margin-bottom:8px; color:var(--ink); }
+    .arrow { display:flex; align-items:center; justify-content:center; color:var(--green); font-size:24px; font-weight:900; }
+    .warn { border-color:rgba(251,113,133,.38); background:rgba(251,113,133,.08); }
+    .ok { border-color:rgba(45,212,191,.34); background:rgba(45,212,191,.08); }
+    .code { overflow:auto; padding:16px; border-radius:8px; border:1px solid var(--line); background:#07100e; color:#d7fff7; font-size:13px; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { padding:11px; border-bottom:1px solid var(--line); text-align:left; color:var(--muted); vertical-align:top; }
+    th { color:var(--ink); }
+    @media (max-width:900px){ h1{font-size:35px}.grid,.grid3,.rail{grid-template-columns:1fr}.arrow{display:none}.nav a{display:none} }
+  </style>
+</head>
+<body>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#boundary">边界</a><a href="#memory">预算</a><a href="#knobs">训练旋钮</a><a href="#run">运行</a></div></nav>
+  <main>
+    <div class="badge"><span class="dot"></span> LESSON 10 · QLORA ENGINEERING</div>
+    <h1><span>QLoRA</span><br>不是 Mac 上的魔法开关</h1>
+    <p class="lead">本课用本地脚本做训练工程规划：检测硬件、选择课程模型策略、读取安全的 Hugging Face 元数据，并估算 LoRA/QLoRA/DeepSpeed 方案的内存边界。</p>
+
+    <section id="boundary">
+      <h2>先划清 <span>执行边界</span></h2>
+      <div class="grid">
+        <div class="card ok"><strong>QLoRA</strong><p>4-bit NF4 冻结 base 权重，加 LoRA adapter 训练小增量。</p></div>
+        <div class="card ok"><strong>CUDA + bitsandbytes</strong><p>标准 HF QLoRA 路径依赖 CUDA 方向的 4-bit kernel。</p></div>
+        <div class="card warn"><strong>Mac / MPS</strong><p>可以学习 LoRA 和做规划，但不要声称 bitsandbytes QLoRA 原生可跑。</p></div>
+        <div class="card"><strong>DeepSpeed</strong><p>多 GPU 状态切分边界，不是 CUDA kernel 的替代品。</p></div>
+      </div>
+    </section>
+
+    <section id="memory">
+      <h2>预算拆成 <span>四块</span></h2>
+      <div class="rail">
+        <div class="node"><b>Base weights</b><p>fp16 LoRA 约 2 bytes/param；NF4 double quant 规划可按约 0.56 bytes/param 初筛。</p></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Adapter train state</b><p>LoRA A/B 权重、梯度、AdamW 两个 fp32 moments。通常远小于 base。</p></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>Activations</b><p>由 microbatch、seq length、hidden、layers 决定；checkpointing 用重算换显存。</p></div>
+      </div>
+      <pre class="code">peak ~= base_weights + lora_weights + lora_grads + optimizer_states + activations + safety_margin</pre>
+    </section>
+
+    <section id="knobs">
+      <h2>训练工程 <span>旋钮</span></h2>
+      <div class="grid3">
+        <div class="card metric"><strong>microbatch</strong><p>直接影响激活峰值。OOM 时先降它。</p></div>
+        <div class="card metric"><strong>accum</strong><p>提高有效 batch，不等价于提高单步峰值。</p></div>
+        <div class="card metric"><strong>checkpoint</strong><p>降低激活保存量，但 backward 更慢。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>DeepSpeed 什么时候进场</h2>
+      <table>
+        <tr><th>场景</th><th>优先选择</th><th>注意</th></tr>
+        <tr><td>7B 单卡 QLoRA</td><td>CUDA + bitsandbytes + PEFT</td><td>先 one-step smoke test。</td></tr>
+        <tr><td>13B/长上下文紧张</td><td>降 seq/batch/rank，开 checkpointing</td><td>先别把分布式复杂度拉进来。</td></tr>
+        <tr><td>多卡全参或大 LoRA</td><td>DeepSpeed ZeRO / FSDP</td><td>确认量化、PEFT、保存格式兼容。</td></tr>
+      </table>
+    </section>
+
+    <section id="run">
+      <h2>运行</h2>
+      <pre class="code">.venv/bin/python lessons/10-qlora-engineering/run.py --quick --trace-delay 0.2</pre>
+      <p>输出写入 <code>lessons/10-qlora-engineering/outputs/</code>，包括 <code>plans.json</code>、<code>memory_budget.csv</code>、<code>hf_metadata.json</code> 和 <code>trace.json</code>；同时归档到 <code>visualizer/traces/10-qlora-engineering.json</code> 供课程下拉框查看。</p>
+    </section>
+  </main>
+</body>
+</html>

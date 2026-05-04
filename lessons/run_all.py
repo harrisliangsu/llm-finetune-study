@@ -19,6 +19,9 @@ LESSONS = [
     ("05", "lessons/05-lora/run.py", []),
     ("06", "lessons/06-peft-lora/run.py", []),
     ("07", "lessons/07-sft-baseline/run.py", []),
+    ("08", "lessons/08-dpo-preference/run.py", []),
+    ("09", "lessons/09-rlhf-reward/run.py", []),
+    ("10", "lessons/10-qlora-engineering/run.py", []),
 ]
 
 
@@ -27,13 +30,16 @@ QUICK_ARGS = {
     "05": ["--max-steps", "1"],
     "06": ["--max-steps", "1"],
     "07": ["--max-steps", "1", "--max-new-tokens", "16"],
+    "08": ["--quick", "--max-steps", "1", "--max-new-tokens", "16"],
+    "09": ["--quick"],
+    "10": ["--quick"],
 }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--from-lesson", default="01")
-    parser.add_argument("--to-lesson", default="07")
+    parser.add_argument("--to-lesson", default="10")
     parser.add_argument("--trace-delay", type=float, default=0.0)
     parser.add_argument("--quick", action="store_true", help="Use one-step training for smoke tests.")
     args = parser.parse_args()

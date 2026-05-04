@@ -1031,6 +1031,326 @@
     .generation-card p {
       min-width:0;
     }
+    .node-popover { display:none; }
+    .stage-3d {
+      background:
+        radial-gradient(circle at 18% 0%,rgba(56,189,248,.14),transparent 34%),
+        radial-gradient(circle at 88% 18%,rgba(34,197,94,.1),transparent 30%),
+        linear-gradient(180deg,#0c121b,#080d15);
+    }
+    .stage-3d .stage-head { border-bottom-color:rgba(56,189,248,.14); }
+    .scene3d {
+      position:relative;
+      min-height:364px;
+      padding:18px;
+      overflow:hidden;
+      perspective:1100px;
+      background:
+        linear-gradient(180deg,rgba(15,23,42,.48),rgba(8,13,21,.86)),
+        repeating-linear-gradient(90deg,rgba(148,163,184,.035) 0 1px,transparent 1px 42px),
+        repeating-linear-gradient(180deg,rgba(148,163,184,.028) 0 1px,transparent 1px 42px);
+      border-top:1px solid rgba(148,163,184,.1);
+    }
+    .scene3d::before {
+      content:"";
+      position:absolute;
+      left:34px;
+      right:34px;
+      top:154px;
+      height:3px;
+      background:linear-gradient(90deg,rgba(59,130,246,.2),rgba(56,189,248,.76),rgba(34,197,94,.24));
+      box-shadow:0 0 24px rgba(56,189,248,.28);
+      transform:perspective(900px) rotateX(44deg);
+    }
+    .scene3d::after {
+      content:"";
+      position:absolute;
+      top:149px;
+      left:34px;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:#67e8f9;
+      box-shadow:0 0 22px rgba(56,189,248,.9), 0 0 44px rgba(34,197,94,.35);
+      animation:scenePacket 3.2s linear infinite;
+      z-index:3;
+    }
+    @keyframes scenePacket {
+      from { left:34px; opacity:0; transform:translateY(0) scale(.75); }
+      10% { opacity:1; }
+      90% { opacity:1; }
+      to { left:calc(100% - 46px); opacity:0; transform:translateY(-3px) scale(1.08); }
+    }
+    .scene-grid {
+      position:relative;
+      z-index:2;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(108px,1fr));
+      gap:14px;
+      align-items:stretch;
+    }
+    .scene-node3d {
+      min-height:194px;
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:10px;
+      background:linear-gradient(180deg,#151d2a,#0c131e 72%);
+      box-shadow:
+        0 20px 38px rgba(0,0,0,.34),
+        inset 0 1px 0 rgba(255,255,255,.05);
+      padding:12px;
+      position:relative;
+      overflow:hidden;
+      transform:perspective(850px) rotateX(5deg) translateZ(0);
+      transform-style:preserve-3d;
+    }
+    .scene-node3d::before {
+      content:"";
+      position:absolute;
+      inset:0 0 auto;
+      height:3px;
+      background:linear-gradient(90deg,transparent,rgba(56,189,248,.72),transparent);
+    }
+    .scene-node3d::after {
+      content:"";
+      position:absolute;
+      inset:auto 8px -10px 8px;
+      height:18px;
+      border-radius:0 0 10px 10px;
+      background:linear-gradient(180deg,rgba(56,189,248,.12),transparent);
+      transform:skewX(-10deg);
+      opacity:.8;
+    }
+    .scene-node3d.active {
+      border-color:rgba(56,189,248,.58);
+      background:linear-gradient(180deg,rgba(56,189,248,.18),#101926 58%);
+      box-shadow:
+        0 22px 46px rgba(0,0,0,.42),
+        0 0 0 1px rgba(56,189,248,.16),
+        0 0 36px rgba(56,189,248,.16),
+        inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .scene-node3d.adapter { border-color:rgba(249,115,22,.3); }
+    .scene-node3d.metric { border-color:rgba(34,197,94,.3); }
+    .scene-node3d.dim { opacity:.68; }
+    .scene-node-top {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:10px;
+      position:relative;
+      z-index:2;
+    }
+    .scene-step {
+      color:#7dd3fc;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .scene-state {
+      color:#94a3b8;
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:999px;
+      padding:2px 6px;
+      font-size:9px;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+    .scene-title {
+      position:relative;
+      z-index:2;
+      color:#f8fbff;
+      font-size:13px;
+      font-weight:950;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      min-height:32px;
+    }
+    .scene-sub {
+      position:relative;
+      z-index:2;
+      margin-top:8px;
+      color:#94a3b8;
+      font-size:11px;
+      line-height:1.35;
+      min-height:30px;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .scene-glyph {
+      position:relative;
+      z-index:2;
+      min-height:82px;
+      display:grid;
+      place-items:center;
+      margin-top:8px;
+    }
+    .scene-cubes {
+      display:grid;
+      grid-template-columns:repeat(3,24px);
+      gap:9px;
+      transform:rotateX(58deg) rotateZ(-35deg);
+      transform-style:preserve-3d;
+    }
+    .scene-cube {
+      width:24px;
+      height:24px;
+      border-radius:5px;
+      background:linear-gradient(135deg,#60a5fa,#1d4ed8);
+      box-shadow:8px 8px 0 rgba(15,23,42,.8), 0 0 18px rgba(59,130,246,.28);
+      animation:cubeLift 2.8s ease-in-out infinite;
+      animation-delay:var(--delay,0s);
+    }
+    .scene-cube.gold { background:linear-gradient(135deg,#fbbf24,#b45309); }
+    @keyframes cubeLift { 50% { transform:translateZ(10px) translateY(-4px); filter:brightness(1.25); } }
+    .scene-token-grid {
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:6px;
+      max-width:170px;
+    }
+    .scene-token {
+      border:1px solid rgba(56,189,248,.26);
+      border-radius:7px;
+      background:rgba(56,189,248,.08);
+      color:#bfdbfe;
+      padding:4px 7px;
+      font-size:10px;
+      font-weight:900;
+      animation:tokenRise 2.5s ease-in-out infinite;
+      animation-delay:var(--delay,0s);
+    }
+    .scene-token.learn { color:#bbf7d0; border-color:rgba(34,197,94,.32); background:rgba(34,197,94,.1); }
+    .scene-model3d {
+      width:min(164px,100%);
+      display:grid;
+      gap:8px;
+    }
+    .scene-layer {
+      height:20px;
+      border-radius:6px;
+      border:1px solid rgba(148,163,184,.16);
+      background:linear-gradient(90deg,rgba(148,163,184,.14),rgba(148,163,184,.06));
+      box-shadow:0 8px 18px rgba(0,0,0,.2);
+      transform:skewX(-10deg);
+    }
+    .scene-layer.hot {
+      border-color:rgba(34,197,94,.34);
+      background:linear-gradient(90deg,rgba(34,197,94,.18),rgba(56,189,248,.12));
+      box-shadow:0 0 18px rgba(34,197,94,.13);
+    }
+    .scene-adapter-rail {
+      display:flex;
+      justify-content:center;
+      gap:7px;
+      margin-top:6px;
+    }
+    .scene-adapter-rail span {
+      border:1px solid rgba(249,115,22,.36);
+      border-radius:7px;
+      background:rgba(249,115,22,.1);
+      color:#fed7aa;
+      padding:4px 7px;
+      font-size:9px;
+      font-weight:950;
+    }
+    .scene-matrix {
+      display:grid;
+      grid-template-columns:repeat(6,16px);
+      gap:5px;
+    }
+    .scene-matrix span {
+      width:16px;
+      height:16px;
+      border-radius:4px;
+      background:rgba(148,163,184,.14);
+      animation:matrixPulse 1.8s ease-in-out infinite;
+      animation-delay:var(--delay,0s);
+    }
+    .scene-matrix span.hot { background:rgba(34,197,94,.5); box-shadow:0 0 14px rgba(34,197,94,.18); }
+    .scene-disk {
+      width:74px;
+      height:74px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(56,189,248,.26);
+      background:linear-gradient(180deg,rgba(56,189,248,.14),rgba(15,23,42,.78));
+      color:#dbeafe;
+      font-size:10px;
+      font-weight:950;
+      text-transform:uppercase;
+      box-shadow:0 16px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .scene-output {
+      display:grid;
+      gap:7px;
+      width:100%;
+    }
+    .scene-output-card {
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:8px;
+      background:rgba(15,23,42,.68);
+      padding:7px;
+      color:#cbd5e1;
+      font-size:10px;
+      line-height:1.35;
+      min-height:34px;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .scene-output-card.hot {
+      border-color:rgba(34,197,94,.3);
+      background:rgba(34,197,94,.08);
+      color:#dcfce7;
+    }
+    .scene-metric {
+      width:100%;
+      display:grid;
+      gap:8px;
+      align-items:center;
+    }
+    .scene-metric svg {
+      width:100%;
+      height:72px;
+      overflow:visible;
+    }
+    .scene-metric path {
+      fill:none;
+      stroke:#22c55e;
+      stroke-width:5;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .scene-metric circle { fill:#38bdf8; filter:drop-shadow(0 0 8px rgba(56,189,248,.6)); }
+    .scene-footer {
+      position:relative;
+      z-index:4;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:16px;
+    }
+    .scene-chip {
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:999px;
+      background:rgba(15,23,42,.72);
+      color:#a8b3c7;
+      padding:5px 9px;
+      font-size:10px;
+      font-weight:900;
+    }
+    .scene-chip.hot {
+      color:#bae6fd;
+      border-color:rgba(56,189,248,.34);
+      background:rgba(56,189,248,.08);
+    }
     @media (max-width:1500px) and (min-width:1151px) {
       .layout { grid-template-columns:minmax(250px,288px) minmax(0,1fr); }
       .layout > aside.panel:last-child { grid-column:2; }
@@ -1041,6 +1361,7 @@
       .layout { grid-template-columns:1fr; }
       .stage-grid,
       .stage-grid .model-viz,
+      .scene-grid,
       .section-grid,
       .sim-flow,
       .teach-flow,
@@ -1121,7 +1442,7 @@
         <div class="panel-title">Execution Flow</div>
         <div class="flow-wrap"><div class="flow" id="flow"></div></div>
         <div class="section-spacer"></div>
-        <div class="panel-title">Animated Stage</div>
+        <div class="panel-title">Training Scene</div>
         <div id="visualStage"></div>
         <div class="section-spacer"></div>
         <div class="panel-title">Selected Event</div>
@@ -1155,7 +1476,10 @@
       { lesson_id: "04-trainer", title: "Lesson 04 · Trainer Loop", trace: "traces/04-trainer.json", outputs: "lessons/04-trainer/outputs", topic: "forward -> loss -> backward -> update", expected_events: 24 },
       { lesson_id: "05-lora", title: "Lesson 05 · Handwritten LoRA", trace: "traces/05-lora.json", outputs: "lessons/05-lora/outputs", topic: "frozen base + adapter delta", expected_events: 30 },
       { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter", expected_events: 26 },
-      { lesson_id: "07-sft-baseline", title: "Lesson 07 · SFT Baseline", trace: "traces/07-sft-baseline.json", outputs: "lessons/07-sft-baseline/outputs", topic: "ticket text -> strict JSON", expected_events: 18 }
+      { lesson_id: "07-sft-baseline", title: "Lesson 07 · SFT Baseline", trace: "traces/07-sft-baseline.json", outputs: "lessons/07-sft-baseline/outputs", topic: "ticket text -> strict JSON", expected_events: 35 },
+      { lesson_id: "08-dpo-preference", title: "Lesson 08 · DPO Preference Optimization", trace: "traces/08-dpo-preference.json", outputs: "lessons/08-dpo-preference/outputs", topic: "prompt + chosen/rejected -> preference margin", expected_events: 9 },
+      { lesson_id: "09-rlhf-reward", title: "Lesson 09 · Reward / RLHF Concept", trace: "traces/09-rlhf-reward.json", outputs: "lessons/09-rlhf-reward/outputs", topic: "reward score + KL + PPO signals", expected_events: 6 },
+      { lesson_id: "10-qlora-engineering", title: "Lesson 10 · QLoRA / Training Engineering", trace: "traces/10-qlora-engineering.json", outputs: "lessons/10-qlora-engineering/outputs", topic: "quantization + memory budget + hardware boundary", expected_events: 7 }
     ];
     let selectedCourseId = requestedTracePath ? courseIdForTrace(requestedTracePath) : "live";
     let selectedTracePath = initialTracePath;
@@ -1542,15 +1866,6 @@
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>
           ${renderNodeProgress(event, trace, events)}
           <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
-          <div class="node-popover" aria-hidden="true">
-            <div class="node-popover-title">STEP ${escapeHtml(event.id)} · ${escapeHtml(event.name)}</div>
-            <div class="node-popover-summary">${escapeHtml(event.summary || "这个步骤没有额外摘要。")}</div>
-            <div class="node-popover-meta">
-              <span>${escapeHtml(event.kind || "event")}</span>
-              <span>${formatPercent(stepProgressPercent(event, trace, events))}</span>
-              <span>${escapeHtml(processLabel(event))}</span>
-            </div>
-          </div>
         </article>
       `).join("") : `<div class="empty" style="min-width:100%">${escapeHtml(trace.missing_trace ? "这个课程检测到了 outputs，但还没有归档 trace。重新运行课程后会自动生成。" : "暂无事件。")}</div>`;
       document.querySelectorAll(".node").forEach((node) => {
@@ -1595,28 +1910,20 @@
     function renderStage(event, trace, events) {
       if (!event) {
         $("visualStage").innerHTML = `
-          <div class="stage">
+          <div class="stage stage-3d">
             <div class="empty" style="margin:15px;">${escapeHtml(trace.missing_trace ? "缺少课程 trace。重新执行课程后，这里会播放数据和模型变化。" : "等待课程事件。")}</div>
           </div>
         `;
         return;
       }
-      const model = event.model || {};
-      const tensors = event.tensors || [];
-      const ratio = trainableRatio(event);
-      const ratioLabel = ratio == null ? "not shown" : `${formatNumber(ratio)}% trainable`;
-      const metric = latestMetric(event);
-      const series = metricSeries(events);
-      const adapterVisible = hasAdapter(event);
       const coursePercent = courseProgressPercent(trace);
       const stepPercent = stepProgressPercent(event, trace, events);
       const metricForHeader = latestMetricAcross(events, event);
-      const visibleEffect = isGenerationEvent(event);
       $("visualStage").innerHTML = `
-        <div class="stage">
+        <div class="stage stage-3d">
           <div class="stage-head">
             <div>
-              <div class="stage-eyebrow ${visibleEffect ? "effect" : ""}">${visibleEffect ? "visible effect" : "course execution graph"}</div>
+              <div class="stage-eyebrow effect">3D training scene</div>
               <div class="stage-title">${escapeHtml(trace.lesson_id || "-")} · STEP ${escapeHtml(event.id)} · ${escapeHtml(event.name)}</div>
             </div>
             <div class="stage-chips">
@@ -1641,46 +1948,317 @@
               <div class="progress-track"><div class="progress-fill" style="--progress:${escapeAttr(formatProgress(stepPercent))}"></div></div>
             </div>
           </div>
-          ${visibleEffect ? `
-            <div class="effect-callout"><strong>看这里：</strong>这一帧专门看同一个 prompt 在 base、训练后 LoRA、重新加载 adapter 三条路径上的回答差异。Lesson 06 的差异不强，说明它更适合验证 PEFT 链路；真正展示 SFT 效果要用 Lesson 07 的结构化 JSON 路由场景。</div>
-          ` : ""}
-          <div class="stage-grid">
-            <div class="stage-cell">
-              <div class="stage-label">${visibleEffect ? "Visible Effect" : "Process Simulator"}</div>
-              ${renderProcessSimulator(event)}
-            </div>
-            <div class="stage-cell">
-              <div class="stage-label">Model / Metric State</div>
-              <div class="model-viz">
-                <div class="model-core">
-                  <div class="param-cloud">${renderParamDots(event)}</div>
-                  <div class="update-beam ${event.kind === "train" ? "active" : ""}"></div>
-                  <div class="layer-stack">
-                    ${renderLayers(event)}
-                  </div>
-                  ${adapterVisible ? `
-                    <div class="adapter-rail">
-                      <div class="adapter-chip">LoRA A</div>
-                      <div class="adapter-chip">${escapeHtml(Array.isArray(model.target_modules) ? model.target_modules.join(" / ") : model.target_module || "adapter")}</div>
-                      <div class="adapter-chip">LoRA B</div>
-                    </div>
-                  ` : ""}
-                </div>
-                <div>
-                  <div class="meta-label">trainable ratio</div>
-                  <div class="ratio-bar"><div class="ratio-fill" style="--ratio:${escapeAttr(String(ratio == null ? 0 : ratio))}%"></div></div>
-                  <div class="stage-note">${escapeHtml(ratioLabel)} · base ${escapeHtml(model.base || model.mode || "not shown")} · adapter ${escapeHtml(model.adapter || "none")}</div>
-                </div>
-                <div class="metric-viz">
-                  <div class="meta-label">loss / metric pulse</div>
-                  ${renderSparkline(series)}
-                  <div class="stage-note">${escapeHtml(metric ? `${metric.key}: ${formatNumber(metric.value)}` : "当前事件没有 loss 类 metric。")}</div>
-                </div>
-              </div>
-            </div>
+          ${renderLearningScene(event, trace, events)}
+        </div>
+      `;
+    }
+
+    function renderLearningScene(event, trace, events) {
+      const nodes = sceneNodes(event, trace, events);
+      const footer = sceneFooter(event, events);
+      return `
+        <div class="scene3d" aria-label="3D style training process">
+          <div class="scene-grid">
+            ${nodes.map((node, index) => renderSceneNode(node, index)).join("")}
+          </div>
+          <div class="scene-footer">
+            ${footer.map((item, index) => `<span class="scene-chip ${index === 0 ? "hot" : ""}">${escapeHtml(item)}</span>`).join("")}
           </div>
         </div>
       `;
+    }
+
+    function sceneNodes(event, trace, events) {
+      const kind = String(event.kind || "").toLowerCase();
+      if (kind.includes("dpo") || kind.includes("preference")) {
+        return [
+          sceneNode("Prompt", "same input", "tokens", false),
+          sceneNode("Chosen", chosenBadge(event), "generation", true),
+          sceneNode("Rejected", rejectedBadge(event), "generation", false),
+          sceneNode("Margin", metricBadge(event), "metric", true),
+          sceneNode("Adapter", hasAdapter(event) ? "LoRA update" : "policy update", hasAdapter(event) ? "adapter" : "model", true),
+        ];
+      }
+      if (kind.includes("reward") || kind.includes("rlhf") || kind.includes("ppo") || kind.includes("kl")) {
+        return [
+          sceneNode("Prompt", sourceBadge(event), "tokens", false),
+          sceneNode("Policy", "sample answer", "model", false),
+          sceneNode("Reward", rewardBadge(event), "metric", true),
+          sceneNode("KL", klBadge(event), "train", false),
+          sceneNode("Update", processLabel(event), "adapter", kind.includes("ppo")),
+        ];
+      }
+      if (kind.includes("qlora") || kind.includes("quant") || kind.includes("memory") || kind.includes("planning") || kind.includes("hardware")) {
+        return [
+          sceneNode("Hardware", hardwareBadge(event), "data", false),
+          sceneNode("Base", modelBadge(event), "model", false),
+          sceneNode("Quant", quantBadge(event), "train", true),
+          sceneNode("LoRA", trainableBadge(event), "adapter", true),
+          sceneNode("Plan", memoryBadge(event), "metric", false),
+        ];
+      }
+      if (kind.includes("generation")) {
+        return [
+          sceneNode("Prompt", "fixed eval prompt", "tokens", false),
+          sceneNode("Base", "original output", "model", false),
+          sceneNode("Adapter", hasAdapter(event) ? "LoRA path" : "model path", "adapter", hasAdapter(event)),
+          sceneNode("Output", "before / after", "generation", true),
+          sceneNode("Score", metricBadge(event), "metric", false),
+        ];
+      }
+      if (kind.includes("checkpoint") || kind.includes("complete")) {
+        return [
+          sceneNode("Model", modelBadge(event), "model", false),
+          sceneNode("Adapter", hasAdapter(event) ? "delta weights" : "state", "adapter", hasAdapter(event)),
+          sceneNode("Save", kindDiskLabel(event), "save", true),
+          sceneNode("Reload", "fresh base + adapter", "model", kind.includes("checkpoint")),
+          sceneNode("Trace", "course artifact", "metric", kind.includes("complete")),
+        ];
+      }
+      if (kind.includes("eval")) {
+        return [
+          sceneNode("Validation", rowBadge(event), "data", false),
+          sceneNode("Forward", "no gradients", "model", false),
+          sceneNode("Loss", metricBadge(event), "metric", true),
+          sceneNode("Compare", "generalization", "tokens", false),
+          sceneNode("No update", "weights frozen", "save", false),
+        ];
+      }
+      if (kind.includes("train")) {
+        return [
+          sceneNode("Batch", rowBadge(event), "tokens", false),
+          sceneNode("Forward", "logits", "model", false),
+          sceneNode("Loss", metricBadge(event), "metric", latestMetric(event) != null),
+          sceneNode("Grad", "backward pass", "train", true),
+          sceneNode(hasAdapter(event) ? "Adapter" : "Weights", trainableBadge(event), hasAdapter(event) ? "adapter" : "model", true),
+        ];
+      }
+      if (kind.includes("model") || kind.includes("setup")) {
+        return [
+          sceneNode("HF Hub", modelBadge(event), "save", false),
+          sceneNode("Tokenizer", vocabBadge(event), "tokens", false),
+          sceneNode("Base", "loaded layers", "model", true),
+          sceneNode("Adapter", hasAdapter(event) ? "attached" : "none", "adapter", hasAdapter(event)),
+          sceneNode("Ready", trainableBadge(event), "metric", false),
+        ];
+      }
+      if (kind.includes("batch")) {
+        return [
+          sceneNode("Samples", rowBadge(event), "data", false),
+          sceneNode("Collator", "pad + stack", "train", true),
+          sceneNode("Tensor", tensorBadge(event), "tokens", false),
+          sceneNode("Batch", "same shape", "metric", false),
+          sceneNode("Trainer", "next step", "model", false),
+        ];
+      }
+      if (kind.includes("token") || kind.includes("transform") || kind.includes("loss_mask") || kind.includes("tensor")) {
+        return [
+          sceneNode("Text", "prompt + answer", "data", false),
+          sceneNode("Tokenizer", "text -> ids", "tokens", true),
+          sceneNode("Mask", "labels=-100", "train", false),
+          sceneNode("Tensors", tensorBadge(event), "metric", false),
+          sceneNode("Dataset", rowBadge(event), "save", false),
+        ];
+      }
+      if (kind.includes("data")) {
+        return [
+          sceneNode("JSONL", sourceBadge(event), "data", false),
+          sceneNode("Dataset", rowBadge(event), "data", true),
+          sceneNode("Split", splitBadge(event), "train", String(event.name || "").includes("split")),
+          sceneNode("Columns", columnBadge(event), "tokens", false),
+          sceneNode("Ready", "map / filter", "metric", false),
+        ];
+      }
+      return [
+        sceneNode("Input", sourceBadge(event), "data", false),
+        sceneNode("Step", processLabel(event), "train", true),
+        sceneNode("State", rowBadge(event), "tokens", false),
+        sceneNode("Model", modelBadge(event), "model", hasAdapter(event)),
+        sceneNode("Output", metricBadge(event), "metric", false),
+      ];
+    }
+
+    function sceneNode(title, sub, type, active) {
+      return { title, sub, type, active };
+    }
+
+    function renderSceneNode(node, index) {
+      return `
+        <div class="scene-node3d ${node.active ? "active" : "dim"} ${node.type === "adapter" ? "adapter" : ""} ${node.type === "metric" ? "metric" : ""}">
+          <div class="scene-node-top">
+            <span class="scene-step">${String(index + 1).padStart(2, "0")}</span>
+            <span class="scene-state">${escapeHtml(node.active ? "active" : node.type)}</span>
+          </div>
+          <div class="scene-title">${escapeHtml(node.title)}</div>
+          <div class="scene-glyph">${renderSceneGlyph(node)}</div>
+          <div class="scene-sub">${escapeHtml(compactText(node.sub || "", 72))}</div>
+        </div>
+      `;
+    }
+
+    function renderSceneGlyph(node) {
+      if (node.type === "data") return renderSceneCubes();
+      if (node.type === "tokens") return `<div class="scene-token-grid">${renderSceneTokens(node.title)}</div>`;
+      if (node.type === "model") return renderSceneModel(false);
+      if (node.type === "adapter") return renderSceneModel(true);
+      if (node.type === "train") return renderSceneMatrix();
+      if (node.type === "save") return `<div class="scene-disk">${escapeHtml(compactText(node.title, 9))}</div>`;
+      if (node.type === "generation") return renderSceneOutput(node);
+      return `<div class="scene-metric">${renderSparkline(metricSeries(lastTrace ? lastTrace.events || [] : []))}</div>`;
+    }
+
+    function renderSceneCubes() {
+      return `
+        <div class="scene-cubes">
+          ${Array.from({ length: 6 }, (_, index) => `<span class="scene-cube ${index === 4 ? "gold" : ""}" style="--delay:${(index * 0.09).toFixed(2)}s"></span>`).join("")}
+        </div>
+      `;
+    }
+
+    function renderSceneTokens(label) {
+      const base = label.toLowerCase().includes("mask")
+        ? ["-100", "-100", "json", "answer", "loss", "eos"]
+        : ["prompt", "input", "ids", "mask", "labels", "json"];
+      return base.map((token, index) => `<span class="scene-token ${index >= 3 ? "learn" : ""}" style="--delay:${(index * 0.07).toFixed(2)}s">${escapeHtml(token)}</span>`).join("");
+    }
+
+    function renderSceneModel(adapter) {
+      return `
+        <div class="scene-model3d">
+          ${["embed", "block", "proj", "head"].map((label, index) => `<div class="scene-layer ${adapter && index >= 2 ? "hot" : ""}" title="${escapeAttr(label)}"></div>`).join("")}
+          ${adapter ? `<div class="scene-adapter-rail"><span>A</span><span>LoRA</span><span>B</span></div>` : ""}
+        </div>
+      `;
+    }
+
+    function renderSceneMatrix() {
+      return `
+        <div class="scene-matrix">
+          ${Array.from({ length: 30 }, (_, index) => `<span class="${index % 3 === 0 ? "hot" : ""}" style="--delay:${(index * 0.025).toFixed(3)}s"></span>`).join("")}
+        </div>
+      `;
+    }
+
+    function renderSceneOutput(node) {
+      return `
+        <div class="scene-output">
+          <div class="scene-output-card">base: markdown / extra text</div>
+          <div class="scene-output-card hot">${escapeHtml(compactText(node.sub || "trained output", 68))}</div>
+        </div>
+      `;
+    }
+
+    function sceneFooter(event, events) {
+      const metric = latestMetric(event) || latestMetricAcross(events, event);
+      return [
+        processLabel(event),
+        sourceBadge(event),
+        metric ? `${metric.key} ${formatNumber(metric.value)}` : trainableBadge(event),
+        hasAdapter(event) ? "base frozen + adapter delta" : tensorBadge(event),
+      ].filter(Boolean).slice(0, 4);
+    }
+
+    function sourceBadge(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      return compactText(inputs.data_file || inputs.data || inputs.model_name || outputs.model_name || outputs.trace || event.kind || "course state", 42);
+    }
+
+    function rowBadge(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const rows = outputs.rows || outputs.raw_rows || outputs.train_rows || inputs.rows || inputs.eval_rows;
+      if (rows) return `${rows} rows`;
+      return outputs.validation_rows ? `${outputs.train_rows || "-"} train / ${outputs.validation_rows} val` : "samples";
+    }
+
+    function splitBadge(event) {
+      const outputs = event.outputs || {};
+      return outputs.validation_rows ? `${outputs.train_rows || "-"} / ${outputs.validation_rows}` : "train / validation";
+    }
+
+    function columnBadge(event) {
+      const outputs = event.outputs || {};
+      if (Array.isArray(outputs.columns)) return `${outputs.columns.length} columns`;
+      return tensorBadge(event);
+    }
+
+    function tensorBadge(event) {
+      const tensors = event.tensors || [];
+      if (!tensors.length) return "state";
+      return tensors.map((tensor) => tensor.name).filter(Boolean).slice(0, 2).join(" + ") || "tensors";
+    }
+
+    function modelBadge(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const model = event.model || {};
+      return compactText(outputs.model_name || inputs.model_name || model.base || "HF model", 42);
+    }
+
+    function vocabBadge(event) {
+      const outputs = event.outputs || {};
+      return outputs.tokenizer_vocab_size ? `${outputs.tokenizer_vocab_size} vocab` : "tokenizer";
+    }
+
+    function metricBadge(event) {
+      const metric = latestMetric(event);
+      if (metric) return `${metric.key} ${formatNumber(metric.value)}`;
+      const outputs = event.outputs || {};
+      if (Number.isFinite(outputs.strict_json_only_rate)) return `strict JSON ${formatPercent(outputs.strict_json_only_rate * 100)}`;
+      if (Number.isFinite(outputs.valid_json_rate)) return `JSON ${formatPercent(outputs.valid_json_rate * 100)}`;
+      return "metric";
+    }
+
+    function trainableBadge(event) {
+      const ratio = trainableRatio(event);
+      if (ratio != null) return `${formatNumber(ratio)}% trainable`;
+      return hasAdapter(event) ? "adapter trainable" : "trainable state";
+    }
+
+    function chosenBadge(event) {
+      const outputs = event.outputs || {};
+      return compactText(outputs.chosen || outputs.chosen_preview || "preferred answer", 52);
+    }
+
+    function rejectedBadge(event) {
+      const outputs = event.outputs || {};
+      return compactText(outputs.rejected || outputs.rejected_preview || "less preferred answer", 52);
+    }
+
+    function rewardBadge(event) {
+      const metrics = event.metrics || {};
+      if (Number.isFinite(metrics.reward)) return `reward ${formatNumber(metrics.reward)}`;
+      if (Number.isFinite(metrics.reward_margin)) return `margin ${formatNumber(metrics.reward_margin)}`;
+      return metricBadge(event);
+    }
+
+    function klBadge(event) {
+      const metrics = event.metrics || {};
+      if (Number.isFinite(metrics.kl)) return `KL ${formatNumber(metrics.kl)}`;
+      if (Number.isFinite(metrics.kl_penalty)) return `penalty ${formatNumber(metrics.kl_penalty)}`;
+      return "reference gap";
+    }
+
+    function hardwareBadge(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const machine = inputs.machine || outputs.machine || {};
+      if (machine.memory_gb) return `${machine.memory_gb}GB ${machine.mps_available ? "MPS" : machine.system || "local"}`;
+      return compactText(outputs.hardware || inputs.hardware || "local machine", 42);
+    }
+
+    function quantBadge(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      return compactText(outputs.quantization || inputs.quantization || outputs.load_mode || "4-bit plan", 42);
+    }
+
+    function memoryBadge(event) {
+      const outputs = event.outputs || {};
+      if (outputs.estimated_memory_gb) return `${formatNumber(outputs.estimated_memory_gb)}GB est.`;
+      if (outputs.decision) return compactText(outputs.decision, 42);
+      return "fit / no-fit";
     }
 
     function renderProcessSimulator(event) {
@@ -2303,6 +2881,10 @@
       if (kind.includes("eval")) return "Evaluation";
       if (kind.includes("checkpoint")) return "Checkpoint";
       if (kind.includes("generation")) return "Generation";
+      if (kind.includes("dpo") || kind.includes("preference")) return "Preference Step";
+      if (kind.includes("reward")) return "Reward Scoring";
+      if (kind.includes("rlhf") || kind.includes("ppo") || kind.includes("kl")) return "RLHF Signal";
+      if (kind.includes("qlora") || kind.includes("quant") || kind.includes("memory") || kind.includes("hardware")) return "Training Engineering";
       return "Step Processor";
     }
 
@@ -2339,7 +2921,7 @@
 
     function latestMetric(event) {
       const metrics = event.metrics || {};
-      const keys = ["loss", "train_loss", "eval_loss", "grad_norm", "learning_rate"];
+      const keys = ["loss", "dpo_loss", "preference_accuracy", "reward_margin", "reward", "kl", "kl_penalty", "train_loss", "eval_loss", "grad_norm", "learning_rate"];
       const key = keys.find((item) => Number.isFinite(metrics[item]));
       return key ? { key, value: metrics[key] } : null;
     }

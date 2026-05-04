@@ -511,8 +511,9 @@ trainer.save_model("outputs/adapter")
 | 手写 LoRA 机制 | Lesson 05 |
 | PEFT + 真实 Qwen LoRA、adapter 保存/加载/输出对比 | Lesson 06 |
 | 独立 SFT baseline 和训练前后输出对比 | Lesson 07 |
-| DPO / preference optimization | 后续 Lesson 08 |
-| RLHF / reward model / PPO | 后续课程 |
+| DPO / preference optimization | Lesson 08 |
+| RLHF / reward model / PPO 信号 | Lesson 09 |
+| QLoRA、量化、显存和训练工程边界 | Lesson 10 |
 
 下一步建议不是马上做 RLHF，而是在已经完成 SFT baseline 后，进入小样本 DPO：
 

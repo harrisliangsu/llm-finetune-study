@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 08 · DPO Preference Optimization</title>
+  <style>
+    body { margin:0; background:#0a0c10; color:#f4f7fb; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; line-height:1.65; }
+    main { max-width:1120px; margin:0 auto; padding:48px 22px 80px; }
+    h1 { font-size:40px; margin:0 0 10px; }
+    h2 { margin-top:34px; color:#bef264; }
+    p, li { color:#aeb8c8; }
+    code, pre { font-family:"SF Mono",Menlo,Consolas,monospace; }
+    pre { overflow:auto; padding:16px; border:1px solid rgba(174,184,200,.2); border-radius:8px; background:#10151d; color:#e5edff; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:22px 0; }
+    .card { border:1px solid rgba(174,184,200,.2); border-radius:8px; background:#111820; padding:16px; }
+    .card strong { display:block; margin-bottom:6px; color:#ffffff; }
+    .flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:10px; }
+    .step { border:1px solid rgba(190,242,100,.24); border-radius:8px; padding:12px; background:#101a14; }
+    .step span { display:block; color:#bef264; font-size:12px; font-weight:800; letter-spacing:.08em; }
+    a { color:#bef264; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lesson 08 · DPO Preference Optimization</h1>
+    <p>目标：不用 TRL，在本地用 transformers + torch + PEFT 手写一个最小 DPO 偏好优化循环。</p>
+    <div class="grid">
+      <div class="card"><strong>偏好数据</strong><code>data/preferences.jsonl</code><br>chosen / rejected 成对回答。</div>
+      <div class="card"><strong>模型</strong><code>--model-name auto</code><br>本机默认 Qwen 0.5B。</div>
+      <div class="card"><strong>Reference</strong><code>disable_adapter()</code><br>同一 base 禁用 LoRA。</div>
+      <div class="card"><strong>产物</strong><code>outputs/</code><br>adapter、metrics、generations。</div>
+    </div>
+    <h2>执行命令</h2>
+    <pre>.venv/bin/python lessons/08-dpo-preference/run.py --quick --trace-delay 0.2</pre>
+    <h2>DPO 流程</h2>
+    <div class="flow">
+      <div class="step"><span>01</span>选择 HF 模型</div>
+      <div class="step"><span>02</span>加载 tokenizer/base</div>
+      <div class="step"><span>03</span>挂 LoRA policy</div>
+      <div class="step"><span>04</span>构造偏好 batch</div>
+      <div class="step"><span>05</span>计算 ref logps</div>
+      <div class="step"><span>06</span>计算 policy logps</div>
+      <div class="step"><span>07</span>DPO loss 更新</div>
+      <div class="step"><span>08</span>生成并写报告</div>
+    </div>
+    <h2>看什么结果</h2>
+    <ul>
+      <li>打开 <a href="report.md">report.md</a> 看 reward margin 和 preference accuracy。</li>
+      <li>对比 <a href="outputs/generations/before.jsonl">before.jsonl</a> 与 <a href="outputs/generations/after.jsonl">after.jsonl</a>。</li>
+      <li>用 visualizer 查看 <code>visualizer/traces/08-dpo-preference.json</code> 的 DPO step 事件。</li>
+    </ul>
+  </main>
+</body>
+</html>

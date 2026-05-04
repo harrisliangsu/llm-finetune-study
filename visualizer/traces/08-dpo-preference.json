@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "lesson_id": "08-dpo-preference",
+  "title": "Lesson 08 · DPO Preference Optimization",
+  "status": "done",
+  "started_at": "2026-05-04T07:08:59+00:00",
+  "updated_at": "2026-05-04T07:09:06+00:00",
+  "current_event_id": "09",
+  "events": [
+    {
+      "id": "01",
+      "name": "select model",
+      "kind": "setup",
+      "summary": "根据本机配置选择真实 Hugging Face causal LM；默认 auto 在当前 Mac 上选择 Qwen 0.5B。",
+      "time": "2026-05-04T07:08:59+00:00",
+      "inputs": {
+        "requested_model": "auto",
+        "machine": {
+          "system": "Darwin",
+          "machine": "arm64",
+          "processor": "arm",
+          "memory_gb": 32,
+          "mps_available": true,
+          "mps_built": true
+        },
+        "quick": true
+      },
+      "outputs": {
+        "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+        "device": "mps",
+        "hf_cache": "/Users/liangsu/dev/repo/llm-finetune-study/lessons/08-dpo-preference/outputs/hf-cache"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "02",
+      "name": "load tokenizer and base model",
+      "kind": "model",
+      "summary": "通过 AutoTokenizer/AutoModelForCausalLM 加载真实 HF 模型，后续不使用手写模型。",
+      "time": "2026-05-04T07:09:02+00:00",
+      "inputs": {
+        "model_name": "Qwen/Qwen2.5-0.5B-Instruct"
+      },
+      "outputs": {
+        "tokenizer_vocab_size": 151665,
+        "pad_token_id": 151643
+      },
+      "tensors": [],
+      "model": {
+        "base": "Qwen/Qwen2.5-0.5B-Instruct",
+        "device": "mps",
+        "adapter": "none"
+      },
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "03",
+      "name": "attach LoRA policy",
+      "kind": "model",
+      "summary": "policy 是 base + LoRA；reference 用同一个 PEFT 模型禁用 adapter，避免加载第二份 0.5B 模型。",
+      "time": "2026-05-04T07:09:02+00:00",
+      "inputs": {
+        "target_modules": [
+          "q_proj",
+          "v_proj"
+        ],
+        "rank": 8,
+        "alpha": 16,
+        "dropout": 0.0
+      },
+      "outputs": {
+        "trainable_params": 540672,
+        "total_params": 494573440
+      },
+      "tensors": [],
+      "model": {
+        "policy": "base + trainable LoRA",
+        "reference": "base with adapter disabled"
+      },
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "04",
+      "name": "build preference batches",
+      "kind": "data",
+      "summary": "把每条样本编码成 prompt+chosen 和 prompt+rejected。prompt token 的 label=-100，只统计 completion logps。",
+      "time": "2026-05-04T07:09:02+00:00",
+      "inputs": {
+        "data": "lessons/08-dpo-preference/data/preferences.jsonl",
+        "eval_prompts": "lessons/08-dpo-preference/data/eval_prompts.jsonl",
+        "max_length": 128
+      },
+      "outputs": {
+        "preference_rows": 4,
+        "eval_prompts": 2
+      },
+      "tensors": [
+        {
+          "name": "chosen input_ids",
+          "shape": [
+            128
+          ]
+        },
+        {
+          "name": "rejected input_ids",
+          "shape": [
+            128
+          ]
+        },
+        {
+          "name": "completion labels",
+          "shape": [
+            128
+          ]
+        }
+      ],
+      "model": {},
+      "metrics": {},
+      "sample": {
+        "id": "pref-001",
+        "chosen": "我会先帮你核对订单和支付流水。请提供订单号、两次扣款时间和支付渠道；确认重复扣款后，我们会按支付渠道发起退款，并同步预计到账时间。",
+        "rejected": "肯定是系统错了，我们马上双倍退款给你，不需要任何订单信息。",
+        "criteria": "chosen 要先收集必要信息、避免未核实承诺；rejected 过度承诺且跳过核验。"
+      }
+    },
+    {
+      "id": "05",
+      "name": "evaluate before DPO",
+      "kind": "eval",
+      "summary": "adapter 初始时 policy 近似 reference，reward margin 通常接近 0。",
+      "time": "2026-05-04T07:09:03+00:00",
+      "inputs": {},
+      "outputs": {
+        "preference_scores": "lessons/08-dpo-preference/outputs/preference_scores_before.jsonl",
+        "generations": "lessons/08-dpo-preference/outputs/generations/before.jsonl"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "loss": 0.6931471824645996,
+        "reward_margin": 0.0,
+        "preference_accuracy": 0.0,
+        "reference_preference_gap": -102.86605072021484
+      },
+      "sample": {}
+    },
+    {
+      "id": "06",
+      "name": "DPO step 1",
+      "kind": "train",
+      "summary": "手写 DPO 更新：policy chosen/rejected logratio 相对 reference logratio 的差越大，loss 越低。",
+      "time": "2026-05-04T07:09:04+00:00",
+      "inputs": {
+        "sample_id": "pref-001",
+        "beta": 0.1,
+        "learning_rate": 2e-05
+      },
+      "outputs": {
+        "loss": 0.6931456327438354,
+        "policy_logratio": -92.81306457519531,
+        "ref_logratio": -92.81309509277344,
+        "reward_margin": 3.0517576306010596e-06
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "step": 1,
+        "sample_id": "pref-001",
+        "loss": 0.6931456327438354,
+        "policy_logratio": -92.81306457519531,
+        "ref_logratio": -92.81309509277344,
+        "reward_margin": 3.0517576306010596e-06,
+        "chosen_reward": 7.62939453125e-06,
+        "rejected_reward": 4.57763690064894e-06,
+        "preference_correct": true
+      },
+      "sample": {}
+    },
+    {
+      "id": "07",
+      "name": "evaluate after DPO",
+      "kind": "eval",
+      "summary": "训练后重新计算整批偏好对的 reward margin，并生成同一批固定 prompts。",
+      "time": "2026-05-04T07:09:05+00:00",
+      "inputs": {},
+      "outputs": {
+        "preference_scores": "lessons/08-dpo-preference/outputs/preference_scores_after.jsonl",
+        "generations": "lessons/08-dpo-preference/outputs/generations/after.jsonl"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "loss": 0.6788811087608337,
+        "reward_margin": 0.028918838361278176,
+        "preference_accuracy": 1.0,
+        "reference_preference_gap": -102.86605072021484
+      },
+      "sample": {}
+    },
+    {
+      "id": "08",
+      "name": "save adapter and reports",
+      "kind": "checkpoint",
+      "summary": "保存 LoRA adapter、tokenizer、metrics、report 和 generation JSONL。",
+      "time": "2026-05-04T07:09:06+00:00",
+      "inputs": {},
+      "outputs": {
+        "adapter_dir": "lessons/08-dpo-preference/outputs/adapter",
+        "metrics": "lessons/08-dpo-preference/outputs/metrics.json",
+        "report": "lessons/08-dpo-preference/report.md",
+        "index": "lessons/08-dpo-preference/index.html"
+      },
+      "tensors": [],
+      "model": {
+        "adapter_saved": true,
+        "base_saved": false
+      },
+      "metrics": {},
+      "sample": {}
+    },
+    {
+      "id": "09",
+      "name": "finish",
+      "kind": "complete",
+      "summary": "Lesson 08 完成：manual DPO objective、偏好指标、固定 prompt 生成和 adapter 保存都已写出。",
+      "time": "2026-05-04T07:09:06+00:00",
+      "inputs": {},
+      "outputs": {
+        "trace": "visualizer/traces/live.json"
+      },
+      "tensors": [],
+      "model": {},
+      "metrics": {
+        "loss_after": 0.6788811087608337,
+        "reward_margin_after": 0.028918838361278176,
+        "preference_accuracy_after": 1.0
+      },
+      "sample": {}
+    }
+  ]
+}

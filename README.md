@@ -67,6 +67,9 @@
 - [lessons/05-lora/index.html](lessons/05-lora/index.html)
 - [lessons/06-peft-lora/index.html](lessons/06-peft-lora/index.html)
 - [lessons/07-sft-baseline/index.html](lessons/07-sft-baseline/index.html)
+- [lessons/08-dpo-preference/index.html](lessons/08-dpo-preference/index.html)
+- [lessons/09-rlhf-reward/index.html](lessons/09-rlhf-reward/index.html)
+- [lessons/10-qlora-engineering/index.html](lessons/10-qlora-engineering/index.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md)
@@ -93,6 +96,9 @@ http://127.0.0.1:8765/visualizer/
 ```bash
 .venv/bin/python lessons/06-peft-lora/run.py --trace-delay 0.5
 .venv/bin/python lessons/07-sft-baseline/run.py --trace-delay 0.5
+.venv/bin/python lessons/08-dpo-preference/run.py --trace-delay 0.5
+.venv/bin/python lessons/09-rlhf-reward/run.py --trace-delay 0.5
+.venv/bin/python lessons/10-qlora-engineering/run.py --trace-delay 0.5
 ```
 
 `--trace-delay` 只用于演示时放慢步骤，方便观察页面变化；正常跑课可以不加。
@@ -106,8 +112,11 @@ http://127.0.0.1:8765/visualizer/
 - [lessons/05-lora/report.md](lessons/05-lora/report.md): 冻结 base、训练 LoRA adapter、保存并重新加载 adapter
 - [lessons/06-peft-lora/report.md](lessons/06-peft-lora/report.md): 使用 `Qwen/Qwen2.5-0.5B-Instruct` 跑真实 PEFT LoRA
 - [lessons/07-sft-baseline/report.md](lessons/07-sft-baseline/report.md): 使用真实 Hugging Face Qwen + LoRA 做客服工单严格 JSON SFT baseline
+- [lessons/08-dpo-preference/report.md](lessons/08-dpo-preference/report.md): 用 `prompt/chosen/rejected` 学习 DPO 偏好优化
+- [lessons/09-rlhf-reward/report.md](lessons/09-rlhf-reward/report.md): 本地理解 reward model、reference model、KL 和 PPO/RLHF 信号
+- [lessons/10-qlora-engineering/report.md](lessons/10-qlora-engineering/report.md): 评估 QLoRA、量化、显存和 Mac/CUDA 工程边界
 
-一次执行 01-07：
+一次执行 01-10：
 
 ```bash
 .venv/bin/python lessons/run_all.py
@@ -126,6 +135,9 @@ http://127.0.0.1:8765/visualizer/
 - Lesson 04: `sshleifer/tiny-gpt2`，用于快速学习 Trainer 训练闭环。
 - Lesson 06: `--model-name auto`，当前 32GB + MPS 本机会选择 `Qwen/Qwen2.5-0.5B-Instruct`，用于真实 PEFT LoRA。
 - Lesson 07: `--model-name auto`，当前 32GB + MPS 本机会选择 `Qwen/Qwen2.5-0.5B-Instruct`，用于中文严格 JSON SFT baseline。
+- Lesson 08: `--model-name auto`，继续使用真实 HF causal LM 学习 DPO 偏好优化。
+- Lesson 09: 本地轻量模拟 reward/KL/PPO 信号，避免把完整 RLHF 强行塞进 Mac 本地训练。
+- Lesson 10: 以硬件和训练工程规划为主，明确 QLoRA 在 CUDA/bitsandbytes 与 Mac/MPS 上的边界。
 
 Lesson 05 保留手写 LoRA，是为了教学低秩矩阵 `A/B` 的作用，不属于真实模型训练课。
 

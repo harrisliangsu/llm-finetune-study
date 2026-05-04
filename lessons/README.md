@@ -21,6 +21,9 @@
 | 05 | LoRA Adapter | [05-lora](05-lora) | frozen base + trainable adapter |
 | 06 | PEFT LoRA | [06-peft-lora](06-peft-lora) | real HF model + PEFT adapter |
 | 07 | SFT Baseline | [07-sft-baseline](07-sft-baseline) | ticket text -> strict JSON |
+| 08 | DPO Preference Optimization | [08-dpo-preference](08-dpo-preference) | prompt + chosen/rejected -> preference margin |
+| 09 | Reward / RLHF Concept | [09-rlhf-reward](09-rlhf-reward) | reward model, reference model, KL, PPO signals |
+| 10 | QLoRA / Training Engineering | [10-qlora-engineering](10-qlora-engineering) | quantization, memory budget, CUDA/MPS boundary |
 
 ## 运行顺序
 
@@ -32,6 +35,9 @@
 .venv/bin/python lessons/05-lora/run.py
 .venv/bin/python lessons/06-peft-lora/run.py
 .venv/bin/python lessons/07-sft-baseline/run.py
+.venv/bin/python lessons/08-dpo-preference/run.py
+.venv/bin/python lessons/09-rlhf-reward/run.py
+.venv/bin/python lessons/10-qlora-engineering/run.py
 ```
 
 也可以一次执行：
@@ -55,6 +61,9 @@
 - Lesson 04 使用 `sshleifer/tiny-gpt2`，用于快速学习 `Trainer` 闭环。
 - Lesson 06 默认 `--model-name auto`，在当前 32GB + MPS 机器上选择 `Qwen/Qwen2.5-0.5B-Instruct`，用于真实 PEFT LoRA。
 - Lesson 07 默认 `--model-name auto`，在当前 32GB + MPS 机器上选择 `Qwen/Qwen2.5-0.5B-Instruct`，用于客服工单严格 JSON SFT baseline。
+- Lesson 08 默认 `--model-name auto`，继续使用真实 HF causal LM 学习 DPO 偏好损失。
+- Lesson 09 默认本地轻量运行 reward/KL/PPO 信号，不做完整 RLHF 训练。
+- Lesson 10 默认做硬件和训练工程规划，不在 Mac 上强行运行 CUDA/bitsandbytes QLoRA。
 
 Lesson 05 仍然保留手写 LoRA，因为它的教学目标是看清低秩矩阵 `A/B` 如何改变模型层输出，而不是训练真实大模型。
 
@@ -79,13 +88,16 @@ http://127.0.0.1:8765/visualizer/
 .venv/bin/python lessons/05-lora/run.py --trace-delay 0.5
 .venv/bin/python lessons/06-peft-lora/run.py --trace-delay 0.5
 .venv/bin/python lessons/07-sft-baseline/run.py --trace-delay 0.5
+.venv/bin/python lessons/08-dpo-preference/run.py --trace-delay 0.5
+.venv/bin/python lessons/09-rlhf-reward/run.py --trace-delay 0.5
+.venv/bin/python lessons/10-qlora-engineering/run.py --trace-delay 0.5
 ```
 
 如果你只想学习页面，直接打开每课目录里的 `index.html`。
 
 ## 训练方法总览
 
-课程 01-07 已覆盖本地数据管线、tokenizer、batch、Trainer、LoRA、PEFT 和独立 SFT baseline。后续课程建议为：
+课程 01-07 已覆盖本地数据管线、tokenizer、batch、Trainer、LoRA、PEFT 和独立 SFT baseline。课程 08-10 进入 post-training 和训练工程边界：
 
 | 课程 | 主题 | 重点 |
 |---|---|---|
