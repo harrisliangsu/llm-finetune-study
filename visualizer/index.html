@@ -83,24 +83,6 @@
     .course-meter-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-width:0; }
     .course-meter-name { flex:1 1 auto; min-width:0; max-width:100%; font-size:11px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .course-meter-state { flex:0 0 auto; color:var(--muted); font-size:10px; font-weight:900; white-space:nowrap; }
-    .overview-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:12px; margin-bottom:18px; }
-    .overview-card {
-      min-height:122px; border:1px solid var(--line); border-radius:11px; padding:13px; min-width:0; overflow:hidden;
-      background:
-        linear-gradient(180deg,rgba(23,29,42,.92),rgba(13,17,26,.94)),
-        linear-gradient(90deg,rgba(6,182,212,.12),transparent);
-      position:relative;
-    }
-    .overview-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent,var(--cyan)); opacity:.9; }
-    .overview-kicker { color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
-    .overview-value { font-size:18px; line-height:1.2; font-weight:950; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .overview-meta { margin-top:8px; color:var(--muted); font-size:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-    .overview-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; }
-    .signal { display:inline-flex; align-items:center; gap:6px; min-height:23px; border:1px solid var(--line); border-radius:999px; padding:3px 8px; color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
-    .signal::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent,var(--cyan)); box-shadow:0 0 12px var(--accent,var(--cyan)); }
-    .micro-bars { display:flex; align-items:flex-end; gap:3px; height:22px; min-width:54px; }
-    .micro-bars span { width:5px; height:var(--h,40%); min-height:4px; border-radius:999px; background:linear-gradient(180deg,var(--accent,var(--cyan)),rgba(255,255,255,.12)); opacity:.8; animation:barBreathe 2.2s ease-in-out infinite; animation-delay:var(--delay,0s); }
-    @keyframes barBreathe { 50% { transform:scaleY(.62); opacity:.45; } }
     @keyframes barPulse { 50% { opacity:.35; } }
     .flow-wrap { overflow-x:auto; padding-bottom:6px; }
     .flow { display:flex; gap:10px; min-width:max-content; }
@@ -222,6 +204,80 @@
     .comparison-item { border:1px solid var(--line); border-radius:9px; padding:9px; background:rgba(23,29,42,.48); }
     .comparison-item strong { display:block; font-size:12px; margin-bottom:5px; color:var(--cyan); }
     .comparison-item div { color:#cbd5e1; font-size:12px; max-height:92px; overflow:auto; white-space:pre-wrap; }
+    .sim-board {
+      min-height:330px; border:1px solid rgba(6,182,212,.18); border-radius:14px; background:
+        linear-gradient(90deg,rgba(59,130,246,.05),transparent 34%,rgba(34,197,94,.05)),
+        repeating-linear-gradient(90deg,rgba(148,163,184,.035) 0 1px,transparent 1px 28px),
+        repeating-linear-gradient(180deg,rgba(148,163,184,.03) 0 1px,transparent 1px 28px),
+        rgba(8,10,18,.62);
+      padding:14px; position:relative; overflow:hidden;
+    }
+    .sim-board::before { content:""; position:absolute; left:8%; right:8%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.18),rgba(6,182,212,.7),rgba(34,197,94,.22)); }
+    .sim-board::after { content:""; position:absolute; top:calc(50% - 4px); left:9%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 20px rgba(6,182,212,.9); animation:simPacket 3s linear infinite; }
+    @keyframes simPacket { from { transform:translateX(0); opacity:0; } 10% { opacity:1; } 90% { opacity:1; } to { transform:translateX(660px); opacity:0; } }
+    .sim-flow { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr); gap:14px; align-items:center; min-height:300px; }
+    .sim-panel { border:1px solid var(--line); border-radius:12px; background:rgba(13,17,26,.86); padding:12px; min-width:0; box-shadow:0 18px 42px rgba(0,0,0,.18); }
+    .sim-panel.source { border-color:rgba(59,130,246,.28); }
+    .sim-panel.target { border-color:rgba(34,197,94,.28); }
+    .sim-processor { display:grid; place-items:center; gap:8px; min-height:116px; border:1px solid rgba(6,182,212,.35); border-radius:14px; background:rgba(6,182,212,.08); color:#bae6fd; font-size:12px; font-weight:950; text-align:center; animation:processorPulse 2.4s ease-in-out infinite; }
+    .sim-processor strong { display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#ecfeff; overflow-wrap:anywhere; }
+    .sim-processor span { color:var(--muted); font-size:10px; font-weight:900; }
+    .processor-ring { width:42px; height:42px; border-radius:50%; border:2px solid rgba(6,182,212,.18); border-top-color:var(--cyan); border-right-color:var(--green); animation:spin 2.5s linear infinite; }
+    @keyframes processorPulse { 50% { box-shadow:0 0 0 1px rgba(6,182,212,.2), 0 0 34px rgba(6,182,212,.14); transform:translateY(-2px); } }
+    .sim-label { color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+    .mini-json { display:grid; gap:7px; }
+    .mini-row { border:1px solid rgba(59,130,246,.2); border-radius:8px; background:rgba(59,130,246,.06); padding:8px; }
+    .mini-row strong { display:block; font-size:11px; color:#bfdbfe; margin-bottom:4px; }
+    .mini-row span { display:block; font-size:12px; color:#cbd5e1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mini-table { display:grid; gap:6px; }
+    .mini-table-head, .mini-table-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+    .mini-cell { min-height:34px; border:1px solid rgba(148,163,184,.16); border-radius:7px; padding:7px; background:rgba(255,255,255,.04); font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mini-table-head .mini-cell { color:#67e8f9; border-color:rgba(6,182,212,.25); font-weight:900; }
+    .token-viz { display:flex; flex-wrap:wrap; gap:5px; }
+    .viz-token { max-width:92px; border:1px solid rgba(59,130,246,.26); border-radius:7px; background:rgba(59,130,246,.08); padding:4px 6px; color:#bfdbfe; font-size:10px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; animation:tokenRise 2.4s ease-in-out infinite; animation-delay:var(--delay,0s); }
+    .viz-token.hot { color:#bbf7d0; border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.08); }
+    .mask-viz { display:grid; grid-template-columns:repeat(16,1fr); gap:4px; }
+    .mask-viz span { height:18px; border-radius:4px; background:rgba(148,163,184,.16); }
+    .mask-viz span.learn { background:rgba(34,197,94,.55); box-shadow:0 0 14px rgba(34,197,94,.18); }
+    .matrix-viz { display:grid; grid-template-columns:repeat(var(--cols,8),1fr); gap:4px; }
+    .matrix-viz span { aspect-ratio:1; border-radius:4px; background:rgba(255,255,255,.08); animation:matrixPulse 1.9s ease-in-out infinite; animation-delay:var(--delay,0s); }
+    .matrix-viz span.hot { background:rgba(34,197,94,.5); }
+    .model-sim { min-height:132px; display:grid; gap:10px; align-content:center; }
+    .model-track { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .model-unit { min-height:58px; border:1px solid rgba(148,163,184,.18); border-radius:10px; background:rgba(23,29,42,.72); display:grid; place-items:center; color:var(--muted); font-size:11px; font-weight:900; }
+    .model-unit.trainable { border-color:rgba(34,197,94,.44); color:#bbf7d0; animation:trainGlow 2.2s ease-in-out infinite; }
+    .model-unit.frozen { opacity:.7; }
+    .adapter-row { display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:8px; }
+    .adapter-box { border:1px solid rgba(249,115,22,.38); border-radius:9px; background:rgba(249,115,22,.08); color:#fed7aa; padding:8px; text-align:center; font-size:11px; font-weight:900; animation:adapterFlow 2.4s ease-in-out infinite; }
+    .loss-gauge { height:16px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+    .loss-gauge span { display:block; height:100%; width:var(--w,55%); border-radius:inherit; background:linear-gradient(90deg,var(--gold),var(--green)); animation:ratioEnter .9s ease both; }
+    .disk-viz { width:96px; height:96px; border:1px solid rgba(6,182,212,.32); border-radius:18px; background:linear-gradient(180deg,rgba(6,182,212,.12),rgba(8,10,18,.76)); display:grid; place-items:center; margin:auto; color:#bae6fd; font-size:12px; font-weight:950; box-shadow:0 20px 44px rgba(0,0,0,.22); }
+    .gen-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .gen-box { min-height:96px; border:1px solid var(--line); border-radius:10px; padding:9px; background:rgba(23,29,42,.56); overflow:hidden; }
+    .gen-box strong { display:block; color:var(--cyan); font-size:11px; margin-bottom:6px; }
+    .gen-box span { display:block; color:#cbd5e1; font-size:11px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+    .sim-caption { margin-top:10px; display:flex; flex-wrap:wrap; gap:7px; }
+    .sim-chip { border:1px solid var(--line); border-radius:999px; padding:4px 8px; color:var(--muted); font-size:10px; font-weight:900; background:rgba(23,29,42,.62); }
+    .sim-chip.hot { color:#bbf7d0; border-color:rgba(34,197,94,.28); background:rgba(34,197,94,.08); }
+    .split-viz { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .split-bucket { border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.035); padding:9px; min-height:88px; }
+    .split-bucket strong { display:block; color:#cbd5e1; font-size:11px; margin-bottom:7px; }
+    .sample-dots { display:flex; flex-wrap:wrap; gap:6px; }
+    .sample-dot { width:14px; height:14px; border-radius:50%; background:rgba(59,130,246,.7); box-shadow:0 0 14px rgba(59,130,246,.3); animation:paramFloat 2.8s ease-in-out infinite; animation-delay:var(--delay,0s); }
+    .sample-dot.val { background:rgba(234,179,8,.82); box-shadow:0 0 14px rgba(234,179,8,.35); }
+    .compare-stack { display:grid; gap:8px; }
+    .compare-row { display:grid; grid-template-columns:84px minmax(0,1fr); gap:8px; align-items:center; }
+    .compare-row strong { color:#67e8f9; font-size:11px; }
+    .compare-bar { height:20px; border-radius:999px; background:rgba(255,255,255,.07); overflow:hidden; }
+    .compare-bar span { display:block; width:var(--w,45%); height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--blue),var(--cyan)); animation:ratioEnter .9s ease both; }
+    .pipeline-viz { position:relative; z-index:1; min-height:300px; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; align-items:center; }
+    .pipeline-node { min-height:170px; border:1px solid var(--line); border-radius:12px; background:rgba(13,17,26,.84); padding:10px; display:grid; gap:10px; align-content:center; position:relative; overflow:hidden; }
+    .pipeline-node::after { content:""; position:absolute; top:50%; right:-10px; width:18px; height:2px; background:linear-gradient(90deg,var(--cyan),transparent); box-shadow:0 0 14px rgba(6,182,212,.4); }
+    .pipeline-node:last-child::after { display:none; }
+    .pipeline-node strong { color:#dbeafe; font-size:11px; font-weight:950; text-transform:uppercase; letter-spacing:.04em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pipeline-node.data { border-color:rgba(59,130,246,.26); }
+    .pipeline-node.model { border-color:rgba(168,85,247,.28); }
+    .pipeline-node.train { border-color:rgba(34,197,94,.28); }
     .data-lane { position:relative; min-height:128px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; align-items:center; }
     .flow-line { position:absolute; left:14%; right:14%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.25),rgba(6,182,212,.75),rgba(34,197,94,.38)); overflow:hidden; }
     .flow-line::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent); animation:scanLine 2.2s linear infinite; }
@@ -306,9 +362,9 @@
     .artifact-path { margin-top:4px; color:var(--cyan); font-size:11px; overflow-wrap:anywhere; }
     .compact-spark { height:60px; margin-top:8px; }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid { grid-template-columns:1fr; } .teach-node::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid,.sim-flow,.gen-grid,.pipeline-viz { grid-template-columns:1fr; } .teach-node::after,.pipeline-node::after { display:none; } .sim-board::before,.sim-board::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
-    @media (max-width:680px) { .overview-grid { grid-template-columns:1fr; } .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
+    @media (max-width:680px) { .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
   </style>
 </head>
 <body>
@@ -354,8 +410,6 @@
       </aside>
 
       <section class="panel">
-        <div class="panel-title">Run Overview</div>
-        <div class="overview-grid" id="runOverview"></div>
         <div class="panel-title">Execution Flow</div>
         <div class="flow-wrap"><div class="flow" id="flow"></div></div>
         <div class="section-spacer"></div>
@@ -602,91 +656,6 @@
       return "not run";
     }
 
-    function renderRunOverview(trace, selected, events) {
-      const coursePercent = courseProgressPercent(trace);
-      const kindCounts = eventKindCounts(events);
-      const metric = latestMetricAcross(events, selected);
-      const series = metricSeries(events);
-      const modelSnapshot = findModelSnapshot(events, selected);
-      const ratio = selected ? trainableRatio(selected) : null;
-      const artifacts = selected ? collectArtifacts(selected) : [];
-      const currentIndex = getCurrentEventIndex(trace, events);
-      const stepLabel = selected ? `STEP ${selected.id} · ${selected.name}` : "No active step";
-      $("runOverview").innerHTML = [
-        overviewCard({
-          accent: "var(--cyan)",
-          kicker: "current step",
-          value: stepLabel,
-          meta: selected ? selected.summary || selected.kind || "trace event" : "等待课程事件写入 trace",
-          signal: trace.status === "done" ? "complete" : trace.status || "running",
-          bars: events.map((event, index) => index <= currentIndex ? 70 : 16),
-        }),
-        overviewCard({
-          accent: "var(--green)",
-          kicker: "pipeline",
-          value: `${formatPercent(coursePercent)} course`,
-          meta: kindCounts.length ? kindCounts.map(([kind, count]) => `${kind}:${count}`).join(" · ") : "暂无事件分布",
-          signal: `${events.length}/${expectedEventCount(trace)} events`,
-          bars: kindCounts.map(([, count]) => 18 + count * 9),
-        }),
-        overviewCard({
-          accent: "var(--gold)",
-          kicker: "metric signal",
-          value: metric ? `${metric.key} ${formatNumber(metric.value)}` : "no metric",
-          meta: metricTrendText(series),
-          signal: series.length ? `${series.length} points` : "waiting",
-          bars: normalizeBars(series),
-        }),
-        overviewCard({
-          accent: "var(--orange)",
-          kicker: "model / artifact",
-          value: ratio == null ? modelSnapshot.label : `${formatNumber(ratio)}% trainable`,
-          meta: artifacts.length ? artifacts.slice(0, 2).map((item) => item.path).join(" · ") : modelSnapshot.meta,
-          signal: artifacts.length ? `${artifacts.length} artifacts` : modelSnapshot.signal,
-          bars: [28, 52, hasAdapter(selected || {}) ? 90 : 36, ratio == null ? 24 : Math.max(6, ratio)],
-        }),
-      ].join("");
-    }
-
-    function overviewCard({ accent, kicker, value, meta, signal, bars }) {
-      return `
-        <article class="overview-card" style="--accent:${escapeAttr(accent)}">
-          <div class="overview-kicker">${escapeHtml(kicker)}</div>
-          <div class="overview-value" title="${escapeAttr(value)}">${escapeHtml(value)}</div>
-          <div class="overview-meta">${escapeHtml(meta || "-")}</div>
-          <div class="overview-foot">
-            <span class="signal">${escapeHtml(signal || "-")}</span>
-            <div class="micro-bars">${renderMicroBars(bars)}</div>
-          </div>
-        </article>
-      `;
-    }
-
-    function renderMicroBars(values) {
-      const source = values && values.length ? values.slice(-8) : [20, 44, 26, 58, 38, 72];
-      return source.map((value, index) => {
-        const height = clamp(value, 8, 100);
-        return `<span style="--h:${height.toFixed(1)}%;--delay:${(index * 0.07).toFixed(2)}s"></span>`;
-      }).join("");
-    }
-
-    function normalizeBars(values) {
-      if (!values || !values.length) return [12, 12, 12, 12];
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const spread = max - min || 1;
-      return values.slice(-8).map((value) => 18 + ((value - min) / spread) * 76);
-    }
-
-    function eventKindCounts(events) {
-      const counts = new Map();
-      events.forEach((event) => {
-        const key = String(event.kind || "event").toLowerCase();
-        counts.set(key, (counts.get(key) || 0) + 1);
-      });
-      return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
-    }
-
     function latestMetricAcross(events, selected) {
       const selectedMetric = selected ? latestMetric(selected) : null;
       if (selectedMetric) return selectedMetric;
@@ -698,6 +667,15 @@
       return null;
     }
 
+    function eventKindCounts(events) {
+      const counts = new Map();
+      events.forEach((event) => {
+        const key = String(event.kind || "event").toLowerCase();
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+      return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+    }
+
     function metricTrendText(values) {
       if (!values.length) return "等待 Trainer log/eval 写入 loss、grad_norm 或 eval_loss。";
       if (values.length === 1) return "已有 1 个 metric 点，继续训练后会形成曲线。";
@@ -705,22 +683,6 @@
       const last = values.at(-1);
       const direction = last < first ? "下降" : last > first ? "上升" : "持平";
       return `首值 ${formatNumber(first)}，末值 ${formatNumber(last)}，趋势 ${direction}`;
-    }
-
-    function findModelSnapshot(events, selected) {
-      const limit = selected ? events.findIndex((event) => event.id === selected.id) : events.length - 1;
-      for (let index = Math.max(0, limit); index >= 0; index -= 1) {
-        const model = events[index].model || {};
-        if (Object.keys(model).length) {
-          const adapter = model.adapter || (hasAdapter(events[index]) ? "adapter" : "none");
-          return {
-            label: model.base || model.mode || adapter || "model state",
-            meta: `base ${model.base || model.mode || "not shown"} · adapter ${adapter}`,
-            signal: Array.isArray(model.updated) ? `${model.updated.length} updated` : model.saved ? "saved" : "model",
-          };
-        }
-      }
-      return { label: "model state", meta: "尚未出现模型状态事件", signal: "waiting" };
     }
 
     function renderCourseDashboard(trace, selected, events) {
@@ -842,7 +804,6 @@
       $("pulse").style.background = trace.status === "done" ? "var(--cyan)" : "var(--green)";
       updateControls();
       renderCourseControls();
-      renderRunOverview(trace, selected, events);
       renderCourseDashboard(trace, selected, events);
       renderCourseProgressList(trace);
 
@@ -936,10 +897,8 @@
           </div>
           <div class="stage-grid">
             <div class="stage-cell">
-              <div class="stage-label">Teaching Flow</div>
-              ${renderTeachingFlow(event)}
-              <div class="teach-note">${escapeHtml(teachingNote(event))}</div>
-              ${renderEvidenceGrid(event)}
+              <div class="stage-label">Process Simulator</div>
+              ${renderProcessSimulator(event)}
             </div>
             <div class="stage-cell">
               <div class="stage-label">Model / Metric State</div>
@@ -975,130 +934,453 @@
       `;
     }
 
-    function renderTeachingFlow(event) {
-      const nodes = teachingNodes(event);
+    function renderProcessSimulator(event) {
+      const kind = String(event.kind || "").toLowerCase();
+      const name = String(event.name || "").toLowerCase();
+      if (kind.includes("complete")) return renderCompleteSimulation(event);
+      if (kind.includes("generation")) return renderGenerationSimulation(event);
+      if (kind.includes("checkpoint")) return renderCheckpointSimulation(event);
+      if (kind.includes("eval")) return renderEvalSimulation(event);
+      if (kind.includes("train")) return renderTrainSimulation(event);
+      if (kind.includes("model") || kind.includes("setup") && name.includes("model")) return renderModelSimulation(event);
+      if (kind.includes("batch") || name.includes("collator")) return renderBatchSimulation(event);
+      if (kind.includes("token") || kind.includes("transform") || kind.includes("loss_mask") || kind.includes("tensor")) return renderTokenSimulation(event);
+      if (kind.includes("data_quality") || name.includes("filter")) return renderDataQualitySimulation(event);
+      if (kind.includes("data") && (name.includes("split") || name.includes("train_test"))) return renderSplitSimulation(event);
+      if (kind.includes("data")) return renderDataSimulation(event);
+      return renderGenericSimulation(event);
+    }
+
+    function renderCompleteSimulation(event) {
+      const tracePath = (event.outputs || {}).trace || "visualizer/traces/live.json";
       return `
-        <div class="teach-flow">
-          ${nodes.map((node, index) => `
-            <div class="teach-node ${index === 1 ? "active" : ""} ${escapeAttr(node.role || "")}">
-              <div class="teach-kicker">${escapeHtml(node.kicker || `stage ${index + 1}`)}</div>
-              <div class="teach-title">${escapeHtml(node.title)}</div>
-              <div class="teach-value">${escapeHtml(node.value || "-")}</div>
+        <div class="sim-board">
+          <div class="pipeline-viz">
+            <div class="pipeline-node data">
+              <strong>data</strong>
+              ${renderSampleDots(5, 1, false)}
             </div>
-          `).join("")}
+            <div class="pipeline-node">
+              <strong>tokens</strong>
+              ${renderMaskViz({ tensors: [{ name: "labels", ignored_tokens: 6, learned_tokens: 10 }] })}
+            </div>
+            <div class="pipeline-node model">
+              <strong>model</strong>
+              ${renderModelTrack(event, "target")}
+            </div>
+            <div class="pipeline-node train">
+              <strong>train</strong>
+              ${renderMatrixViz(3, 6, 2)}
+              <div class="loss-gauge"><span style="--w:58%"></span></div>
+            </div>
+            <div class="pipeline-node">
+              <strong>save</strong>
+              <div class="disk-viz">${escapeHtml(kindDiskLabel(event))}</div>
+            </div>
+          </div>
         </div>
+        ${renderSimChips(["JSONL -> Dataset", "tokens + labels", hasAdapter(event) ? "LoRA adapter" : "model state", tracePath], 2)}
       `;
     }
 
-    function teachingNodes(event) {
-      const kind = String(event.kind || "").toLowerCase();
-      const name = String(event.name || "").toLowerCase();
+    function renderDataSimulation(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const tensorColumns = (event.tensors || []).map((tensor) => tensor.name).filter(Boolean);
+      const columns = outputs.columns || inputs.columns || (tensorColumns.length ? tensorColumns : Object.keys(event.sample || {}).slice(0, 3));
+      const processor = tensorColumns.length ? "map tokenize" : event.name || "load_dataset";
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Source", renderMiniJson(event.sample || inputs, 3), "source")}
+            ${renderProcessor(processor, tensorColumns.length ? "text -> tensors" : "JSONL -> Dataset")}
+            ${renderSimPanel("Dataset", renderMiniTable(columns, event.sample || outputs), "target")}
+          </div>
+        </div>
+        ${renderSimChips([
+          inputs.data_file || inputs.data || "local data",
+          `${outputs.rows || outputs.train_rows || "-"} rows`,
+          `${(columns || []).length || "-"} columns`,
+        ], 1)}
+      `;
+    }
+
+    function renderSplitSimulation(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const total = Number(inputs.rows || outputs.train_rows + outputs.validation_rows || 5);
+      const trainRows = Number(outputs.train_rows || Math.max(1, total - 1));
+      const valRows = Number(outputs.validation_rows || Math.max(1, total - trainRows));
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Dataset", renderSampleDots(total, valRows, false), "source")}
+            ${renderProcessor("seeded split", `seed ${inputs.seed ?? "-"}`)}
+            ${renderSimPanel("Splits", `
+              <div class="split-viz">
+                <div class="split-bucket"><strong>train · ${escapeHtml(String(trainRows))}</strong>${renderSampleDots(trainRows, 0, false)}</div>
+                <div class="split-bucket"><strong>validation · ${escapeHtml(String(valRows))}</strong>${renderSampleDots(valRows, valRows, true)}</div>
+              </div>
+            `, "target")}
+          </div>
+        </div>
+        ${renderSimChips([`test_size ${inputs.test_size ?? "-"}`, `seed ${inputs.seed ?? "-"}`, "可复现划分"], 2)}
+      `;
+    }
+
+    function renderDataQualitySimulation(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const before = Number(inputs.train_rows_before || inputs.rows || outputs.train_rows || 4);
+      const after = Number(outputs.train_rows || before);
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Before", renderSampleDots(before, Math.max(0, before - after), true), "source")}
+            ${renderProcessor("filter", "drop bad rows")}
+            ${renderSimPanel("After", renderSampleDots(after, 0, false), "target")}
+          </div>
+        </div>
+        ${renderSimChips([`${before} -> ${after}`, "空 output 会被删除", "训练集更干净"], 1)}
+      `;
+    }
+
+    function renderTokenSimulation(event) {
+      const sample = event.sample || {};
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const prompt = sample.prompt || inputs.instruction || inputs.labels || "instruction + input";
+      const answer = sample.answer || outputs.decoded_learned_labels || "answer tokens";
+      const inputIds = findTensor(event, "input_ids");
+      const tensorNames = (event.tensors || []).map((tensor) => tensor.name).join(" / ") || "input_ids / labels";
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Text", `
+              <div class="token-viz">${renderTokenChips(textTokens(prompt, 8), "prompt")}</div>
+              <div style="height:8px"></div>
+              <div class="token-viz">${renderTokenChips(textTokens(answer, 8), "answer")}</div>
+            `, "source")}
+            ${renderProcessor(processLabel(event), "text -> ids")}
+            ${renderSimPanel("Training Tensors", `
+              <div class="token-viz">${renderTokenChips(tokenPreview(inputIds, outputs), "ids")}</div>
+              <div style="height:12px"></div>
+              ${renderMaskViz(event)}
+            `, "target")}
+          </div>
+        </div>
+        ${renderSimChips([tensorNames, lossMaskSummary(event) || `max_length ${inputs.max_length || outputs.input_ids_length || "-"}`, "labels=-100 不算 loss"], 2)}
+      `;
+    }
+
+    function renderBatchSimulation(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const keys = outputs.batch_keys || inputs.feature_keys || ["input_ids", "attention_mask", "labels"];
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Samples", `
+              <div class="mini-json">
+                ${keys.slice(0, 3).map((key) => `<div class="mini-row"><strong>${escapeHtml(String(key))}</strong><span>[seq]</span></div>`).join("")}
+              </div>
+            `, "source")}
+            ${renderProcessor("collator", "pad + stack")}
+            ${renderSimPanel("Batch", renderMatrixViz(4, 8, 3), "target")}
+          </div>
+        </div>
+        ${renderSimChips([`features ${inputs.feature_count || keys.length}`, "padding 对齐长度", tensorSummary(event.tensors || []) || "batch tensor"], 1)}
+      `;
+    }
+
+    function renderModelSimulation(event) {
       const inputs = event.inputs || {};
       const outputs = event.outputs || {};
       const model = event.model || {};
-      const metric = latestMetric(event);
-      if (kind.includes("data") && name.includes("load_dataset")) {
-        return [
-          { kicker: "raw file", title: "JSONL 样本行", value: `${inputs.data_file || "data file"} · 每行一个 instruction/input/output` },
-          { kicker: "reader", title: "load_dataset", value: "把普通文本文件解析成 Hugging Face Dataset 表对象" },
-          { kicker: "dataset", title: `${outputs.rows || "-"} rows`, value: sampleText(event.sample) || `columns: ${previewValue(outputs.columns || [])}` },
-        ];
-      }
-      if (kind.includes("data_quality")) {
-        return [
-          { kicker: "before", title: "原始 split", value: `train ${inputs.train_rows_before || "-"} · validation ${inputs.validation_rows_before || "-"}` },
-          { kicker: "filter", title: "质量规则", value: "删除空回答、坏样本或不符合训练目标的数据" },
-          { kicker: "after", title: "保留样本", value: `train ${outputs.train_rows || "-"} · validation ${outputs.validation_rows || "-"}` },
-        ];
-      }
-      if (kind.includes("token") || kind.includes("transform") || kind.includes("loss_mask")) {
-        const prompt = event.sample && event.sample.prompt ? event.sample.prompt : dataSummary(inputs);
-        const tensorNames = (event.tensors || []).map((tensor) => tensor.name).join(" / ");
-        return [
-          { kicker: "text", title: "Prompt + Answer", value: prompt || "instruction/input/output 文本字段" },
-          { kicker: "tokenizer/map", title: processLabel(event), value: "文本被切成 token ids，同时构造 attention_mask 和 labels" },
-          { kicker: "training columns", title: tensorNames || "input_ids / labels", value: lossMaskSummary(event) || dataSummary(outputs) },
-        ];
-      }
-      if (kind.includes("batch")) {
-        return [
-          { kicker: "samples", title: `${inputs.feature_count || "-"} features`, value: previewValue(inputs.feature_keys || inputs) },
-          { kicker: "collator", title: "Pad + Stack", value: "把多条样本按 batch 维度堆叠，短序列补齐，生成同形状张量" },
-          { kicker: "batch tensors", title: previewValue(outputs.batch_keys || ["input_ids", "attention_mask", "labels"]), value: tensorSummary(event.tensors || []) },
-        ];
-      }
-      if (kind.includes("model")) {
-        const target = inputs.target_modules || inputs.target_module || model.target_modules || model.target_module;
-        return [
-          { kicker: "base", title: model.base || "Base Model", value: inputs.model_name || `total params ${outputs.total_params || "-"}`, role: "model" },
-          { kicker: "adapter", title: hasAdapter(event) ? "Inject LoRA / PEFT" : "Build Model", value: target ? `target: ${previewValue(target)}` : dataSummary(inputs), role: "model" },
-          { kicker: "trainable", title: model.trainable_ratio || trainableRatioText(event), value: `trainable ${outputs.trainable_params || "-"} / total ${outputs.total_params || "-"}`, role: "model" },
-        ];
-      }
-      if (kind.includes("train")) {
-        return [
-          { kicker: "batch", title: `global step ${inputs.global_step ?? inputs.max_steps ?? "-"}`, value: `epoch ${inputs.epoch ?? "-"} · lr ${inputs.learning_rate ?? latestLearningRate(event) ?? "-"}` },
-          { kicker: "forward/backward", title: "Loss -> Grad", value: metric ? `${metric.key}: ${formatNumber(metric.value)}` : dataSummary(outputs), role: "metric" },
-          { kicker: "update", title: hasAdapter(event) ? "只更新 Adapter" : "更新可训练参数", value: model.updated ? previewValue(model.updated) : "optimizer.step() 改变可训练权重", role: "model" },
-        ];
-      }
-      if (kind.includes("eval")) {
-        return [
-          { kicker: "validation", title: "验证集样本", value: `eval rows ${inputs.eval_rows || "-"}` },
-          { kicker: "forward only", title: "No Gradient Update", value: "只计算 loss/metric，用来判断泛化，不执行 optimizer.step()" },
-          { kicker: "metric", title: metric ? metric.key : "eval metric", value: metric ? formatNumber(metric.value) : dataSummary(outputs), role: "metric" },
-        ];
-      }
-      if (kind.includes("checkpoint")) {
-        return [
-          { kicker: "state", title: "训练产物", value: dataSummary(inputs) || dataSummary(model) },
-          { kicker: "save/load", title: processLabel(event), value: event.summary || "把模型状态或 adapter 写入磁盘，再从磁盘恢复" },
-          { kicker: "artifact", title: "可复用文件", value: dataSummary(outputs), role: "model" },
-        ];
-      }
-      if (kind.includes("generation")) {
-        return [
-          { kicker: "prompt", title: "固定问题", value: inputs.prompt || "解释什么是梯度累积" },
-          { kicker: "compare", title: "Base vs Tuned", value: "同一个 prompt 分别经过 base、训练后 LoRA、重新加载 adapter" },
-          { kicker: "answer", title: "输出差异", value: generationSummary(outputs), role: "metric" },
-        ];
-      }
-      return [
-        { kicker: "input", title: "输入状态", value: dataSummary(inputs) },
-        { kicker: "step", title: processLabel(event), value: event.summary || stepVerb(event) },
-        { kicker: "output", title: "输出状态", value: dataSummary(outputs) },
-      ];
+      const ratio = trainableRatio(event);
+      const target = inputs.target_modules || model.target_modules || inputs.target_module || model.target_module || [];
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Base Model", renderModelTrack(event, "base"), "source")}
+            ${renderProcessor(hasAdapter(event) ? "PEFT / LoRA" : "init model", hasAdapter(event) ? "freeze base" : "all trainable")}
+            ${renderSimPanel("Trainable State", `
+              ${renderModelTrack(event, "target")}
+              ${hasAdapter(event) ? `<div style="height:10px"></div><div class="adapter-row">${["LoRA A", previewValue(target) || "target", "LoRA B"].map((item) => `<div class="adapter-box">${escapeHtml(compactText(item, 16))}</div>`).join("")}</div>` : ""}
+            `, "target")}
+          </div>
+        </div>
+        ${renderSimChips([
+          model.base || model.mode || inputs.model_name || "model",
+          hasAdapter(event) ? `adapter ${model.adapter || "trainable"}` : "full params",
+          ratio == null ? `${outputs.total_params || "-"} params` : `${formatNumber(ratio)}% trainable`,
+        ], 2)}
+      `;
     }
 
-    function renderEvidenceGrid(event) {
-      const cards = [];
-      const sample = event.sample || {};
-      if (Object.keys(sample).length) {
-        cards.push({ title: "actual sample values", body: renderValueRows(sample) });
-      }
-      if ((event.tensors || []).length) {
-        cards.push({ title: "tensor evidence", body: renderTensorEvidence(event) });
-      }
-      if (Object.keys(event.metrics || {}).length) {
-        cards.push({ title: "metric values", body: renderValueRows(event.metrics, 8) });
-      }
-      if (isGenerationEvent(event)) {
-        cards.push({ title: "generation comparison", body: renderGenerationComparison(event.outputs || {}) });
-      }
-      if (!cards.length) {
-        cards.push({ title: "input values", body: renderValueRows(event.inputs || {}, 6) });
-        cards.push({ title: "output values", body: renderValueRows(event.outputs || {}, 6) });
-      }
+    function renderTrainSimulation(event) {
+      const inputs = event.inputs || {};
+      const metric = latestMetric(event);
+      const ratio = trainableRatio(event);
+      const gauge = metric ? metricToGauge(metric.value) : 55;
       return `
-        <div class="evidence-grid">
-          ${cards.slice(0, 4).map((card) => `
-            <div class="evidence-card">
-              <div class="evidence-title">${escapeHtml(card.title)}</div>
-              <div class="evidence-body">${card.body}</div>
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Batch", renderMatrixViz(4, 8, 2), "source")}
+            ${renderProcessor("forward / backward", "loss -> grad")}
+            ${renderSimPanel("Update", `
+              ${renderModelTrack(event, "target")}
+              <div style="height:12px"></div>
+              <div class="loss-gauge"><span style="--w:${escapeAttr(String(gauge))}%"></span></div>
+            `, "target")}
+          </div>
+        </div>
+        ${renderSimChips([
+          `step ${inputs.global_step ?? inputs.max_steps ?? "-"}`,
+          metric ? `${metric.key} ${formatNumber(metric.value)}` : "loss waiting",
+          hasAdapter(event) ? "只更新 LoRA" : `${ratio == null ? "更新可训练参数" : `${formatNumber(ratio)}% trainable`}`,
+        ], 1)}
+      `;
+    }
+
+    function renderEvalSimulation(event) {
+      const inputs = event.inputs || {};
+      const metric = latestMetric(event);
+      const gauge = metric ? metricToGauge(metric.value) : 45;
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Validation", renderSampleDots(Number(inputs.eval_rows || 4), 0, false), "source")}
+            ${renderProcessor("forward only", "no update")}
+            ${renderSimPanel("Metric", `
+              <div class="loss-gauge"><span style="--w:${escapeAttr(String(gauge))}%"></span></div>
+              <div style="height:12px"></div>
+              ${renderMatrixViz(2, 8, 4)}
+            `, "target")}
+          </div>
+        </div>
+        ${renderSimChips([metric ? `${metric.key} ${formatNumber(metric.value)}` : "eval metric", "不反传梯度", "观察泛化"], 1)}
+      `;
+    }
+
+    function renderCheckpointSimulation(event) {
+      const outputs = event.outputs || {};
+      const artifact = collectArtifacts(event)[0];
+      const state = Object.keys(event.inputs || {}).length ? event.inputs : event.model || {};
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("State", hasAdapter(event) ? renderModelTrack(event, "target") : renderMiniJson(state, 3), "source")}
+            ${renderProcessor(processLabel(event), "state -> file")}
+            ${renderSimPanel("Disk", `
+              <div class="disk-viz">${escapeHtml(kindDiskLabel(event))}</div>
+            `, "target")}
+          </div>
+        </div>
+        ${renderSimChips([artifact ? artifact.path : outputs.trace || "trace / artifact", processLabel(event), event.kind || "complete"], 1)}
+      `;
+    }
+
+    function renderGenerationSimulation(event) {
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Prompt", `<div class="token-viz">${renderTokenChips(textTokens(inputs.prompt || "解释什么是梯度累积", 10), "prompt")}</div>`, "source")}
+            ${renderProcessor("generate", "model -> text")}
+            ${renderSimPanel("Outputs", renderGenerationBars(outputs), "target")}
+          </div>
+        </div>
+        ${renderSimChips(["same prompt", "base / tuned / reload", "对比输出差异"], 1)}
+      `;
+    }
+
+    function renderGenericSimulation(event) {
+      return `
+        <div class="sim-board">
+          <div class="sim-flow">
+            ${renderSimPanel("Input", renderMiniJson(event.inputs || {}, 3), "source")}
+            ${renderProcessor(processLabel(event), stepVerb(event))}
+            ${renderSimPanel("Output", renderMiniJson(event.outputs || {}, 3), "target")}
+          </div>
+        </div>
+        ${renderSimChips([event.kind || "event", processLabel(event), event.summary || "state moves"], 1)}
+      `;
+    }
+
+    function renderSimPanel(title, body, cls = "") {
+      return `
+        <div class="sim-panel ${escapeAttr(cls)}">
+          <div class="sim-label">${escapeHtml(title)}</div>
+          ${body}
+        </div>
+      `;
+    }
+
+    function renderProcessor(title, subtitle) {
+      return `
+        <div class="sim-processor">
+          <div class="processor-ring"></div>
+          <div><strong>${escapeHtml(compactText(title, 18))}</strong><span>${escapeHtml(compactText(subtitle || "", 22))}</span></div>
+        </div>
+      `;
+    }
+
+    function renderSimChips(items, hotIndex = 0) {
+      const values = items.filter((item) => item !== undefined && item !== null && item !== "");
+      return `
+        <div class="sim-caption">
+          ${values.slice(0, 4).map((item, index) => `<span class="sim-chip ${index === hotIndex ? "hot" : ""}">${escapeHtml(compactText(String(item), 36))}</span>`).join("")}
+        </div>
+      `;
+    }
+
+    function renderMiniJson(value, limit = 3) {
+      const entries = Array.isArray(value)
+        ? value.map((item, index) => [String(index), item])
+        : Object.entries(value || {});
+      if (!entries.length) return `<div class="subtle">empty</div>`;
+      return `
+        <div class="mini-json">
+          ${entries.slice(0, limit).map(([key, item]) => `
+            <div class="mini-row">
+              <strong>${escapeHtml(key)}</strong>
+              <span title="${escapeAttr(previewValue(item))}">${escapeHtml(previewValue(item))}</span>
             </div>
           `).join("")}
         </div>
       `;
+    }
+
+    function renderMiniTable(columns, sample) {
+      const sourceColumns = Array.isArray(columns) && columns.length ? columns.slice(0, 3) : Object.keys(sample || {}).slice(0, 3);
+      const safeColumns = sourceColumns.length ? sourceColumns : ["input_ids", "attention_mask", "labels"];
+      return `
+        <div class="mini-table">
+          <div class="mini-table-head">
+            ${safeColumns.map((column) => `<div class="mini-cell">${escapeHtml(String(column))}</div>`).join("")}
+          </div>
+          <div class="mini-table-row">
+            ${safeColumns.map((column) => `<div class="mini-cell" title="${escapeAttr(previewValue((sample || {})[column]))}">${escapeHtml(previewValue((sample || {})[column] ?? "value"))}</div>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTokenChips(tokens, mode) {
+      const cls = mode === "answer" ? "hot" : "";
+      return tokens.map((token, index) => `
+        <span class="viz-token ${cls}" style="--delay:${(index * 0.06).toFixed(2)}s">${escapeHtml(compactText(String(token), 12))}</span>
+      `).join("");
+    }
+
+    function textTokens(text, limit = 10) {
+      const raw = String(text || "").replace(/[#:\n\r\t]/g, " ").trim();
+      if (!raw) return ["empty"];
+      const parts = raw.includes(" ")
+        ? raw.split(/\s+/).filter(Boolean)
+        : Array.from(raw).reduce((groups, char, index) => {
+            const groupIndex = Math.floor(index / 3);
+            groups[groupIndex] = `${groups[groupIndex] || ""}${char}`;
+            return groups;
+          }, []);
+      return parts.slice(0, limit);
+    }
+
+    function tokenPreview(tensor, outputs) {
+      if (tensor && Array.isArray(tensor.preview) && tensor.preview.length) return tensor.preview.slice(0, 16);
+      const length = Number(outputs.input_ids_length || outputs.prompt_tokens || 16);
+      return Array.from({ length: Math.min(16, Math.max(6, length)) }, (_, index) => index * 7 + 101);
+    }
+
+    function renderMaskViz(event) {
+      const labels = findTensor(event, "labels");
+      if (labels && Array.isArray(labels.preview) && labels.preview.length) {
+        return `
+          <div class="mask-viz">
+            ${labels.preview.slice(0, 16).map((value) => `<span class="${value === -100 ? "" : "learn"}" title="${escapeAttr(String(value))}"></span>`).join("")}
+          </div>
+        `;
+      }
+      const ignored = labels ? Number(labels.masked_prompt_tokens ?? labels.ignored_tokens ?? 8) : 8;
+      const learned = labels ? Number(labels.learned_answer_tokens ?? labels.learned_tokens ?? 8) : 8;
+      const total = Math.max(1, ignored + learned);
+      const ignoredCells = Math.round((ignored / total) * 16);
+      return `
+        <div class="mask-viz">
+          ${Array.from({ length: 16 }, (_, index) => `<span class="${index >= ignoredCells ? "learn" : ""}"></span>`).join("")}
+        </div>
+      `;
+    }
+
+    function renderMatrixViz(rows = 4, cols = 8, hotEvery = 3) {
+      const total = rows * cols;
+      return `
+        <div class="matrix-viz" style="--cols:${cols}">
+          ${Array.from({ length: total }, (_, index) => `<span class="${index % hotEvery === 0 ? "hot" : ""}" style="--delay:${(index * 0.025).toFixed(3)}s"></span>`).join("")}
+        </div>
+      `;
+    }
+
+    function renderModelTrack(event, mode) {
+      const labels = ["embed", "block", "attn", "head"];
+      const adapter = hasAdapter(event);
+      const fullTrain = trainableRatio(event) === 100 || (event.model || {}).base === "trainable";
+      return `
+        <div class="model-sim">
+          <div class="model-track">
+            ${labels.map((label, index) => {
+              const trainable = mode === "target" && (fullTrain || (adapter && index >= 2) || event.kind === "train" && !adapter);
+              return `<div class="model-unit ${trainable ? "trainable" : "frozen"}">${escapeHtml(label)}</div>`;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSampleDots(count, valCount = 0, allVal = false) {
+      const safeCount = clamp(Number.isFinite(count) ? count : 5, 1, 12);
+      const validation = clamp(Number.isFinite(valCount) ? valCount : 0, 0, safeCount);
+      return `
+        <div class="sample-dots">
+          ${Array.from({ length: safeCount }, (_, index) => {
+            const isVal = allVal || index >= safeCount - validation;
+            return `<span class="sample-dot ${isVal ? "val" : ""}" style="--delay:${(index * 0.08).toFixed(2)}s"></span>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function renderGenerationBars(outputs) {
+      const entries = Object.entries(outputs || {});
+      if (!entries.length) return renderMatrixViz(3, 8, 3);
+      return `
+        <div class="compare-stack">
+          ${entries.slice(0, 3).map(([key, value], index) => `
+            <div class="compare-row">
+              <strong>${escapeHtml(compactText(key, 12))}</strong>
+              <div class="compare-bar" title="${escapeAttr(compactText(value, 180))}"><span style="--w:${45 + index * 18}%"></span></div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function kindDiskLabel(event) {
+      const kind = String(event.kind || "").toLowerCase();
+      if (kind.includes("complete")) return "trace";
+      if (hasAdapter(event)) return "adapter";
+      return "files";
+    }
+
+    function findTensor(event, name) {
+      return (event.tensors || []).find((tensor) => tensor.name === name);
+    }
+
+    function metricToGauge(value) {
+      if (!Number.isFinite(value)) return 50;
+      return clamp(15 + (value % 6) * 12, 16, 92);
     }
 
     function renderValueRows(value, limit = 12) {
@@ -1164,26 +1446,6 @@
           `).join("")}
         </div>
       `;
-    }
-
-    function teachingNote(event) {
-      const kind = String(event.kind || "").toLowerCase();
-      const name = String(event.name || "").toLowerCase();
-      if (kind.includes("data") && name.includes("load_dataset")) return "观察重点：Dataset 的 columns 只是字段名，真正的数据值在样本行里；点击 data_file 可看到完整 JSONL。";
-      if (kind.includes("transform") || kind.includes("token")) return "观察重点：微调不是直接喂字符串，而是把 prompt/answer 转成 input_ids、attention_mask、labels。";
-      if (kind.includes("loss_mask")) return "观察重点：labels=-100 的位置不会参与 loss；SFT 通常只让回答部分学习。";
-      if (kind.includes("batch")) return "观察重点：collator 把多条样本补齐并堆叠成 batch，训练循环实际读的是 batch tensor。";
-      if (kind.includes("model")) return hasAdapter(event) ? "观察重点：LoRA/PEFT 不改完整基座权重，只在目标模块旁边挂可训练低秩矩阵。" : "观察重点：模型初始化后，参数量决定训练成本和显存压力。";
-      if (kind.includes("train")) return "观察重点：训练步骤包含 forward、loss、backward、optimizer update；LoRA 课程里 update 只作用于 adapter。";
-      if (kind.includes("eval")) return "观察重点：eval 只前向计算验证损失，不更新参数，用来判断是否真的泛化。";
-      if (kind.includes("checkpoint")) return "观察重点：保存/加载的是可复用训练产物；LoRA 场景通常保存 adapter 而不是完整 base model。";
-      if (kind.includes("generation")) return "观察重点：同一个 prompt 对比 base、训练后、reload 后输出，验证训练产物是否生效且可复现。";
-      return event.summary || "观察输入如何经过当前步骤变成输出。";
-    }
-
-    function sampleText(sample) {
-      if (!sample || !Object.keys(sample).length) return "";
-      return Object.entries(sample).map(([key, value]) => `${key}: ${previewValue(value)}`).join(" · ");
     }
 
     function tensorSummary(tensors) {
