@@ -43,7 +43,10 @@
 2. 再用 `datasets + transformers` 跑一个文本分类微调。
 3. 然后跑一个 causal LM 生成式微调。
 4. 接着学习 instruction/input/output 数据格式，做一个小 SFT。
-5. 最后看 LoRA/QLoRA、中文指令数据、adapter 保存和合并。
+5. 再用同一批固定 prompts 做 SFT 前后效果评估。
+6. 最后看 LoRA/QLoRA、DPO、中文指令数据、adapter 保存和合并。
+
+注意：当前 Lesson 02-06 已经使用 SFT 形态的数据和 labels，但课程标题分别聚焦 tokenizer、batch、Trainer、LoRA 和 PEFT，所以还缺一个独立命名的 SFT 基线课。后续课程应先补 Lesson 07: SFT baseline，再进入 adapter 评估和 DPO。
 
 ## 你可以从这里开始
 

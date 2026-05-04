@@ -60,4 +60,15 @@ http://127.0.0.1:8765/visualizer/
 
 ## 训练方法总览
 
-课程 01-06 主要覆盖本地 SFT + LoRA 主线。想从开发者视角理解什么时候选 SFT、PEFT/LoRA、QLoRA、DPO、RLHF、蒸馏，以及每种方法需要什么数据、输出什么 artifact，见 [docs/07-training-methods-guide.md](../docs/07-training-methods-guide.md)。
+课程 01-06 主要覆盖本地 SFT + LoRA 主线，但 SFT 是被拆进 Lesson 02 的 labels、Lesson 04 的 Trainer 闭环、Lesson 05/06 的 LoRA 训练里的，还没有独立命名成一课。
+
+后续课程应调整为：
+
+| 课程 | 主题 | 重点 |
+|---|---|---|
+| 07 | SFT Baseline | 不加 LoRA 概念干扰，明确 prompt、answer、loss mask、训练前后输出对比 |
+| 08 | Adapter Evaluation | 比较 base、trained adapter、reloaded adapter，确认 LoRA 是否真的改变回答 |
+| 09 | DPO Preference Optimization | 用 `prompt/chosen/rejected` 做小样本偏好优化 |
+| 10 | Reward / RLHF Concept | 理解 reward model、reference model、KL、PPO，不做大规模本地训练 |
+
+想从开发者视角理解什么时候选 SFT、PEFT/LoRA、QLoRA、DPO、RLHF、蒸馏，以及每种方法需要什么数据、输出什么 artifact，见 [docs/07-training-methods-guide.md](../docs/07-training-methods-guide.md)。
