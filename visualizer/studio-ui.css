@@ -4118,3 +4118,67 @@ body[data-view="learn"] .scene3d {
     font-size: 14px !important;
   }
 }
+
+/* UI14 Course balance: reduce left/middle/right column length contrast. */
+@media (min-width: 1281px) {
+  body[data-view="learn"] .layout {
+    grid-template-columns: minmax(0, 1fr) clamp(348px, 24vw, 368px) !important;
+    gap: 16px !important;
+    align-items: start !important;
+  }
+
+  body[data-view="learn"] .course-canvas {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    min-height: calc(100vh - 210px);
+  }
+
+  body[data-view="learn"] .course-canvas-grid {
+    grid-template-columns: clamp(314px, 31%, 340px) minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    min-height: 0;
+  }
+
+  body[data-view="learn"] .trace-rail-card,
+  body[data-view="learn"] .stage-workspace {
+    min-height: calc(100vh - 306px);
+  }
+
+  body[data-view="learn"] .trace-rail-card {
+    padding-right: 20px !important;
+  }
+
+  body[data-view="learn"] .flow-wrap,
+  body[data-view="learn"] .trace-rail-card .flow-wrap {
+    max-height: calc(100vh - 382px) !important;
+  }
+
+  body[data-view="learn"] .stage-workspace {
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+    gap: 14px !important;
+  }
+
+  body[data-view="learn"] .stage,
+  body[data-view="learn"] .event-inspector {
+    margin: 0 !important;
+  }
+
+  body[data-view="learn"] .layout > aside.panel {
+    align-self: start !important;
+  }
+
+  body[data-view="learn"] .layout > aside.panel:first-child {
+    position: sticky !important;
+    top: 92px !important;
+    max-height: calc(100vh - 108px);
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+
+  body[data-view="learn"] .layout > aside.panel:last-child {
+    max-height: calc(100vh - 108px);
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+}
