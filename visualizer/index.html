@@ -700,6 +700,337 @@
       border-radius:8px;
       background:#0d131d;
     }
+    .flow-wrap {
+      margin:0;
+      padding:14px 14px 118px;
+      margin-bottom:-104px;
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:8px;
+      background:
+        linear-gradient(180deg,rgba(15,23,42,.56),rgba(8,13,21,.78)),
+        #0b111a;
+      overflow-x:auto;
+      overflow-y:visible;
+    }
+    .flow {
+      gap:8px;
+      align-items:stretch;
+      padding:0;
+      position:relative;
+    }
+    .node {
+      width:146px;
+      min-height:102px;
+      padding:10px 10px 9px;
+      border-radius:7px;
+      background:#101722;
+      border:1px solid rgba(148,163,184,.14);
+      display:grid;
+      grid-template-rows:auto auto 1fr auto auto;
+      gap:6px;
+      overflow:visible;
+      box-shadow:none;
+      transition:border-color .14s ease,background .14s ease,box-shadow .14s ease,transform .14s ease;
+    }
+    .node::after {
+      right:-9px;
+      width:9px;
+      top:49px;
+      background:linear-gradient(90deg,rgba(100,116,139,.55),rgba(100,116,139,0));
+      box-shadow:none;
+    }
+    .node:hover {
+      width:146px;
+      min-height:102px;
+      background:#141c29;
+      border-color:rgba(56,189,248,.34);
+      box-shadow:0 10px 26px rgba(0,0,0,.24);
+      transform:translateY(-1px);
+      z-index:8;
+    }
+    .node.done { border-color:rgba(34,197,94,.18); }
+    .node.current:not(.active) {
+      border-color:rgba(56,189,248,.36);
+      box-shadow:inset 0 2px 0 rgba(56,189,248,.58);
+    }
+    .node.current:not(.active)::before {
+      content:"LIVE";
+      top:8px;
+      right:8px;
+      padding:1px 5px;
+      border-radius:5px;
+      border-color:rgba(56,189,248,.26);
+      background:rgba(56,189,248,.08);
+      color:#93c5fd;
+      font-size:8px;
+      letter-spacing:.08em;
+    }
+    .node.active {
+      border-color:rgba(217,119,6,.62);
+      background:#151923;
+      box-shadow:inset 0 2px 0 rgba(217,119,6,.95), 0 12px 28px rgba(0,0,0,.26);
+    }
+    .node-top {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      min-width:0;
+    }
+    .node-id {
+      margin:0;
+      color:#768198;
+      font-size:10px;
+      line-height:1;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .node-status {
+      flex:0 0 auto;
+      color:#8b96ac;
+      font-size:10px;
+      font-weight:900;
+      font-variant-numeric:tabular-nums;
+    }
+    .node.current:not(.active) .node-id { color:#7dd3fc; }
+    .node.active .node-id,
+    .node.active .node-status { color:#fbbf24; }
+    .node-name {
+      font-size:12px;
+      line-height:1.22;
+      font-weight:850;
+      letter-spacing:0;
+      color:#e7edf8;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+    .node-summary {
+      margin:0;
+      color:#8f9ab0;
+      font-size:10px;
+      line-height:1.35;
+      -webkit-line-clamp:2;
+    }
+    .node:hover .node-summary { -webkit-line-clamp:2; color:#9aa6bd; }
+    .node-progress { margin:0; align-self:end; }
+    .node-progress .progress-track {
+      height:3px;
+      background:rgba(148,163,184,.16);
+    }
+    .node-progress .progress-track::after,
+    .node-percent { display:none; }
+    .node .kind {
+      width:max-content;
+      max-width:100%;
+      min-height:18px;
+      margin:0;
+      padding:2px 6px;
+      border-radius:5px;
+      font-size:8px;
+      letter-spacing:.08em;
+      opacity:.88;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .node-popover {
+      position:absolute;
+      left:8px;
+      top:calc(100% + 10px);
+      width:280px;
+      max-width:min(280px,calc(100vw - 56px));
+      border:1px solid rgba(56,189,248,.28);
+      border-radius:8px;
+      background:#0b111a;
+      box-shadow:0 22px 54px rgba(0,0,0,.42);
+      padding:12px;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(-4px);
+      transition:opacity .14s ease,transform .14s ease;
+      z-index:30;
+    }
+    .node:hover .node-popover,
+    .node:focus-visible .node-popover {
+      opacity:1;
+      transform:translateY(0);
+    }
+    .node-popover-title {
+      color:#eef3ff;
+      font-size:13px;
+      font-weight:900;
+      line-height:1.25;
+      margin-bottom:8px;
+    }
+    .node-popover-summary {
+      color:#a8b3c7;
+      font-size:12px;
+      line-height:1.55;
+      margin-bottom:10px;
+    }
+    .node-popover-meta {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .node-popover-meta span {
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:999px;
+      background:#111827;
+      color:#b6c1d5;
+      padding:3px 7px;
+      font-size:10px;
+      font-weight:850;
+    }
+    .stage-grid {
+      grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);
+    }
+    .stage-cell {
+      min-width:0;
+      overflow:visible;
+    }
+    .sim-board {
+      min-height:280px;
+      padding:12px;
+      overflow:hidden;
+    }
+    .sim-board::before {
+      left:10%;
+      right:10%;
+    }
+    .sim-board::after {
+      left:10%;
+      animation-name:simPacketTight;
+    }
+    @keyframes simPacketTight {
+      from { left:10%; opacity:0; transform:scale(.85); }
+      10% { opacity:1; }
+      90% { opacity:1; }
+      to { left:90%; opacity:0; transform:scale(1.08); }
+    }
+    .sim-flow {
+      grid-template-columns:minmax(0,1fr) minmax(70px,86px) minmax(0,1fr);
+      gap:10px;
+      min-height:236px;
+    }
+    .sim-panel {
+      min-width:0;
+      padding:10px;
+    }
+    .sim-processor {
+      min-width:0;
+      min-height:94px;
+      padding:8px;
+      font-size:10px;
+      line-height:1.25;
+    }
+    .processor-ring {
+      width:34px;
+      height:34px;
+    }
+    .pipeline-viz {
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      min-height:226px;
+      gap:8px;
+    }
+    .pipeline-viz::before {
+      left:8%;
+      right:8%;
+    }
+    .pipeline-viz::after {
+      left:8%;
+      animation-name:pipelinePacketTight;
+    }
+    @keyframes pipelinePacketTight {
+      from { left:8%; opacity:0; transform:scale(.82); }
+      10% { opacity:1; }
+      90% { opacity:1; }
+      to { left:92%; opacity:0; transform:scale(1.08); }
+    }
+    .pipeline-node {
+      min-width:0;
+      min-height:120px;
+      padding:8px 6px;
+      border-radius:8px;
+      gap:6px;
+      overflow:hidden;
+    }
+    .pipeline-node::after {
+      display:none;
+    }
+    .pipeline-node strong {
+      font-size:9px;
+      line-height:1.15;
+      white-space:normal;
+      text-align:center;
+      min-width:0;
+    }
+    .pipeline-number {
+      font-size:8px;
+    }
+    .pipeline-glyph {
+      min-height:54px;
+      max-width:100%;
+    }
+    .pipeline-dots {
+      grid-template-columns:repeat(2,11px);
+      gap:5px;
+    }
+    .pipeline-dots span {
+      width:11px;
+      height:11px;
+    }
+    .pipeline-mask {
+      width:100%;
+      max-width:58px;
+      gap:3px;
+    }
+    .pipeline-mask span {
+      height:10px;
+      border-radius:3px;
+    }
+    .pipeline-mini-model {
+      width:100%;
+      max-width:56px;
+      gap:4px;
+    }
+    .pipeline-mini-model span {
+      height:38px;
+    }
+    .pipeline-train {
+      width:100%;
+      max-width:62px;
+      gap:6px;
+    }
+    .pipeline-train-grid {
+      gap:3px;
+    }
+    .pipeline-loss {
+      height:8px;
+    }
+    .pipeline-disk {
+      width:50px;
+      height:50px;
+      border-radius:12px;
+      font-size:9px;
+    }
+    .sim-caption {
+      gap:6px;
+    }
+    .sim-chip {
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .mini-cell,
+    .mini-row span,
+    .gen-box span,
+    .generation-card p {
+      min-width:0;
+    }
     @media (max-width:1500px) and (min-width:1151px) {
       .layout { grid-template-columns:minmax(250px,288px) minmax(0,1fr); }
       .layout > aside.panel:last-child { grid-column:2; }
@@ -718,7 +1049,7 @@
       }
       .stage-grid .stage-cell { border-right:0; border-bottom:1px solid rgba(148,163,184,.12); }
       .stage-grid .stage-cell:last-child { border-bottom:0; }
-      .pipeline-viz { grid-template-columns:repeat(5,minmax(96px,1fr)); }
+      .pipeline-viz { grid-template-columns:repeat(5,minmax(0,1fr)); }
     }
     @media (max-width:680px) {
       .shell { padding:12px; }
@@ -727,8 +1058,8 @@
       .toolbar { display:grid; grid-template-columns:1fr 1fr; }
       .button { width:100%; }
       .node,
-      .node:hover { width:168px; min-height:130px; }
-      .pipeline-viz { grid-template-columns:repeat(5,minmax(92px,1fr)); }
+      .node:hover { width:140px; min-height:100px; }
+      .pipeline-viz { grid-template-columns:repeat(5,minmax(0,1fr)); }
     }
     @media (prefers-reduced-motion: reduce) {
       *,
@@ -839,6 +1170,7 @@
     let usingDemo = false;
     let selectedField = null;
     let fileFetchToken = 0;
+    let renderedOnce = false;
 
     const $ = (id) => document.getElementById(id);
     const json = (value) => {
@@ -1202,11 +1534,23 @@
 
       $("flow").innerHTML = events.length ? events.map((event) => `
         <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}" tabindex="0" role="button" aria-pressed="${event.id === activeEventId ? "true" : "false"}" aria-label="${escapeAttr(`选择 STEP ${event.id} · ${event.name}`)}" title="${escapeAttr(`STEP ${event.id} · ${event.name}\n${event.summary || ""}`)}">
-          <div class="node-id">STEP ${event.id}</div>
+          <div class="node-top">
+            <div class="node-id">STEP ${event.id}</div>
+            <div class="node-status">${formatPercent(stepProgressPercent(event, trace, events))}</div>
+          </div>
           <div class="node-name">${escapeHtml(event.name)}</div>
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>
           ${renderNodeProgress(event, trace, events)}
           <span class="${kindClass(event.kind)}">${escapeHtml(event.kind || "event")}</span>
+          <div class="node-popover" aria-hidden="true">
+            <div class="node-popover-title">STEP ${escapeHtml(event.id)} · ${escapeHtml(event.name)}</div>
+            <div class="node-popover-summary">${escapeHtml(event.summary || "这个步骤没有额外摘要。")}</div>
+            <div class="node-popover-meta">
+              <span>${escapeHtml(event.kind || "event")}</span>
+              <span>${formatPercent(stepProgressPercent(event, trace, events))}</span>
+              <span>${escapeHtml(processLabel(event))}</span>
+            </div>
+          </div>
         </article>
       `).join("") : `<div class="empty" style="min-width:100%">${escapeHtml(trace.missing_trace ? "这个课程检测到了 outputs，但还没有归档 trace。重新运行课程后会自动生成。" : "暂无事件。")}</div>`;
       document.querySelectorAll(".node").forEach((node) => {
@@ -1224,12 +1568,13 @@
           selectNode();
         });
       });
-      if (options.forceScroll || followCurrent || previousActiveId !== activeEventId) {
+      if (options.forceScroll || followCurrent || previousActiveId !== activeEventId || !renderedOnce) {
         requestAnimationFrame(() => {
           scrollActiveNodeIntoView();
           setTimeout(scrollActiveNodeIntoView, 80);
         });
       }
+      renderedOnce = true;
 
       renderStage(selected, trace, events);
       renderDetail(selected);
@@ -1240,10 +1585,10 @@
       const scroller = document.querySelector(".flow-wrap");
       const active = document.querySelector(".node.active");
       if (!scroller || !active) return;
-      const scrollerRect = scroller.getBoundingClientRect();
-      const activeRect = active.getBoundingClientRect();
-      const delta = activeRect.left - scrollerRect.left - ((scroller.clientWidth - activeRect.width) / 2);
-      const target = scroller.scrollLeft + delta;
+      const nodes = Array.from(document.querySelectorAll(".node"));
+      const activeIndex = nodes.indexOf(active);
+      const anchor = nodes[Math.max(0, activeIndex - 3)] || active;
+      const target = activeIndex <= 3 ? 0 : anchor.offsetLeft + 8;
       scroller.scrollLeft = Math.max(0, target);
     }
 
