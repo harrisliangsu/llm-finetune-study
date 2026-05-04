@@ -184,6 +184,44 @@
     .stage-cell { padding:15px; border-right:1px solid var(--line); min-width:0; position:relative; overflow:hidden; }
     .stage-cell:last-child { border-right:0; }
     .stage-label { color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
+    .teach-flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; align-items:stretch; position:relative; }
+    .teach-node {
+      min-height:118px; border:1px solid var(--line); border-radius:12px; background:rgba(8,10,18,.74);
+      padding:12px; position:relative; overflow:hidden;
+    }
+    .teach-node::after {
+      content:""; position:absolute; top:50%; right:-13px; width:14px; height:2px;
+      background:linear-gradient(90deg,var(--cyan),transparent); box-shadow:0 0 16px rgba(6,182,212,.5);
+    }
+    .teach-node:last-child::after { display:none; }
+    .teach-node.active { border-color:rgba(6,182,212,.48); box-shadow:0 0 0 1px rgba(6,182,212,.12), 0 18px 36px rgba(0,0,0,.22); }
+    .teach-node.model { border-color:rgba(168,85,247,.35); }
+    .teach-node.metric { border-color:rgba(234,179,8,.34); }
+    .teach-kicker { color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .teach-title { margin-top:6px; font-size:15px; font-weight:950; line-height:1.18; overflow-wrap:anywhere; }
+    .teach-value { margin-top:8px; color:#b9c2d8; font-size:12px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+    .teach-note { margin-top:12px; border:1px solid rgba(6,182,212,.18); border-radius:10px; background:rgba(6,182,212,.06); padding:10px; color:#b9c2d8; font-size:12px; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px; }
+    .evidence-card { border:1px solid var(--line); border-radius:10px; background:rgba(8,10,18,.62); padding:11px; min-width:0; overflow:hidden; }
+    .evidence-title { color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:7px; }
+    .evidence-body { color:#cbd5e1; font-size:12px; overflow-wrap:anywhere; }
+    .value-table { display:grid; gap:6px; }
+    .value-row { display:grid; grid-template-columns:minmax(0,.75fr) minmax(0,1.35fr); gap:10px; align-items:start; border-bottom:1px solid var(--line); padding-bottom:6px; }
+    .value-row:last-child { border-bottom:0; padding-bottom:0; }
+    .value-key { color:var(--muted); font-size:11px; font-weight:900; overflow-wrap:anywhere; }
+    .value-val { color:var(--ink); font-size:12px; overflow-wrap:anywhere; white-space:pre-wrap; }
+    .schema-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; }
+    .schema-pill { border:1px solid rgba(6,182,212,.24); background:rgba(6,182,212,.07); border-radius:9px; padding:8px; min-width:0; }
+    .schema-pill strong { display:block; font-size:12px; margin-bottom:4px; overflow-wrap:anywhere; }
+    .schema-pill span { color:var(--muted); font-size:11px; overflow-wrap:anywhere; }
+    .mask-strip { display:grid; grid-template-columns:repeat(16,1fr); gap:4px; margin-top:8px; }
+    .mask-cell { min-height:18px; border-radius:4px; background:rgba(255,255,255,.08); border:1px solid transparent; }
+    .mask-cell.masked { background:rgba(148,163,184,.12); border-color:rgba(148,163,184,.12); }
+    .mask-cell.learn { background:rgba(34,197,94,.42); border-color:rgba(34,197,94,.22); box-shadow:0 0 14px rgba(34,197,94,.18); }
+    .comparison-grid { display:grid; gap:8px; }
+    .comparison-item { border:1px solid var(--line); border-radius:9px; padding:9px; background:rgba(23,29,42,.48); }
+    .comparison-item strong { display:block; font-size:12px; margin-bottom:5px; color:var(--cyan); }
+    .comparison-item div { color:#cbd5e1; font-size:12px; max-height:92px; overflow:auto; white-space:pre-wrap; }
     .data-lane { position:relative; min-height:128px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; align-items:center; }
     .flow-line { position:absolute; left:14%; right:14%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.25),rgba(6,182,212,.75),rgba(34,197,94,.38)); overflow:hidden; }
     .flow-line::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent); animation:scanLine 2.2s linear infinite; }
@@ -268,7 +306,7 @@
     .artifact-path { margin-top:4px; color:var(--cyan); font-size:11px; overflow-wrap:anywhere; }
     .compact-spark { height:60px; margin-top:8px; }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid { grid-template-columns:1fr; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid { grid-template-columns:1fr; } .teach-node::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
     @media (max-width:680px) { .overview-grid { grid-template-columns:1fr; } .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
   </style>
@@ -898,44 +936,13 @@
           </div>
           <div class="stage-grid">
             <div class="stage-cell">
-              <div class="stage-label">Data Movement</div>
-              <div class="data-lane">
-                <div class="flow-line"></div>
-                <span class="particle"></span><span class="particle p2"></span><span class="particle p3"></span>
-                <div class="data-node input">
-                  <strong>Input</strong>
-                  <span>${escapeHtml(dataSummary(event.inputs || {}))}</span>
-                </div>
-                <div class="data-node process">
-                  <strong>${escapeHtml(processLabel(event))}</strong>
-                  <span>${escapeHtml(event.kind || "event")} · ${escapeHtml(stepVerb(event))}</span>
-                </div>
-                <div class="data-node output">
-                  <strong>Output</strong>
-                  <span>${escapeHtml(dataSummary(event.outputs || {}))}</span>
-                </div>
-              </div>
-              <div class="tensor-strip">
-                ${tensors.length ? tensors.map((tensor) => `<span class="tensor-pill">${escapeHtml(tensor.name || "tensor")} ${escapeHtml(JSON.stringify(tensor.shape || ""))}</span>`).join("") : `<span class="tensor-pill">no tensor emitted</span>`}
-              </div>
-              <div class="sim-grid">
-                <div class="sim-card">
-                  <div class="stage-label">Token Stream</div>
-                  <div class="token-stream">${renderTokenStream(event)}</div>
-                </div>
-                <div class="sim-card">
-                  <div class="stage-label">Batch Matrix</div>
-                  <div class="batch-matrix">${renderBatchMatrix(event)}</div>
-                </div>
-                <div class="sim-card">
-                  <div class="stage-label">Gradient Loop</div>
-                  <div class="gradient-loop"><span>${escapeHtml(gradientLoopLabel(event))}</span></div>
-                </div>
-              </div>
-              <p class="stage-note">${escapeHtml(event.summary || "")}</p>
+              <div class="stage-label">Teaching Flow</div>
+              ${renderTeachingFlow(event)}
+              <div class="teach-note">${escapeHtml(teachingNote(event))}</div>
+              ${renderEvidenceGrid(event)}
             </div>
             <div class="stage-cell">
-              <div class="stage-label">Model Change</div>
+              <div class="stage-label">Model / Metric State</div>
               <div class="model-viz">
                 <div class="model-core">
                   <div class="param-cloud">${renderParamDots(event)}</div>
@@ -966,6 +973,248 @@
           </div>
         </div>
       `;
+    }
+
+    function renderTeachingFlow(event) {
+      const nodes = teachingNodes(event);
+      return `
+        <div class="teach-flow">
+          ${nodes.map((node, index) => `
+            <div class="teach-node ${index === 1 ? "active" : ""} ${escapeAttr(node.role || "")}">
+              <div class="teach-kicker">${escapeHtml(node.kicker || `stage ${index + 1}`)}</div>
+              <div class="teach-title">${escapeHtml(node.title)}</div>
+              <div class="teach-value">${escapeHtml(node.value || "-")}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function teachingNodes(event) {
+      const kind = String(event.kind || "").toLowerCase();
+      const name = String(event.name || "").toLowerCase();
+      const inputs = event.inputs || {};
+      const outputs = event.outputs || {};
+      const model = event.model || {};
+      const metric = latestMetric(event);
+      if (kind.includes("data") && name.includes("load_dataset")) {
+        return [
+          { kicker: "raw file", title: "JSONL 样本行", value: `${inputs.data_file || "data file"} · 每行一个 instruction/input/output` },
+          { kicker: "reader", title: "load_dataset", value: "把普通文本文件解析成 Hugging Face Dataset 表对象" },
+          { kicker: "dataset", title: `${outputs.rows || "-"} rows`, value: sampleText(event.sample) || `columns: ${previewValue(outputs.columns || [])}` },
+        ];
+      }
+      if (kind.includes("data_quality")) {
+        return [
+          { kicker: "before", title: "原始 split", value: `train ${inputs.train_rows_before || "-"} · validation ${inputs.validation_rows_before || "-"}` },
+          { kicker: "filter", title: "质量规则", value: "删除空回答、坏样本或不符合训练目标的数据" },
+          { kicker: "after", title: "保留样本", value: `train ${outputs.train_rows || "-"} · validation ${outputs.validation_rows || "-"}` },
+        ];
+      }
+      if (kind.includes("token") || kind.includes("transform") || kind.includes("loss_mask")) {
+        const prompt = event.sample && event.sample.prompt ? event.sample.prompt : dataSummary(inputs);
+        const tensorNames = (event.tensors || []).map((tensor) => tensor.name).join(" / ");
+        return [
+          { kicker: "text", title: "Prompt + Answer", value: prompt || "instruction/input/output 文本字段" },
+          { kicker: "tokenizer/map", title: processLabel(event), value: "文本被切成 token ids，同时构造 attention_mask 和 labels" },
+          { kicker: "training columns", title: tensorNames || "input_ids / labels", value: lossMaskSummary(event) || dataSummary(outputs) },
+        ];
+      }
+      if (kind.includes("batch")) {
+        return [
+          { kicker: "samples", title: `${inputs.feature_count || "-"} features`, value: previewValue(inputs.feature_keys || inputs) },
+          { kicker: "collator", title: "Pad + Stack", value: "把多条样本按 batch 维度堆叠，短序列补齐，生成同形状张量" },
+          { kicker: "batch tensors", title: previewValue(outputs.batch_keys || ["input_ids", "attention_mask", "labels"]), value: tensorSummary(event.tensors || []) },
+        ];
+      }
+      if (kind.includes("model")) {
+        const target = inputs.target_modules || inputs.target_module || model.target_modules || model.target_module;
+        return [
+          { kicker: "base", title: model.base || "Base Model", value: inputs.model_name || `total params ${outputs.total_params || "-"}`, role: "model" },
+          { kicker: "adapter", title: hasAdapter(event) ? "Inject LoRA / PEFT" : "Build Model", value: target ? `target: ${previewValue(target)}` : dataSummary(inputs), role: "model" },
+          { kicker: "trainable", title: model.trainable_ratio || trainableRatioText(event), value: `trainable ${outputs.trainable_params || "-"} / total ${outputs.total_params || "-"}`, role: "model" },
+        ];
+      }
+      if (kind.includes("train")) {
+        return [
+          { kicker: "batch", title: `global step ${inputs.global_step ?? inputs.max_steps ?? "-"}`, value: `epoch ${inputs.epoch ?? "-"} · lr ${inputs.learning_rate ?? latestLearningRate(event) ?? "-"}` },
+          { kicker: "forward/backward", title: "Loss -> Grad", value: metric ? `${metric.key}: ${formatNumber(metric.value)}` : dataSummary(outputs), role: "metric" },
+          { kicker: "update", title: hasAdapter(event) ? "只更新 Adapter" : "更新可训练参数", value: model.updated ? previewValue(model.updated) : "optimizer.step() 改变可训练权重", role: "model" },
+        ];
+      }
+      if (kind.includes("eval")) {
+        return [
+          { kicker: "validation", title: "验证集样本", value: `eval rows ${inputs.eval_rows || "-"}` },
+          { kicker: "forward only", title: "No Gradient Update", value: "只计算 loss/metric，用来判断泛化，不执行 optimizer.step()" },
+          { kicker: "metric", title: metric ? metric.key : "eval metric", value: metric ? formatNumber(metric.value) : dataSummary(outputs), role: "metric" },
+        ];
+      }
+      if (kind.includes("checkpoint")) {
+        return [
+          { kicker: "state", title: "训练产物", value: dataSummary(inputs) || dataSummary(model) },
+          { kicker: "save/load", title: processLabel(event), value: event.summary || "把模型状态或 adapter 写入磁盘，再从磁盘恢复" },
+          { kicker: "artifact", title: "可复用文件", value: dataSummary(outputs), role: "model" },
+        ];
+      }
+      if (kind.includes("generation")) {
+        return [
+          { kicker: "prompt", title: "固定问题", value: inputs.prompt || "解释什么是梯度累积" },
+          { kicker: "compare", title: "Base vs Tuned", value: "同一个 prompt 分别经过 base、训练后 LoRA、重新加载 adapter" },
+          { kicker: "answer", title: "输出差异", value: generationSummary(outputs), role: "metric" },
+        ];
+      }
+      return [
+        { kicker: "input", title: "输入状态", value: dataSummary(inputs) },
+        { kicker: "step", title: processLabel(event), value: event.summary || stepVerb(event) },
+        { kicker: "output", title: "输出状态", value: dataSummary(outputs) },
+      ];
+    }
+
+    function renderEvidenceGrid(event) {
+      const cards = [];
+      const sample = event.sample || {};
+      if (Object.keys(sample).length) {
+        cards.push({ title: "actual sample values", body: renderValueRows(sample) });
+      }
+      if ((event.tensors || []).length) {
+        cards.push({ title: "tensor evidence", body: renderTensorEvidence(event) });
+      }
+      if (Object.keys(event.metrics || {}).length) {
+        cards.push({ title: "metric values", body: renderValueRows(event.metrics, 8) });
+      }
+      if (isGenerationEvent(event)) {
+        cards.push({ title: "generation comparison", body: renderGenerationComparison(event.outputs || {}) });
+      }
+      if (!cards.length) {
+        cards.push({ title: "input values", body: renderValueRows(event.inputs || {}, 6) });
+        cards.push({ title: "output values", body: renderValueRows(event.outputs || {}, 6) });
+      }
+      return `
+        <div class="evidence-grid">
+          ${cards.slice(0, 4).map((card) => `
+            <div class="evidence-card">
+              <div class="evidence-title">${escapeHtml(card.title)}</div>
+              <div class="evidence-body">${card.body}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderValueRows(value, limit = 12) {
+      const entries = Array.isArray(value)
+        ? value.map((item, index) => [String(index), item])
+        : Object.entries(value || {});
+      if (!entries.length) return `<div class="subtle">暂无可展示的实际值。</div>`;
+      return `
+        <div class="value-table">
+          ${entries.slice(0, limit).map(([key, item]) => `
+            <div class="value-row">
+              <div class="value-key">${escapeHtml(key)}</div>
+              <div class="value-val">${escapeHtml(displayValue(item))}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderTensorEvidence(event) {
+      const tensors = event.tensors || [];
+      const mask = renderMaskEvidence(tensors);
+      return `
+        <div class="schema-grid">
+          ${tensors.map((tensor) => `
+            <div class="schema-pill">
+              <strong>${escapeHtml(tensor.name || "tensor")}</strong>
+              <span>${escapeHtml(JSON.stringify(tensor.shape || "-"))}${tensor.dtype ? ` · ${escapeHtml(tensor.dtype)}` : ""}</span>
+            </div>
+          `).join("")}
+        </div>
+        ${mask}
+      `;
+    }
+
+    function renderMaskEvidence(tensors) {
+      const labels = tensors.find((tensor) => tensor.name === "labels");
+      if (!labels) return "";
+      if (Array.isArray(labels.preview)) {
+        return `
+          <div class="mask-strip" title="-100 表示该位置不参与 loss">
+            ${labels.preview.slice(0, 32).map((value) => `<span class="mask-cell ${value === -100 ? "masked" : "learn"}"></span>`).join("")}
+          </div>
+          <p class="stage-note">灰色是 labels=-100 的 prompt/padding 区域，绿色是参与 loss 的 answer token。</p>
+        `;
+      }
+      if (labels.masked_prompt_tokens || labels.ignored_tokens || labels.learned_answer_tokens || labels.learned_tokens) {
+        return `<p class="stage-note">${escapeHtml(lossMaskSummary({ tensors }))}</p>`;
+      }
+      return "";
+    }
+
+    function renderGenerationComparison(outputs) {
+      const entries = Object.entries(outputs || {});
+      if (!entries.length) return `<div class="subtle">当前步骤没有生成输出。</div>`;
+      return `
+        <div class="comparison-grid">
+          ${entries.map(([key, value]) => `
+            <div class="comparison-item">
+              <strong>${escapeHtml(key)}</strong>
+              <div>${escapeHtml(compactText(value, 420))}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function teachingNote(event) {
+      const kind = String(event.kind || "").toLowerCase();
+      const name = String(event.name || "").toLowerCase();
+      if (kind.includes("data") && name.includes("load_dataset")) return "观察重点：Dataset 的 columns 只是字段名，真正的数据值在样本行里；点击 data_file 可看到完整 JSONL。";
+      if (kind.includes("transform") || kind.includes("token")) return "观察重点：微调不是直接喂字符串，而是把 prompt/answer 转成 input_ids、attention_mask、labels。";
+      if (kind.includes("loss_mask")) return "观察重点：labels=-100 的位置不会参与 loss；SFT 通常只让回答部分学习。";
+      if (kind.includes("batch")) return "观察重点：collator 把多条样本补齐并堆叠成 batch，训练循环实际读的是 batch tensor。";
+      if (kind.includes("model")) return hasAdapter(event) ? "观察重点：LoRA/PEFT 不改完整基座权重，只在目标模块旁边挂可训练低秩矩阵。" : "观察重点：模型初始化后，参数量决定训练成本和显存压力。";
+      if (kind.includes("train")) return "观察重点：训练步骤包含 forward、loss、backward、optimizer update；LoRA 课程里 update 只作用于 adapter。";
+      if (kind.includes("eval")) return "观察重点：eval 只前向计算验证损失，不更新参数，用来判断是否真的泛化。";
+      if (kind.includes("checkpoint")) return "观察重点：保存/加载的是可复用训练产物；LoRA 场景通常保存 adapter 而不是完整 base model。";
+      if (kind.includes("generation")) return "观察重点：同一个 prompt 对比 base、训练后、reload 后输出，验证训练产物是否生效且可复现。";
+      return event.summary || "观察输入如何经过当前步骤变成输出。";
+    }
+
+    function sampleText(sample) {
+      if (!sample || !Object.keys(sample).length) return "";
+      return Object.entries(sample).map(([key, value]) => `${key}: ${previewValue(value)}`).join(" · ");
+    }
+
+    function tensorSummary(tensors) {
+      return tensors.map((tensor) => `${tensor.name || "tensor"} ${JSON.stringify(tensor.shape || "-")}`).join(" · ");
+    }
+
+    function lossMaskSummary(event) {
+      const labels = (event.tensors || []).find((tensor) => tensor.name === "labels");
+      if (!labels) return "";
+      const ignored = labels.masked_prompt_tokens ?? labels.ignored_tokens;
+      const learned = labels.learned_answer_tokens ?? labels.learned_tokens;
+      if (ignored || learned) return `mask/ignore: ${ignored || 0} tokens · learn: ${learned || 0} tokens`;
+      return "";
+    }
+
+    function latestLearningRate(event) {
+      return event.metrics && Number.isFinite(event.metrics.learning_rate) ? event.metrics.learning_rate : null;
+    }
+
+    function trainableRatioText(event) {
+      const ratio = trainableRatio(event);
+      return ratio == null ? "trainable ratio unknown" : `${formatNumber(ratio)}% trainable`;
+    }
+
+    function isGenerationEvent(event) {
+      return String(event.kind || "").toLowerCase().includes("generation");
+    }
+
+    function generationSummary(outputs) {
+      const values = Object.entries(outputs || {}).map(([key, value]) => `${key}: ${compactText(value, 60)}`);
+      return values.join(" · ");
     }
 
     function renderLayers(event) {
@@ -1273,7 +1522,114 @@
           <summary>Field Value</summary>
           <pre>${escapeHtml(json(field.value))}</pre>
         </details>
+        ${renderFieldContext(field)}
         ${pathInfo ? renderFilePanel(field, pathInfo) : ""}
+      `;
+    }
+
+    function renderFieldContext(field) {
+      const event = currentEventForField(field);
+      if (!event) return "";
+      const blocks = [];
+      const sampleBlock = renderSampleForField(field, event);
+      if (sampleBlock) blocks.push(sampleBlock);
+      const arrayBlock = renderArrayFieldDetails(field, event);
+      if (arrayBlock) blocks.push(arrayBlock);
+      const tensorBlock = renderTensorMatchForField(field, event);
+      if (tensorBlock) blocks.push(tensorBlock);
+      const metricBlock = renderMetricMatchForField(field, event);
+      if (metricBlock) blocks.push(metricBlock);
+      if (!blocks.length) return "";
+      return blocks.join("");
+    }
+
+    function currentEventForField(field) {
+      const events = (lastTrace && lastTrace.events) || [];
+      return events.find((event) => event.id === field.eventId) || null;
+    }
+
+    function renderSampleForField(field, event) {
+      const sample = event.sample || {};
+      if (!Object.keys(sample).length) return "";
+      if (Array.isArray(field.value)) {
+        const matched = field.value
+          .filter((key) => Object.prototype.hasOwnProperty.call(sample, key))
+          .map((key) => [key, sample[key]]);
+        if (matched.length) {
+          return `
+            <details class="reveal" open>
+              <summary>Actual Sample Values For These Fields</summary>
+              ${renderValueRows(Object.fromEntries(matched))}
+            </details>
+          `;
+        }
+      }
+      if (typeof field.value === "string" && Object.prototype.hasOwnProperty.call(sample, field.key)) {
+        return `
+          <details class="reveal" open>
+            <summary>Actual Sample Value</summary>
+            ${renderValueRows({ [field.key]: sample[field.key] })}
+          </details>
+        `;
+      }
+      if (field.key === "columns" || field.key.includes("keys")) {
+        return `
+          <details class="reveal" open>
+            <summary>Current Event Sample Row</summary>
+            ${renderValueRows(sample)}
+          </details>
+        `;
+      }
+      return "";
+    }
+
+    function renderArrayFieldDetails(field, event) {
+      if (!Array.isArray(field.value)) return "";
+      const inputColumns = Array.isArray(event.inputs && event.inputs.columns) ? event.inputs.columns : [];
+      const outputColumns = Array.isArray(event.outputs && event.outputs.columns) ? event.outputs.columns : [];
+      const added = outputColumns.filter((item) => !inputColumns.includes(item));
+      const removed = inputColumns.filter((item) => !outputColumns.includes(item));
+      const kept = outputColumns.filter((item) => inputColumns.includes(item));
+      const showSchemaDelta = field.key === "columns" && (inputColumns.length || outputColumns.length);
+      return `
+        <details class="reveal" open>
+          <summary>${showSchemaDelta ? "Schema / Column Meaning" : "Array Items"}</summary>
+          ${showSchemaDelta ? `
+            <div class="schema-grid">
+              <div class="schema-pill"><strong>input columns</strong><span>${escapeHtml(inputColumns.join(", ") || "-")}</span></div>
+              <div class="schema-pill"><strong>output columns</strong><span>${escapeHtml(outputColumns.join(", ") || "-")}</span></div>
+              <div class="schema-pill"><strong>added</strong><span>${escapeHtml(added.join(", ") || "-")}</span></div>
+              <div class="schema-pill"><strong>removed</strong><span>${escapeHtml(removed.join(", ") || "-")}</span></div>
+              <div class="schema-pill"><strong>kept</strong><span>${escapeHtml(kept.join(", ") || "-")}</span></div>
+            </div>
+          ` : renderValueRows(field.value)}
+        </details>
+      `;
+    }
+
+    function renderTensorMatchForField(field, event) {
+      if (!Array.isArray(field.value) || !(event.tensors || []).length) return "";
+      const selected = event.tensors.filter((tensor) => field.value.includes(tensor.name));
+      if (!selected.length) return "";
+      return `
+        <details class="reveal" open>
+          <summary>Concrete Tensor Shapes For These Fields</summary>
+          ${renderTensorEvidence({ tensors: selected })}
+        </details>
+      `;
+    }
+
+    function renderMetricMatchForField(field, event) {
+      if (!Array.isArray(field.value) || !Object.keys(event.metrics || {}).length) return "";
+      const selected = field.value
+        .filter((key) => Object.prototype.hasOwnProperty.call(event.metrics, key))
+        .map((key) => [key, event.metrics[key]]);
+      if (!selected.length) return "";
+      return `
+        <details class="reveal" open>
+          <summary>Actual Metric Values For These Keys</summary>
+          ${renderValueRows(Object.fromEntries(selected))}
+        </details>
       `;
     }
 
@@ -1294,7 +1650,46 @@
           <summary>File Content</summary>
           <pre class="file-content">${escapeHtml(content)}</pre>
         </details>
+        ${field.fileStatus === "loaded" ? renderStructuredFilePreview(field, pathInfo) : ""}
       `;
+    }
+
+    function renderStructuredFilePreview(field, pathInfo) {
+      if (!field.fileContent || pathInfo.isBinary) return "";
+      const rows = parseStructuredRows(field.fileContent, pathInfo.repoPath);
+      if (!rows.length) return "";
+      const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))].slice(0, 8);
+      return `
+        <details class="reveal" open>
+          <summary>Parsed Data Rows</summary>
+          <div class="comparison-grid">
+            ${rows.slice(0, 5).map((row, index) => `
+              <div class="comparison-item">
+                <strong>row ${index}</strong>
+                ${renderValueRows(Object.fromEntries(columns.map((column) => [column, row[column] ?? ""])), 8)}
+              </div>
+            `).join("")}
+          </div>
+        </details>
+      `;
+    }
+
+    function parseStructuredRows(text, repoPath) {
+      const trimmed = String(text || "").trim();
+      if (!trimmed) return [];
+      try {
+        if (/\.jsonl$/i.test(repoPath)) {
+          return trimmed.split(/\n+/).slice(0, 20).map((line) => JSON.parse(line)).filter((row) => row && typeof row === "object" && !Array.isArray(row));
+        }
+        if (/\.json$/i.test(repoPath)) {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed.filter((row) => row && typeof row === "object" && !Array.isArray(row));
+          if (parsed && typeof parsed === "object") return [parsed];
+        }
+      } catch (error) {
+        return [];
+      }
+      return [];
     }
 
     function syncFieldCards() {
@@ -1422,6 +1817,16 @@
         text = json(value);
       }
       return text.length > 150 ? `${text.slice(0, 147)}...` : text;
+    }
+
+    function displayValue(value, limit = 900) {
+      let text;
+      if (value === null) text = "null";
+      else if (value === undefined) text = "undefined";
+      else if (typeof value === "string") text = value;
+      else if (typeof value === "number" || typeof value === "boolean") text = String(value);
+      else text = json(value);
+      return text.length > limit ? `${text.slice(0, limit)}\n... truncated in preview` : text;
     }
 
     function repoPathInfo(value) {
