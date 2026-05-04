@@ -11,12 +11,14 @@
       --blue:#3b82f6; --cyan:#06b6d4; --green:#22c55e; --gold:#eab308; --orange:#f97316; --purple:#a855f7; --red:#ef4444;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
+    html { min-height:100%; background:var(--bg); }
     body {
       min-height:100vh;
       background:
         linear-gradient(180deg, rgba(8,10,18,.95), rgba(8,10,18,1)),
         repeating-linear-gradient(90deg, rgba(148,163,184,.035) 0 1px, transparent 1px 52px),
         repeating-linear-gradient(180deg, rgba(148,163,184,.028) 0 1px, transparent 1px 52px);
+      background-color:var(--bg);
       color:var(--ink);
       font-family:-apple-system,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;
       line-height:1.55;
@@ -30,7 +32,7 @@
       mask-image:linear-gradient(180deg, black, transparent 76%);
     }
     code, pre, .mono { font-family:"SF Mono",Menlo,Consolas,monospace; }
-    .shell { max-width:1440px; margin:0 auto; padding:22px; }
+    .shell { max-width:1680px; margin:0 auto; padding:22px; }
     .topbar {
       min-height:64px; display:flex; align-items:center; justify-content:space-between; gap:18px;
       border:1px solid var(--line-strong); border-radius:12px; background:rgba(17,22,32,.86);
@@ -49,7 +51,7 @@
     }
     .button:hover { border-color:rgba(6,182,212,.45); color:white; }
     .button.active { border-color:rgba(34,197,94,.42); background:rgba(34,197,94,.1); color:#bbf7d0; }
-    .layout { display:grid; grid-template-columns:minmax(0,280px) minmax(0,1fr) minmax(0,360px); gap:18px; margin-top:18px; align-items:start; }
+    .layout { display:grid; grid-template-columns:minmax(0,268px) minmax(0,1fr) minmax(0,340px); gap:18px; margin-top:18px; align-items:start; }
     .panel { background:rgba(17,22,32,.92); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:0; overflow:hidden; box-shadow:0 18px 56px rgba(0,0,0,.18); }
     .panel-title { font-size:13px; font-weight:900; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:13px; }
     .lesson-title { font-size:27px; line-height:1.15; font-weight:900; margin-bottom:8px; overflow-wrap:anywhere; }
@@ -162,12 +164,11 @@
     .stage-chip { border:1px solid var(--line); border-radius:999px; padding:4px 8px; color:var(--muted); background:rgba(23,29,42,.64); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; }
     .stage-chip.hot { color:#bae6fd; border-color:rgba(6,182,212,.38); background:rgba(6,182,212,.08); }
     .stage-progress-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px 15px 0; }
-    .stage-grid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,.75fr); gap:0; min-height:310px; }
-    .stage-grid.wide { grid-template-columns:1fr; }
+    .stage-grid { display:grid; grid-template-columns:1fr; gap:0; min-height:310px; }
     .stage-cell { padding:15px; border-right:1px solid var(--line); min-width:0; position:relative; overflow:hidden; }
     .stage-cell:last-child { border-right:0; }
-    .stage-grid.wide .stage-cell { border-right:0; border-bottom:1px solid var(--line); }
-    .stage-grid.wide .stage-cell:last-child { border-bottom:0; }
+    .stage-grid .stage-cell { border-right:0; border-bottom:1px solid var(--line); }
+    .stage-grid .stage-cell:last-child { border-bottom:0; }
     .stage-label { color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
     .teach-flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; align-items:stretch; position:relative; }
     .teach-node {
@@ -216,9 +217,9 @@
       padding:14px; position:relative; overflow:hidden;
     }
     .sim-board::before { content:""; position:absolute; left:8%; right:8%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.18),rgba(6,182,212,.7),rgba(34,197,94,.22)); }
-    .sim-board::after { content:""; position:absolute; top:calc(50% - 4px); left:9%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 20px rgba(6,182,212,.9); animation:simPacket 3s linear infinite; }
-    @keyframes simPacket { from { transform:translateX(0); opacity:0; } 10% { opacity:1; } 90% { opacity:1; } to { transform:translateX(660px); opacity:0; } }
-    .sim-flow { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr); gap:14px; align-items:center; min-height:300px; }
+    .sim-board::after { content:""; position:absolute; top:calc(50% - 4px); left:8%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 20px rgba(6,182,212,.9); animation:simPacket 3s linear infinite; }
+    @keyframes simPacket { from { left:8%; opacity:0; transform:scale(.85); } 10% { opacity:1; } 90% { opacity:1; } to { left:92%; opacity:0; transform:scale(1.12); } }
+    .sim-flow { position:relative; z-index:1; display:grid; grid-template-columns:minmax(220px,1fr) minmax(104px,128px) minmax(220px,1fr); gap:16px; align-items:center; min-height:280px; }
     .sim-panel { border:1px solid var(--line); border-radius:12px; background:rgba(13,17,26,.86); padding:12px; min-width:0; box-shadow:0 18px 42px rgba(0,0,0,.18); }
     .sim-panel.source { border-color:rgba(59,130,246,.28); }
     .sim-panel.target { border-color:rgba(34,197,94,.28); }
@@ -262,7 +263,7 @@
     .sim-caption { margin-top:10px; display:flex; flex-wrap:wrap; gap:7px; }
     .sim-chip { border:1px solid var(--line); border-radius:999px; padding:4px 8px; color:var(--muted); font-size:10px; font-weight:900; background:rgba(23,29,42,.62); }
     .sim-chip.hot { color:#bbf7d0; border-color:rgba(34,197,94,.28); background:rgba(34,197,94,.08); }
-    .split-viz { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .split-viz { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
     .split-bucket { border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.035); padding:9px; min-height:88px; }
     .split-bucket strong { display:block; color:#cbd5e1; font-size:11px; margin-bottom:7px; }
     .sample-dots { display:flex; flex-wrap:wrap; gap:6px; }
@@ -276,8 +277,8 @@
     .pipeline-board::before,.pipeline-board::after { display:none; }
     .pipeline-viz { position:relative; z-index:1; min-height:278px; display:grid; grid-template-columns:repeat(5,minmax(68px,1fr)); gap:8px; align-items:center; }
     .pipeline-viz::before { content:""; position:absolute; left:7%; right:7%; top:50%; height:2px; background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(6,182,212,.72),rgba(34,197,94,.4)); box-shadow:0 0 18px rgba(6,182,212,.12); }
-    .pipeline-viz::after { content:""; position:absolute; top:calc(50% - 4px); left:8%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 18px rgba(6,182,212,.86); animation:pipelinePacket 3.2s linear infinite; }
-    @keyframes pipelinePacket { from { transform:translateX(0); opacity:0; } 10% { opacity:1; } 90% { opacity:1; } to { transform:translateX(500px); opacity:0; } }
+    .pipeline-viz::after { content:""; position:absolute; top:calc(50% - 4px); left:7%; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 18px rgba(6,182,212,.86); animation:pipelinePacket 3.2s linear infinite; }
+    @keyframes pipelinePacket { from { left:7%; opacity:0; transform:scale(.85); } 10% { opacity:1; } 90% { opacity:1; } to { left:93%; opacity:0; transform:scale(1.12); } }
     .pipeline-node { min-height:156px; border:1px solid var(--line); border-radius:12px; background:rgba(13,17,26,.9); padding:9px; display:grid; grid-template-rows:auto 1fr auto; gap:8px; align-items:center; justify-items:center; position:relative; overflow:hidden; }
     .pipeline-node::after { content:""; position:absolute; top:50%; right:-9px; width:15px; height:2px; background:linear-gradient(90deg,var(--cyan),transparent); box-shadow:0 0 14px rgba(6,182,212,.4); }
     .pipeline-node:last-child::after { display:none; }
@@ -335,7 +336,8 @@
     .gradient-loop span { position:absolute; color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .model-viz { display:grid; gap:10px; }
-    .stage-grid.wide .model-viz { grid-template-columns:minmax(240px,.9fr) minmax(180px,.45fr) minmax(260px,.8fr); align-items:start; }
+    .stage-grid .model-viz { grid-template-columns:minmax(200px,1fr) minmax(130px,.55fr) minmax(210px,1fr); align-items:start; }
+    .model-viz > * { min-width:0; }
     .model-core { position:relative; min-height:146px; border:1px solid rgba(168,85,247,.22); border-radius:12px; background:rgba(8,10,18,.72); padding:12px; overflow:hidden; }
     .model-core::before { content:""; position:absolute; inset:10px; border:1px dashed rgba(255,255,255,.08); border-radius:10px; }
     .update-beam { position:absolute; left:8%; right:8%; top:52%; height:2px; background:linear-gradient(90deg,transparent,rgba(34,197,94,.8),transparent); opacity:.2; z-index:1; animation:beamMove 2.2s linear infinite; }
@@ -356,7 +358,7 @@
     .ratio-bar { height:9px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:10px; }
     .ratio-fill { height:100%; width:var(--ratio,0%); min-width:3px; max-width:100%; background:linear-gradient(90deg,var(--green),var(--cyan)); animation:ratioEnter .9s ease both; }
     @keyframes ratioEnter { from { width:0; } }
-    .metric-viz { margin-top:10px; border:1px solid var(--line); background:rgba(8,10,18,.72); border-radius:10px; padding:10px; }
+    .metric-viz { margin-top:10px; border:1px solid var(--line); background:rgba(8,10,18,.72); border-radius:10px; padding:10px; min-width:0; overflow:hidden; }
     .sparkline { width:100%; height:86px; overflow:visible; }
     .sparkline path { fill:none; stroke:var(--green); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 8px rgba(34,197,94,.45)); }
     .sparkline circle { fill:var(--cyan); animation:dotPulse 1.6s ease-in-out infinite; }
@@ -388,7 +390,11 @@
     .artifact-path { margin-top:4px; color:var(--cyan); font-size:11px; overflow-wrap:anywhere; }
     .compact-spark { height:60px; margin-top:8px; }
     .empty { color:var(--muted); font-size:13px; padding:18px; text-align:center; border:1px dashed var(--line); border-radius:10px; }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid,.sim-flow,.gen-grid,.stage-grid.wide .model-viz { grid-template-columns:1fr; } .pipeline-viz { grid-template-columns:repeat(5,minmax(68px,1fr)); } .teach-node::after { display:none; } .sim-board::before,.sim-board::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
+    @media (max-width:1500px) and (min-width:1151px) {
+      .layout { grid-template-columns:minmax(0,260px) minmax(0,1fr); }
+      .layout > aside.panel:last-child { grid-column:2; }
+    }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .layout > aside.panel:last-child { grid-column:auto; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid,.sim-flow,.gen-grid,.stage-grid .model-viz { grid-template-columns:1fr; } .pipeline-viz { grid-template-columns:repeat(5,minmax(68px,1fr)); } .teach-node::after { display:none; } .sim-board::before,.sim-board::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
     @media (max-width:680px) { .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
   </style>
@@ -455,7 +461,10 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const liveTracePath = params.get("trace") || "traces/live.json";
+    const requestedTracePath = params.get("trace");
+    const requestedEventId = params.get("event");
+    const liveTracePath = "traces/live.json";
+    const initialTracePath = requestedTracePath || liveTracePath;
     const catalogPath = params.get("catalog") || "traces/catalog.json";
     const demoTracePath = "demo-trace.json";
     const requestedInterval = Number(params.get("interval") || 5000);
@@ -471,14 +480,14 @@
       { lesson_id: "05-lora", title: "Lesson 05 · Handwritten LoRA", trace: "traces/05-lora.json", outputs: "lessons/05-lora/outputs", topic: "frozen base + adapter delta", expected_events: 30 },
       { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter", expected_events: 26 }
     ];
-    let selectedCourseId = "live";
-    let selectedTracePath = liveTracePath;
+    let selectedCourseId = requestedTracePath ? courseIdForTrace(requestedTracePath) : "live";
+    let selectedTracePath = initialTracePath;
     let catalog = fallbackCatalog;
     let courseStates = [];
     let liveSummary = null;
-    let followLatestCourse = true;
-    let activeEventId = null;
-    let followCurrent = true;
+    let followLatestCourse = !requestedTracePath;
+    let activeEventId = requestedEventId || null;
+    let followCurrent = !requestedEventId;
     let live = true;
     let lastTrace = null;
     let usingDemo = false;
@@ -555,7 +564,7 @@
           expected_events: course.expected_events || traceSummary.events || 1,
         };
       }));
-      if (liveSummary && liveSummary.status === "running") {
+      if (!requestedTracePath && liveSummary && liveSummary.status === "running") {
         followLatestCourse = true;
         followCurrent = true;
       }
@@ -680,6 +689,16 @@
       if (course.traceAvailable) return course.status === "done" ? "executed" : course.status;
       if (course.outputsDetected || course.missingTrace) return "need rerun trace";
       return "not run";
+    }
+
+    function courseIdForTrace(tracePath) {
+      const normalized = normalizeTracePath(tracePath);
+      const course = fallbackCatalog.find((item) => normalizeTracePath(item.trace) === normalized);
+      return course ? course.lesson_id : "live";
+    }
+
+    function normalizeTracePath(tracePath) {
+      return String(tracePath || "").replace(/^\.\//, "").replace(/^visualizer\//, "");
     }
 
     function latestMetricAcross(events, selected) {
@@ -892,7 +911,6 @@
       const coursePercent = courseProgressPercent(trace);
       const stepPercent = stepProgressPercent(event, trace, events);
       const metricForHeader = latestMetricAcross(events, event);
-      const stageGridClass = String(event.kind || "").toLowerCase().includes("complete") ? "stage-grid wide" : "stage-grid";
       $("visualStage").innerHTML = `
         <div class="stage">
           <div class="stage-head">
@@ -922,7 +940,7 @@
               <div class="progress-track"><div class="progress-fill" style="--progress:${escapeAttr(formatProgress(stepPercent))}"></div></div>
             </div>
           </div>
-          <div class="${stageGridClass}">
+          <div class="stage-grid">
             <div class="stage-cell">
               <div class="stage-label">Process Simulator</div>
               ${renderProcessSimulator(event)}
