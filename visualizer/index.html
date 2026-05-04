@@ -34,7 +34,7 @@
     code, pre, .mono { font-family:"SF Mono",Menlo,Consolas,monospace; }
     .shell { max-width:1680px; margin:0 auto; padding:22px; }
     .topbar {
-      min-height:64px; display:flex; align-items:center; justify-content:space-between; gap:18px;
+      min-height:64px; display:grid; grid-template-columns:auto minmax(220px,1fr) minmax(260px,360px) auto; align-items:center; gap:14px;
       border:1px solid var(--line-strong); border-radius:12px; background:rgba(17,22,32,.86);
       backdrop-filter:blur(18px); padding:12px 18px; position:sticky; top:12px; z-index:10;
       box-shadow:0 20px 60px rgba(0,0,0,.24);
@@ -44,7 +44,7 @@
     .status { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; overflow:hidden; }
     .pulse { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(34,197,94,.45); animation:pulse 1.5s infinite; flex:0 0 auto; }
     @keyframes pulse { 70% { box-shadow:0 0 0 10px rgba(34,197,94,0); } 100% { box-shadow:0 0 0 0 rgba(34,197,94,0); } }
-    .toolbar { display:flex; align-items:center; gap:10px; }
+    .toolbar { display:flex; align-items:center; justify-content:flex-end; gap:10px; min-width:0; }
     .button {
       border:1px solid var(--line); background:var(--panel-2); color:var(--ink); border-radius:8px;
       padding:8px 11px; font-size:12px; font-weight:800; cursor:pointer;
@@ -64,6 +64,8 @@
     .run-card { margin-top:14px; padding:13px; border-radius:10px; background:var(--panel-3); border:1px solid var(--line); min-width:0; overflow:hidden; }
     .run-card .mono { color:var(--cyan); font-size:12px; overflow-wrap:anywhere; }
     .course-picker { display:grid; gap:10px; margin-top:14px; min-width:0; }
+    .top-course-picker { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:center; min-width:0; }
+    .top-course-label { color:var(--muted); font-size:11px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
     .course-select {
       width:100%; max-width:100%; min-width:0; min-height:42px; color:var(--ink); border:1px solid rgba(6,182,212,.22); border-radius:10px;
       background:rgba(13,17,26,.96); padding:0 12px; font:inherit; font-size:13px; font-weight:850;
@@ -86,11 +88,11 @@
     .course-meter-name { flex:1 1 auto; min-width:0; max-width:100%; font-size:11px; font-weight:900; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .course-meter-state { flex:0 0 auto; color:var(--muted); font-size:10px; font-weight:900; white-space:nowrap; }
     @keyframes barPulse { 50% { opacity:.35; } }
-    .flow-wrap { overflow-x:auto; padding-bottom:6px; }
+    .flow-wrap { overflow-x:auto; overflow-y:visible; padding:10px 0 14px; }
     .flow { display:flex; gap:10px; min-width:max-content; }
     .node {
-      width:184px; min-height:132px; border:1px solid var(--line); background:var(--panel-2);
-      border-radius:11px; padding:13px; cursor:pointer; position:relative; transition:.18s ease;
+      width:154px; min-height:104px; border:1px solid var(--line); background:var(--panel-2);
+      border-radius:11px; padding:11px; cursor:pointer; position:relative; transition:width .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease; overflow:hidden;
     }
     .node::after {
       content:""; position:absolute; top:50%; right:-10px; width:10px; height:1px;
@@ -103,13 +105,15 @@
       content:"LATEST"; position:absolute; top:10px; right:10px; color:#67e8f9; border:1px solid rgba(6,182,212,.28);
       border-radius:999px; padding:2px 6px; background:rgba(6,182,212,.08); font-size:9px; font-weight:950; letter-spacing:.08em;
     }
-    .node.active { border-color:rgba(234,179,8,.72); box-shadow:0 0 0 1px rgba(234,179,8,.22), 0 18px 42px rgba(0,0,0,.28); transform:translateY(-2px); }
+    .node.active { border-color:rgba(234,179,8,.72); box-shadow:inset 0 0 0 1px rgba(234,179,8,.28), 0 0 0 1px rgba(234,179,8,.16), 0 16px 34px rgba(0,0,0,.24); }
+    .node:hover { width:260px; min-height:150px; z-index:4; background:#1a2030; }
     .node-id { color:var(--faint); font-size:11px; font-weight:900; margin-bottom:7px; }
     .node.current:not(.active) .node-id { color:var(--cyan); }
     .node.active .node-id { color:var(--gold); }
     .node-name { font-size:14px; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
-    .node-summary { color:var(--muted); font-size:12px; margin-top:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-    .node-progress { margin-top:10px; }
+    .node-summary { color:var(--muted); font-size:11px; margin-top:7px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .node:hover .node-summary { -webkit-line-clamp:5; color:#b9c2d8; }
+    .node-progress { margin-top:8px; }
     .node-progress .progress-track { height:6px; }
     .node-percent { margin-top:5px; color:var(--faint); font-size:10px; font-weight:900; font-variant-numeric:tabular-nums; }
     .kind { display:inline-flex; align-items:center; min-height:23px; margin-top:10px; border-radius:999px; padding:3px 8px; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; border:1px solid var(--line); color:var(--muted); }
@@ -407,8 +411,8 @@
       .layout { grid-template-columns:minmax(0,260px) minmax(0,1fr); }
       .layout > aside.panel:last-child { grid-column:2; }
     }
-    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .layout > aside.panel:last-child { grid-column:auto; } .topbar { position:static; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid,.sim-flow,.gen-grid,.stage-grid .model-viz { grid-template-columns:1fr; } .pipeline-viz { grid-template-columns:repeat(5,minmax(68px,1fr)); } .teach-node::after { display:none; } .sim-board::before,.sim-board::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
-    @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; align-items:flex-start; flex-direction:column; padding:14px; } .toolbar { flex-wrap:wrap; } .node { width:164px; } .lesson-title { font-size:23px; } }
+    @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .layout > aside.panel:last-child { grid-column:auto; } .topbar { position:static; grid-template-columns:1fr; align-items:stretch; } .toolbar { justify-content:flex-start; flex-wrap:wrap; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid,.sim-flow,.gen-grid,.stage-grid .model-viz { grid-template-columns:1fr; } .pipeline-viz { grid-template-columns:repeat(5,minmax(68px,1fr)); } .teach-node::after { display:none; } .sim-board::before,.sim-board::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
+    @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; padding:14px; } .toolbar { flex-wrap:wrap; } .top-course-picker { grid-template-columns:1fr; } .node { width:150px; } .node:hover { width:220px; } .lesson-title { font-size:23px; } }
     @media (max-width:680px) { .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
   </style>
 </head>
@@ -417,6 +421,12 @@
     <header class="topbar">
       <div class="brand"><span>LLM</span> Training Visualizer</div>
       <div class="status"><span class="pulse" id="pulse"></span><span id="statusText">等待 trace...</span></div>
+      <div class="top-course-picker">
+        <div class="top-course-label">Course</div>
+        <select class="course-select" id="courseSelect" aria-label="选择课程">
+          <option value="live">LIVE · latest course</option>
+        </select>
+      </div>
       <div class="toolbar">
         <button class="button active" id="followLatestCourse">跟随最新课程</button>
         <button class="button active" id="followCurrent">跟随当前步骤</button>
@@ -442,13 +452,8 @@
           <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
         </div>
         <div style="height:18px"></div>
-        <div class="panel-title">Course Switch</div>
-        <div class="course-picker">
-          <select class="course-select" id="courseSelect" aria-label="选择课程">
-            <option value="live">LIVE · latest course</option>
-          </select>
-          <div class="course-dashboard" id="courseDashboard"></div>
-        </div>
+        <div class="panel-title">Course Status</div>
+        <div class="course-dashboard" id="courseDashboard"></div>
         <div style="height:18px"></div>
         <div class="panel-title">Course Progress</div>
         <div class="course-meter-list" id="courseProgressList"></div>
@@ -491,7 +496,8 @@
       { lesson_id: "03-batching", title: "Lesson 03 · Batch and Collator", trace: "traces/03-batching.json", outputs: "lessons/03-batching/outputs", topic: "samples -> padded tensor batch", expected_events: 4 },
       { lesson_id: "04-trainer", title: "Lesson 04 · Trainer Loop", trace: "traces/04-trainer.json", outputs: "lessons/04-trainer/outputs", topic: "forward -> loss -> backward -> update", expected_events: 24 },
       { lesson_id: "05-lora", title: "Lesson 05 · Handwritten LoRA", trace: "traces/05-lora.json", outputs: "lessons/05-lora/outputs", topic: "frozen base + adapter delta", expected_events: 30 },
-      { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter", expected_events: 26 }
+      { lesson_id: "06-peft-lora", title: "Lesson 06 · PEFT Qwen LoRA", trace: "traces/06-peft-lora.json", outputs: "lessons/06-peft-lora/outputs", topic: "real HF model + PEFT adapter", expected_events: 26 },
+      { lesson_id: "07-sft-baseline", title: "Lesson 07 · SFT Baseline", trace: "traces/07-sft-baseline.json", outputs: "lessons/07-sft-baseline/outputs", topic: "ticket text -> strict JSON", expected_events: 18 }
     ];
     let selectedCourseId = requestedTracePath ? courseIdForTrace(requestedTracePath) : "live";
     let selectedTracePath = initialTracePath;
@@ -868,7 +874,7 @@
       renderCourseProgressList(trace);
 
       $("flow").innerHTML = events.length ? events.map((event) => `
-        <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}">
+        <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}" title="${escapeAttr(`STEP ${event.id} · ${event.name}\n${event.summary || ""}`)}">
           <div class="node-id">STEP ${event.id}</div>
           <div class="node-name">${escapeHtml(event.name)}</div>
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>

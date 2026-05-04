@@ -48,6 +48,14 @@
       "outputs": "lessons/06-peft-lora/outputs",
       "topic": "real Hugging Face model + PEFT adapter",
       "expected_events": 26
+    },
+    {
+      "lesson_id": "07-sft-baseline",
+      "title": "Lesson 07 · SFT Baseline",
+      "trace": "traces/07-sft-baseline.json",
+      "outputs": "lessons/07-sft-baseline/outputs",
+      "topic": "ticket text -> strict JSON",
+      "expected_events": 18
     }
   ]
 }
