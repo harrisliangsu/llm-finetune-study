@@ -39,6 +39,25 @@ LoRA 通常训练的是注意力或 MLP 中的部分线性层旁路参数。
 
 不同模型命名不同，不能盲抄。
 
+## PEFT 方法地图
+
+PEFT 是 Parameter-Efficient Fine-Tuning，意思是参数高效微调。它不是单一算法，而是一组“冻结大部分 base model，只训练少量新增或选定参数”的方法。LoRA 是其中最常用、最适合作为本地学习起点的一种。
+
+| 方法 | 核心想法 | 适合先学吗 |
+|---|---|---|
+| LoRA | 在目标线性层旁边加低秩 A/B 矩阵，只训练 adapter delta | 是，当前课程主线 |
+| AdaLoRA | 动态调整不同层的 rank，把参数预算分给更重要的层 | LoRA 后再学 |
+| IA3 | 训练少量缩放向量，调节 attention/FFN 激活 | LoRA 后可了解 |
+| Prompt Tuning | 训练 soft prompt，不改模型主体权重 | 可了解 |
+| Prefix Tuning | 在每层 attention 前加入可训练 prefix key/value | 可了解 |
+| P-Tuning | 用可训练 prompt 表示或 prompt encoder 引导模型 | 可了解 |
+| LoHa / LoKr | LoRA 的 Hadamard/Kronecker 分解变体 | 进阶了解 |
+| OFT / BOFT | 用正交变换方式调整权重表示 | 进阶了解 |
+| X-LoRA | 用门控方式组合多个 LoRA adapter | 多 adapter 后再看 |
+| LayerNorm Tuning | 只训练 LayerNorm 等极少参数 | 了解即可 |
+
+学习顺序建议：先掌握 LoRA 的保存、加载、推理；再学 AdaLoRA/IA3；最后看 Prompt/Prefix/P-Tuning 和多 adapter 组合。
+
 ## LoRA 实验顺序
 
 ### 1. 先跑小模型 SFT

@@ -86,6 +86,25 @@ AutoModelForCausalLM
 
 例子：本课用 PEFT 的 `LoraConfig` 和 `get_peft_model` 把 Qwen base model 改造成只训练 LoRA adapter 的模型。
 
+### PEFT 支持的常见方法
+
+PEFT 不是一种算法，而是一组“少训练参数”的方法集合。当前最适合作为本课程主线的是 LoRA，因为它最常见、工程资料最多，也最容易观察 adapter 的保存和加载。
+
+| 方法 | 核心想法 | 简短例子 | 学习优先级 |
+|---|---|---|---|
+| LoRA | 在目标线性层旁边加低秩 A/B 矩阵，只训练增量 | 本课把 LoRA 加到 `q_proj`、`v_proj` | 最高 |
+| AdaLoRA | 训练时动态分配不同层的 rank，把参数预算给更重要的层 | 不是所有层都固定 `r=8`，重要层 rank 更高 | 中 |
+| IA3 | 不加低秩矩阵，而是学习少量缩放向量来调节激活 | 给 attention/FFN 的中间表示乘一个可训练 gate | 中 |
+| Prompt Tuning | 冻结模型，只训练一段连续向量形式的 soft prompt | 在真实 prompt 前面拼一串可训练“虚拟 token” | 中 |
+| Prefix Tuning | 给 Transformer 每层 attention 加可训练 prefix key/value | 每层都多一段可学习上下文，影响注意力 | 中 |
+| P-Tuning | 用可训练 prompt 表示或 prompt encoder 引导模型 | 比手写 prompt 更可训练，但仍不改大部分模型权重 | 中 |
+| LoHa / LoKr | LoRA 的低秩分解变体，用 Hadamard/Kronecker 结构提高表达 | 常见于 LyCORIS 系列 adapter | 低 |
+| OFT / BOFT | 用正交变换方式调整权重，关注保持原模型表示结构 | 适合了解，不建议作为第一条本地实践线 | 低 |
+| X-LoRA | 用门控/混合方式组合多个 LoRA adapter | 不同任务 adapter 由路由权重决定贡献 | 低 |
+| LayerNorm Tuning | 只训练 LayerNorm 等极少数参数 | 参数量极小，但能力也受限 | 低 |
+
+本课程当前只执行 LoRA。你先掌握 `base model + adapter`、`target_modules`、`save_pretrained`、`PeftModel.from_pretrained`，再扩展到 AdaLoRA、IA3、Prompt/Prefix Tuning。
+
 ### Hugging Face model id
 
 作用：model id 是 Hugging Face Hub 上定位模型的名字，通常是 `组织或用户/模型名`。代码用它来下载 tokenizer、config 和权重。

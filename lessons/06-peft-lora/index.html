@@ -67,7 +67,7 @@
   </style>
 </head>
 <body>
-  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#terms">术语</a><a href="#trace">步骤</a></div></nav>
+  <nav class="nav"><div class="brand"><span>LLM</span> Finetune Study</div><div><a href="#model">模型</a><a href="#flow">变化图</a><a href="#params">参数</a><a href="#terms">术语</a><a href="#peft-methods">PEFT方法</a><a href="#trace">步骤</a></div></nav>
   <main class="wrap">
     <div class="badge"><span class="dot"></span> LESSON 06 · PEFT LORA</div>
     <h1><span>PEFT LoRA</span><br />用真实 Qwen 小模型跑 adapter</h1>
@@ -180,6 +180,11 @@ base gradients are blocked because base weights are frozen</div>
           <p><b>例子：</b>本课用 <span class="mono">LoraConfig</span> 和 <span class="mono">get_peft_model</span> 把 Qwen 改造成只训练 LoRA adapter 的模型。</p>
         </div>
         <div class="term">
+          <div class="term-name">PEFT 方法地图</div>
+          <p><b>作用：</b>PEFT 是一组省参数微调方法，不是单一算法。当前课程主线是 LoRA，后续可扩展到 AdaLoRA、IA3、Prompt/Prefix/P-Tuning。</p>
+          <p><b>例子：</b>LoRA 训练 A/B 低秩矩阵；Prompt Tuning 训练 soft prompt；IA3 训练少量缩放向量。</p>
+        </div>
+        <div class="term">
           <div class="term-name">Hugging Face model id</div>
           <p><b>作用：</b>定位 Hub 上模型的名字，通常是 <span class="mono">组织或用户/模型名</span>，用于下载 tokenizer、config 和权重。</p>
           <p><b>例子：</b><span class="mono">Qwen/Qwen2.5-0.5B-Instruct</span> 是本课 model id，<span class="mono">from_pretrained</span> 会根据它找模型文件。</p>
@@ -219,6 +224,20 @@ base gradients are blocked because base weights are frozen</div>
           <p><b>作用：</b>可训练参数占总参数的比例，用来衡量参数高效微调到底省了多少训练量。</p>
           <p><b>例子：</b>本课只训练 540,672 个参数，占约 494.6M 总参数的 0.1093%。</p>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="peft-methods">
+      <div class="kicker">PEFT METHOD MAP</div>
+      <h2>PEFT 还有哪些具体方法</h2>
+      <p class="lead">PEFT 的共同点是少训练参数。你当前应该先吃透 LoRA，再把其他方法当作扩展地图。</p>
+      <div class="grid-3" style="margin-top:18px;">
+        <div class="card"><div class="card-title">LoRA / AdaLoRA</div><p class="card-body">LoRA 在目标线性层加 A/B 低秩矩阵；AdaLoRA 会动态分配 rank，把参数预算给更重要的层。</p></div>
+        <div class="card"><div class="card-title">IA3</div><p class="card-body">不加低秩矩阵，而是学习少量缩放向量，调节 attention 或 FFN 中的激活流。</p></div>
+        <div class="card"><div class="card-title">Prompt / Prefix / P-Tuning</div><p class="card-body">不主要改模型层，而是训练 soft prompt、每层 prefix key/value，或 prompt encoder。</p></div>
+        <div class="card"><div class="card-title">LoHa / LoKr</div><p class="card-body">LoRA 的分解变体，用 Hadamard 或 Kronecker 结构表达 adapter 增量。</p></div>
+        <div class="card"><div class="card-title">OFT / BOFT</div><p class="card-body">通过正交变换方式调整权重表示，属于更进阶的参数高效方法。</p></div>
+        <div class="card"><div class="card-title">X-LoRA / LayerNorm Tuning</div><p class="card-body">X-LoRA 用门控组合多个 LoRA adapter；LayerNorm Tuning 只训练极少数 norm 参数。</p></div>
       </div>
     </section>
 

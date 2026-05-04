@@ -245,6 +245,25 @@ def write_report(
         | `save_pretrained` | 保存 adapter-only checkpoint | PEFT model | adapter dir |
         | `PeftModel.from_pretrained` | 把 adapter 加载到 fresh base | base model + adapter dir | 可推理 LoRA model |
 
+        ## PEFT 还有哪些具体方法
+
+        PEFT 不是单一算法，而是一组参数高效微调方法。当前课程只执行 LoRA，因为它最常见，也最容易观察 adapter 的保存、加载和推理效果。
+
+        | 方法 | 核心想法 | 学习优先级 |
+        |---|---|---|
+        | LoRA | 在目标线性层旁边加低秩 A/B 矩阵，只训练 adapter delta | 最高 |
+        | AdaLoRA | 动态调整不同层的 rank，把参数预算给更重要的层 | 中 |
+        | IA3 | 学习少量缩放向量，调节 attention/FFN 激活 | 中 |
+        | Prompt Tuning | 冻结模型，只训练 soft prompt 向量 | 中 |
+        | Prefix Tuning | 给每层 attention 加可训练 prefix key/value | 中 |
+        | P-Tuning | 用可训练 prompt 表示或 prompt encoder 引导模型 | 中 |
+        | LoHa / LoKr | LoRA 的 Hadamard/Kronecker 分解变体 | 低 |
+        | OFT / BOFT | 用正交变换方式调整权重表示 | 低 |
+        | X-LoRA | 用门控方式组合多个 LoRA adapter | 低 |
+        | LayerNorm Tuning | 只训练 LayerNorm 等极少参数 | 低 |
+
+        建议顺序：LoRA -> AdaLoRA / IA3 -> Prompt / Prefix / P-Tuning -> 多 adapter 组合。
+
         ## 和 Lesson 05 的区别
 
         - Lesson 05 手写 LoRA，目标是看清 A/B 低秩矩阵。
