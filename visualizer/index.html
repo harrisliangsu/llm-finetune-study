@@ -414,9 +414,336 @@
     @media (max-width:1150px) { .layout { grid-template-columns:1fr; } .layout > aside.panel:last-child { grid-column:auto; } .topbar { position:static; grid-template-columns:1fr; align-items:stretch; } .toolbar { justify-content:flex-start; flex-wrap:wrap; } .tensor-list,.model-grid,.section-grid,.meta-grid,.stage-grid,.stage-progress-grid,.sim-grid,.teach-flow,.evidence-grid,.sim-flow,.gen-grid,.stage-grid .model-viz { grid-template-columns:1fr; } .pipeline-viz { grid-template-columns:repeat(5,minmax(68px,1fr)); } .teach-node::after { display:none; } .sim-board::before,.sim-board::after { display:none; } .stage-cell { border-right:0; border-bottom:1px solid var(--line); } .stage-cell:last-child { border-bottom:0; } }
     @media (max-width:680px) { .shell { padding:12px; } .topbar { height:auto; padding:14px; } .toolbar { flex-wrap:wrap; } .top-course-picker { grid-template-columns:1fr; } .node { width:150px; } .node:hover { width:220px; } .lesson-title { font-size:23px; } }
     @media (max-width:680px) { .stage-head { grid-template-columns:1fr; } .stage-chips { justify-content:flex-start; } }
+
+    :root {
+      --bg:#090b10;
+      --panel:#10151f;
+      --panel-2:#151b27;
+      --panel-3:#0c111a;
+      --panel-4:#0a0f17;
+      --ink:#eef3ff;
+      --muted:#9aa6bd;
+      --faint:#647087;
+      --line:rgba(148,163,184,.14);
+      --line-strong:rgba(148,163,184,.24);
+      --blue:#3b82f6;
+      --cyan:#38bdf8;
+      --green:#22c55e;
+      --gold:#d97706;
+      --orange:#ea580c;
+      --purple:#8b5cf6;
+      --red:#ef4444;
+      --ring:#60a5fa;
+      --surface-hover:#1a2231;
+      --shadow:0 24px 72px rgba(0,0,0,.32);
+    }
+    html { scroll-behavior:smooth; }
+    body {
+      background:
+        linear-gradient(180deg,#090b10 0%,#0b1018 54%,#080a0f 100%),
+        repeating-linear-gradient(90deg,rgba(148,163,184,.025) 0 1px,transparent 1px 56px),
+        repeating-linear-gradient(180deg,rgba(148,163,184,.02) 0 1px,transparent 1px 56px);
+      font-family:"Fira Sans",-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+    }
+    body::before { display:none; }
+    code, pre, .mono { font-family:"Fira Code","SF Mono",Menlo,Consolas,monospace; }
+    .skip-link {
+      position:fixed; left:18px; top:-56px; z-index:99; border:1px solid var(--ring); border-radius:8px;
+      background:#0f172a; color:#e0f2fe; padding:9px 12px; font-weight:900; text-decoration:none;
+    }
+    .skip-link:focus { top:14px; }
+    .shell { max-width:1760px; padding:20px 22px 28px; }
+    .topbar {
+      min-height:72px;
+      grid-template-columns:minmax(210px,auto) minmax(200px,1fr) minmax(360px,520px) auto;
+      gap:16px;
+      border-radius:10px;
+      background:rgba(12,17,26,.94);
+      border-color:var(--line-strong);
+      box-shadow:var(--shadow);
+      top:10px;
+    }
+    .brand {
+      display:flex; align-items:center; gap:8px; font-size:16px; font-weight:950;
+    }
+    .brand span {
+      display:inline-flex; min-width:44px; color:#e0f2fe; background:rgba(56,189,248,.12);
+      border:1px solid rgba(56,189,248,.24); border-radius:7px; padding:3px 8px;
+    }
+    .status { justify-content:center; font-size:14px; min-width:0; white-space:nowrap; text-overflow:ellipsis; }
+    .pulse { background:var(--cyan); }
+    .top-course-picker {
+      grid-template-columns:76px minmax(0,1fr);
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:10px;
+      padding:8px;
+      background:rgba(8,13,21,.72);
+    }
+    .top-course-label { color:#7dd3fc; }
+    .course-select {
+      min-height:38px;
+      border-radius:8px;
+      background:#0b111b;
+      border-color:rgba(56,189,248,.26);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .toolbar { gap:8px; }
+    .button {
+      min-height:38px;
+      border-radius:8px;
+      background:#151b27;
+      border-color:rgba(148,163,184,.18);
+      color:#dbeafe;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+      transition:background .16s ease,border-color .16s ease,transform .16s ease,color .16s ease;
+    }
+    .button:hover { background:#1b2433; border-color:rgba(56,189,248,.38); transform:translateY(-1px); }
+    .button.active { background:rgba(34,197,94,.1); border-color:rgba(34,197,94,.36); color:#bbf7d0; }
+    button:focus-visible,
+    select:focus-visible,
+    .node:focus-visible,
+    .field-card:focus-visible,
+    a:focus-visible {
+      outline:2px solid var(--ring);
+      outline-offset:2px;
+    }
+    .layout {
+      grid-template-columns:minmax(260px,300px) minmax(720px,1fr) minmax(300px,360px);
+      gap:18px;
+    }
+    .panel {
+      border-radius:10px;
+      padding:18px;
+      background:rgba(16,21,31,.96);
+      border-color:rgba(148,163,184,.16);
+      box-shadow:0 20px 60px rgba(0,0,0,.22);
+    }
+    .panel-title {
+      margin-bottom:12px;
+      color:#a8b3c7;
+      font-size:12px;
+      letter-spacing:.16em;
+    }
+    .lesson-title { font-size:28px; letter-spacing:0; }
+    .subtle { color:var(--muted); }
+    .stat,
+    .run-card,
+    .course-dashboard,
+    .course-meter-row,
+    .box,
+    .side-card,
+    .metric-viz,
+    .field-card {
+      border-radius:8px;
+      background:#0d131d;
+      border-color:rgba(148,163,184,.14);
+    }
+    .stat { padding:14px 12px; }
+    .stat-value { color:#f8fbff; font-size:24px; letter-spacing:-.02em; }
+    .stat-label,
+    .box-title,
+    .meta-label,
+    .kv-key {
+      color:#8d98af;
+      letter-spacing:.12em;
+    }
+    .progress-track { height:8px; background:rgba(148,163,184,.12); }
+    .progress-fill { background:linear-gradient(90deg,#22c55e,#38bdf8); }
+    .progress-fill.course { background:linear-gradient(90deg,#3b82f6,#38bdf8); }
+    .flow-wrap {
+      margin:0 -2px;
+      padding:4px 2px 12px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-color:rgba(56,189,248,.45) rgba(148,163,184,.1);
+    }
+    .flow { gap:12px; align-items:stretch; padding:1px; }
+    .node {
+      width:176px;
+      min-height:132px;
+      padding:14px;
+      border-radius:8px;
+      background:#151b27;
+      border-color:rgba(148,163,184,.18);
+      display:grid;
+      grid-template-rows:auto auto minmax(34px,1fr) auto auto;
+      box-shadow:none;
+      transform:translateZ(0);
+    }
+    .node::after {
+      right:-13px;
+      width:13px;
+      background:linear-gradient(90deg,rgba(56,189,248,.68),transparent);
+    }
+    .node:hover {
+      width:240px;
+      min-height:132px;
+      background:var(--surface-hover);
+      box-shadow:0 18px 40px rgba(0,0,0,.24);
+    }
+    .node.done { border-color:rgba(34,197,94,.24); }
+    .node.current:not(.active) {
+      border-color:rgba(56,189,248,.48);
+      box-shadow:inset 0 0 0 1px rgba(56,189,248,.12);
+    }
+    .node.active {
+      border-color:rgba(217,119,6,.88);
+      background:linear-gradient(180deg,rgba(217,119,6,.12),#151b27 42%);
+      box-shadow:inset 0 0 0 1px rgba(217,119,6,.24), 0 16px 36px rgba(0,0,0,.28);
+    }
+    .node.current:not(.active)::before {
+      top:12px; right:12px;
+      color:#bae6fd;
+      border-color:rgba(56,189,248,.32);
+      background:rgba(56,189,248,.1);
+    }
+    .node-id { font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+    .node-name { font-size:15px; line-height:1.22; }
+    .node-summary {
+      font-size:12px;
+      color:#9aa6bd;
+      -webkit-line-clamp:3;
+    }
+    .node:hover .node-summary { -webkit-line-clamp:4; }
+    .kind { min-height:24px; margin-top:8px; border-radius:999px; }
+    .stage {
+      border-radius:10px;
+      border-color:rgba(56,189,248,.18);
+      background:#0c121b;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .stage-head {
+      padding:16px 18px;
+      background:#0f1622;
+      border-bottom-color:rgba(148,163,184,.16);
+    }
+    .stage-title { font-size:18px; }
+    .stage-grid {
+      grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+      min-height:0;
+    }
+    .stage-grid .stage-cell {
+      border-bottom:0;
+      border-right:1px solid rgba(148,163,184,.12);
+    }
+    .stage-grid .stage-cell:last-child { border-right:0; }
+    .stage-label { color:#a8b3c7; }
+    .stage-chip {
+      border-radius:999px;
+      background:#151b27;
+      border-color:rgba(148,163,184,.16);
+    }
+    .stage-chip.hot { color:#bae6fd; border-color:rgba(56,189,248,.4); background:rgba(56,189,248,.08); }
+    .sim-board {
+      min-height:300px;
+      border-radius:10px;
+      border-color:rgba(56,189,248,.16);
+      background:
+        repeating-linear-gradient(90deg,rgba(148,163,184,.026) 0 1px,transparent 1px 32px),
+        repeating-linear-gradient(180deg,rgba(148,163,184,.02) 0 1px,transparent 1px 32px),
+        #0b111a;
+    }
+    .sim-panel,
+    .pipeline-node,
+    .data-node,
+    .model-core,
+    .generation-card,
+    .gen-box {
+      border-radius:8px;
+      background:#101722;
+    }
+    .pipeline-viz {
+      grid-template-columns:repeat(5,minmax(112px,1fr));
+      min-height:250px;
+      gap:10px;
+    }
+    .pipeline-node {
+      min-height:138px;
+      padding:10px;
+    }
+    .pipeline-node strong,
+    .sim-label,
+    .stage-eyebrow,
+    .teach-kicker {
+      letter-spacing:.1em;
+    }
+    .model-viz { gap:12px; }
+    .stage-grid .model-viz {
+      grid-template-columns:1fr;
+    }
+    .model-core { min-height:168px; }
+    .detail-title { font-size:23px; letter-spacing:-.01em; }
+    .section-grid { gap:14px; }
+    .field-grid { gap:10px; }
+    .field-card {
+      padding:12px;
+      transition:border-color .16s ease,background .16s ease,box-shadow .16s ease;
+    }
+    .field-card:hover,
+    .field-card.active {
+      background:rgba(56,189,248,.07);
+      border-color:rgba(56,189,248,.52);
+    }
+    .inspector {
+      border-radius:10px;
+      border-color:rgba(56,189,248,.22);
+      background:#0c141e;
+    }
+    .model-grid { gap:10px; }
+    .model-chip {
+      border-radius:8px;
+      background:#0d131d;
+      border-color:rgba(148,163,184,.14);
+    }
+    .sparkline path { stroke:#22c55e; filter:none; }
+    .reveal {
+      border-radius:8px;
+      background:#0d131d;
+    }
+    @media (max-width:1500px) and (min-width:1151px) {
+      .layout { grid-template-columns:minmax(250px,288px) minmax(0,1fr); }
+      .layout > aside.panel:last-child { grid-column:2; }
+    }
+    @media (max-width:1150px) {
+      .topbar { grid-template-columns:1fr; position:static; }
+      .status { justify-content:flex-start; white-space:normal; }
+      .layout { grid-template-columns:1fr; }
+      .stage-grid,
+      .stage-grid .model-viz,
+      .section-grid,
+      .sim-flow,
+      .teach-flow,
+      .evidence-grid {
+        grid-template-columns:1fr;
+      }
+      .stage-grid .stage-cell { border-right:0; border-bottom:1px solid rgba(148,163,184,.12); }
+      .stage-grid .stage-cell:last-child { border-bottom:0; }
+      .pipeline-viz { grid-template-columns:repeat(5,minmax(96px,1fr)); }
+    }
+    @media (max-width:680px) {
+      .shell { padding:12px; }
+      .topbar { padding:12px; }
+      .top-course-picker { grid-template-columns:1fr; }
+      .toolbar { display:grid; grid-template-columns:1fr 1fr; }
+      .button { width:100%; }
+      .node,
+      .node:hover { width:168px; min-height:130px; }
+      .pipeline-viz { grid-template-columns:repeat(5,minmax(92px,1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+        scroll-behavior:auto !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#mainContent">跳到主内容</a>
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span>LLM</span> Training Visualizer</div>
@@ -435,7 +762,7 @@
       </div>
     </header>
 
-    <main class="layout">
+    <main class="layout" id="mainContent">
       <aside class="panel">
         <div class="panel-title">Current Run</div>
         <h1 class="lesson-title" id="lessonTitle">读取中</h1>
@@ -874,7 +1201,7 @@
       renderCourseProgressList(trace);
 
       $("flow").innerHTML = events.length ? events.map((event) => `
-        <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}" title="${escapeAttr(`STEP ${event.id} · ${event.name}\n${event.summary || ""}`)}">
+        <article class="${nodeClass(event, currentId)}" data-event-id="${escapeAttr(event.id)}" tabindex="0" role="button" aria-pressed="${event.id === activeEventId ? "true" : "false"}" aria-label="${escapeAttr(`选择 STEP ${event.id} · ${event.name}`)}" title="${escapeAttr(`STEP ${event.id} · ${event.name}\n${event.summary || ""}`)}">
           <div class="node-id">STEP ${event.id}</div>
           <div class="node-name">${escapeHtml(event.name)}</div>
           <div class="node-summary">${escapeHtml(event.summary || "")}</div>
@@ -883,12 +1210,18 @@
         </article>
       `).join("") : `<div class="empty" style="min-width:100%">${escapeHtml(trace.missing_trace ? "这个课程检测到了 outputs，但还没有归档 trace。重新运行课程后会自动生成。" : "暂无事件。")}</div>`;
       document.querySelectorAll(".node").forEach((node) => {
-        node.addEventListener("click", () => {
+        const selectNode = () => {
           followCurrent = false;
           activeEventId = node.dataset.eventId;
           selectedField = null;
           syncLocationEvent(activeEventId);
           render(lastTrace, { forceScroll: true });
+        };
+        node.addEventListener("click", selectNode);
+        node.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          selectNode();
         });
       });
       if (options.forceScroll || followCurrent || previousActiveId !== activeEventId) {
