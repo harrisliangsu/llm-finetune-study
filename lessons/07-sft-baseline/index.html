@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 07 · SFT Baseline</title>
+  <style>
+    body { margin:0; background:#090b10; color:#eef3ff; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; line-height:1.65; }
+    main { max-width:1120px; margin:0 auto; padding:48px 22px 80px; }
+    h1 { font-size:42px; margin:0 0 10px; }
+    h2 { margin-top:34px; color:#bae6fd; }
+    p, li { color:#a8b3c7; }
+    code, pre { font-family:"SF Mono",Menlo,Consolas,monospace; }
+    pre { overflow:auto; padding:16px; border:1px solid rgba(148,163,184,.18); border-radius:8px; background:#0d131d; color:#dbeafe; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:22px 0; }
+    .card { border:1px solid rgba(148,163,184,.18); border-radius:8px; background:#101722; padding:16px; }
+    .card strong { display:block; margin-bottom:6px; color:#f8fafc; }
+    .flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+    .step { border:1px solid rgba(56,189,248,.22); border-radius:8px; padding:12px; background:#0d1723; }
+    .step span { display:block; color:#38bdf8; font-size:12px; font-weight:800; letter-spacing:.08em; }
+    a { color:#7dd3fc; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lesson 07 · SFT Baseline</h1>
+    <p>目标：用真实 Hugging Face Qwen 0.5B + LoRA，在本地训练一个客服工单到严格 JSON 的 SFT baseline。</p>
+    <div class="grid">
+      <div class="card"><strong>数据</strong><code>data/train.jsonl</code><br>40 条 instruction/input/output。</div>
+      <div class="card"><strong>评估</strong><code>data/eval_prompts.jsonl</code><br>固定 6 条 prompt，对比训练前后。</div>
+      <div class="card"><strong>模型</strong><code>Qwen/Qwen2.5-0.5B-Instruct</code><br>按本机 32GB/MPS 选择。</div>
+      <div class="card"><strong>产物</strong><code>outputs/adapter/</code><br>adapter、generations、metrics。</div>
+    </div>
+    <h2>执行命令</h2>
+    <pre>.venv/bin/python lessons/07-sft-baseline/run.py --trace-delay 0.5</pre>
+    <h2>训练流程</h2>
+    <div class="flow">
+      <div class="step"><span>01</span>选择 HF 模型</div>
+      <div class="step"><span>02</span>加载 tokenizer/base</div>
+      <div class="step"><span>03</span>构造 SFT labels</div>
+      <div class="step"><span>04</span>训练前生成</div>
+      <div class="step"><span>05</span>挂 LoRA adapter</div>
+      <div class="step"><span>06</span>Trainer SFT</div>
+      <div class="step"><span>07</span>训练后生成</div>
+      <div class="step"><span>08</span>保存并重新加载 adapter</div>
+    </div>
+    <h2>关键概念</h2>
+    <p><strong>SFT</strong> 是用标准答案训练模型。这里标准答案是严格 JSON。</p>
+    <p><strong>loss mask</strong> 是让 prompt 的 labels 等于 <code>-100</code>，只让 answer token 计算 loss。</p>
+    <p><strong>LoRA</strong> 是参数高效训练方式，本课为了在本地跑 Qwen，只训练 adapter，不更新 base model。</p>
+    <p><strong>adapter</strong> 是训练后的增量权重，部署时用同一个 base model 加载 adapter。</p>
+    <h2>看什么结果</h2>
+    <ul>
+      <li>打开 <a href="report.md">report.md</a> 看训练前后 JSON 格式指标。</li>
+      <li>打开 <a href="outputs/generations/before.jsonl">before.jsonl</a> 和 <a href="outputs/generations/after.jsonl">after.jsonl</a> 看固定 prompt 输出。</li>
+      <li>打开可视化页看 <code>visualizer/traces/07-sft-baseline.json</code> 的数据流和模型变化。</li>
+    </ul>
+  </main>
+</body>
+</html>

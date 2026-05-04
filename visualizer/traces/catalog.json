@@ -55,7 +55,7 @@
       "trace": "traces/07-sft-baseline.json",
       "outputs": "lessons/07-sft-baseline/outputs",
       "topic": "ticket text -> strict JSON",
-      "expected_events": 18
+      "expected_events": 35
     }
   ]
 }

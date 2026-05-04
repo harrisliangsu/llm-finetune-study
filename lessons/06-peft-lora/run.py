@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import inspect
 import os
-import platform
 import sys
 from pathlib import Path
 from textwrap import dedent
@@ -25,6 +24,7 @@ os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
 os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
 os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
+from lessons.common.hf_model_policy import detect_local_config, infer_lora_target_modules, resolve_model_name
 from lessons.common.lesson_common import (
     decode_learned_labels,
     load_sft_splits,
@@ -76,21 +76,6 @@ def make_training_arguments(TrainingArguments, **kwargs):
     return TrainingArguments(**{key: value for key, value in kwargs.items() if key in parameters})
 
 
-def detect_machine(torch) -> dict[str, str | bool | int]:
-    try:
-        mem_bytes = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
-    except (AttributeError, ValueError):
-        mem_bytes = 0
-    return {
-        "machine": platform.machine(),
-        "processor": platform.processor() or "unknown",
-        "system": platform.system(),
-        "memory_gb": round(mem_bytes / (1024**3)),
-        "mps_available": torch.backends.mps.is_available(),
-        "mps_built": torch.backends.mps.is_built(),
-    }
-
-
 def load_tokenizer(AutoTokenizer, model_name: str):
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     if tokenizer.pad_token is None:
@@ -130,6 +115,13 @@ def trainable_parameter_counts(model) -> tuple[int, int]:
         if parameter.requires_grad:
             trainable += count
     return trainable, total
+
+
+def display_path(path: Path) -> Path | str:
+    try:
+        return path.relative_to(resolve_project_path("."))
+    except ValueError:
+        return str(path)
 
 
 def greedy_generate(torch, model, tokenizer, prompt: str, max_new_tokens: int = 80) -> str:
@@ -239,7 +231,7 @@ def write_report(
 
         | 步骤 | 作用 | 输入 | 输出 |
         |---|---|---|---|
-        | `AutoTokenizer.from_pretrained` | 下载/加载真实模型 tokenizer | `{model_name}` | Qwen tokenizer |
+        | `AutoTokenizer.from_pretrained` | 下载/加载真实模型 tokenizer | `{model_name}` | tokenizer |
         | `AutoModelForCausalLM.from_pretrained` | 下载/加载真实 causal LM | `{model_name}` | base model |
         | `LoraConfig` | 描述 LoRA 插入位置和超参 | target modules, r, alpha | PEFT 配置 |
         | `get_peft_model` | 把 base model 包成 LoRA model | base model + config | trainable adapter |
@@ -271,7 +263,7 @@ def write_report(
         - Lesson 05 手写 LoRA，目标是看清 A/B 低秩矩阵。
         - Lesson 06 使用 PEFT，目标是学习真实工程接口。
         - Lesson 05 不下载模型；Lesson 06 下载真实 Hugging Face base model。
-        - Lesson 05 把 LoRA 插在 `lm_head`；Lesson 06 插在 Qwen attention 的 `q_proj/v_proj`。
+        - Lesson 05 把 LoRA 插在 `lm_head`；Lesson 06 按模型结构选择 attention target modules。
 
         ## 下一步
 
@@ -284,7 +276,7 @@ def write_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-name", default="Qwen/Qwen2.5-0.5B-Instruct")
+    parser.add_argument("--model-name", default="auto")
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/06-peft-lora/report.md")
     parser.add_argument("--output-dir", default="lessons/06-peft-lora/outputs/trainer")
@@ -320,28 +312,29 @@ def main() -> None:
     report_path.parent.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     adapter_dir.mkdir(parents=True, exist_ok=True)
-    trace = VisualTrace("06-peft-lora", "Lesson 06 · PEFT Qwen LoRA", args.trace, args.trace_delay)
+    trace = VisualTrace("06-peft-lora", "Lesson 06 · PEFT LoRA", args.trace, args.trace_delay)
 
-    machine = detect_machine(torch)
+    machine = detect_local_config(torch)
+    model_name = resolve_model_name(args.model_name, machine)
     print("Step 0: selected model")
     print("machine:", machine)
-    print("model:", args.model_name)
+    print("model:", model_name)
     trace.event(
         "select model",
         "setup",
         "根据本机配置选择真实 Hugging Face causal LM，并把缓存写入课程 outputs。",
-        inputs={"machine": machine},
-        outputs={"model_name": args.model_name, "hf_cache": os.environ["HF_HOME"]},
+        inputs={"requested_model": args.model_name, "machine": machine},
+        outputs={"model_name": model_name, "hf_cache": os.environ["HF_HOME"]},
     )
 
     print("\nStep 1: load tokenizer and base model")
-    tokenizer = load_tokenizer(AutoTokenizer, args.model_name)
-    base_model = load_base_model(torch, AutoModelForCausalLM, args.model_name)
+    tokenizer = load_tokenizer(AutoTokenizer, model_name)
+    base_model = load_base_model(torch, AutoModelForCausalLM, model_name)
     trace.event(
         "load tokenizer and base model",
         "model",
-        "加载真实 Qwen tokenizer 和 base model。此时模型仍是原始权重，尚未注入 LoRA。",
-        inputs={"model_name": args.model_name},
+        "加载真实 Hugging Face tokenizer 和 base model。此时模型仍是原始权重，尚未注入 LoRA。",
+        inputs={"model_name": model_name},
         outputs={"tokenizer_vocab_size": len(tokenizer), "pad_token_id": tokenizer.pad_token_id},
         model={"base": "loaded", "adapter": "none", "cache": os.environ["HF_HOME"]},
     )
@@ -358,7 +351,7 @@ def main() -> None:
     trace.event(
         "build SFT dataset",
         "data",
-        "用真实 Qwen tokenizer 构造 SFT 训练张量，数据字段仍然是 input_ids、attention_mask、labels。",
+        "用真实 Hugging Face tokenizer 构造 SFT 训练张量，数据字段仍然是 input_ids、attention_mask、labels。",
         inputs={"data": args.data, "max_length": args.max_length},
         outputs={"train_rows": len(tokenized["train"]), "validation_rows": len(tokenized["validation"])},
         tensors=[
@@ -368,7 +361,7 @@ def main() -> None:
         ],
     )
 
-    target_modules = ["q_proj", "v_proj"]
+    target_modules = infer_lora_target_modules(model_name)
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=args.rank,
@@ -389,7 +382,7 @@ def main() -> None:
     trace.event(
         "attach PEFT LoRA",
         "model",
-        "PEFT 在 q_proj/v_proj 上挂 LoRA adapter。base model 冻结，只训练少量 adapter 参数。",
+        "PEFT 在所选模型的 attention target modules 上挂 LoRA adapter。base model 冻结，只训练少量 adapter 参数。",
         inputs={"target_modules": target_modules, "rank": args.rank, "alpha": args.alpha, "dropout": args.dropout},
         outputs={"trainable_params": trainable_params, "total_params": total_params},
         model={
@@ -445,7 +438,7 @@ def main() -> None:
     trace.event(
         "train PEFT LoRA adapter",
         "train",
-        "Trainer 只更新 q_proj/v_proj 上的 LoRA adapter，Qwen base 权重不更新。",
+        "Trainer 只更新 target modules 上的 LoRA adapter，base 权重不更新。",
         inputs={"max_steps": args.max_steps, "learning_rate": args.learning_rate},
         outputs={"train_loss": train_output.metrics.get("train_loss")},
         metrics=train_output.metrics,
@@ -484,7 +477,7 @@ def main() -> None:
     )
 
     print("\nStep 8: reload adapter into fresh base model")
-    fresh_base = load_base_model(torch, AutoModelForCausalLM, args.model_name)
+    fresh_base = load_base_model(torch, AutoModelForCausalLM, model_name)
     loaded_model = PeftModel.from_pretrained(fresh_base, str(adapter_dir))
     generated_loaded = greedy_generate(
         torch,
@@ -493,12 +486,12 @@ def main() -> None:
         "### Instruction:\n解释什么是梯度累积\n\n### Response:\n",
     )
     trace.event(
-        "reload adapter into fresh Qwen",
+        "reload adapter into fresh base",
         "checkpoint",
         "重新加载 fresh base，再用 PeftModel.from_pretrained 挂回 adapter，模拟真实推理部署。",
-        inputs={"model_name": args.model_name, "adapter_dir": adapter_dir},
+        inputs={"model_name": model_name, "adapter_dir": adapter_dir},
         outputs={"loaded_generation_matches_training_path": generated_loaded == generated_after},
-        model={"base": "fresh Qwen", "adapter": "loaded"},
+        model={"base": "fresh", "adapter": "loaded"},
     )
 
     print("\nStep 9: fixed prompt generation")
@@ -518,7 +511,7 @@ def main() -> None:
 
     write_report(
         report_path,
-        args.model_name,
+        model_name,
         machine,
         tokenizer,
         tokenized,
@@ -530,15 +523,15 @@ def main() -> None:
         eval_before,
         train_output.metrics,
         eval_after,
-        adapter_dir.relative_to(resolve_project_path(".")),
+        display_path(adapter_dir),
         generated_before,
         generated_after,
         generated_loaded,
         args.max_steps,
         args.max_length,
     )
-    trace.finish("Lesson 06 完成：真实 Qwen + PEFT LoRA 的训练、保存、加载流程已可视化。", metrics={"trainable_ratio": trainable_params / total_params})
-    print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
+    trace.finish("Lesson 06 完成：真实 Hugging Face 模型 + PEFT LoRA 的训练、保存、加载流程已可视化。", metrics={"trainable_ratio": trainable_params / total_params})
+    print(f"\nReport written: {display_path(report_path)}")
 
 
 if __name__ == "__main__":

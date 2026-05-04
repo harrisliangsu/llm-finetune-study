@@ -46,9 +46,15 @@
 5. 再用同一批固定 prompts 做 SFT 前后效果评估。
 6. 最后看 LoRA/QLoRA、DPO、中文指令数据、adapter 保存和合并。
 
-注意：当前 Lesson 02-06 已经使用 SFT 形态的数据和 labels，但课程标题分别聚焦 tokenizer、batch、Trainer、LoRA 和 PEFT，所以还缺一个独立命名的 SFT 基线课。PEFT adapter 的保存、加载、重新加载对比已经在 Lesson 06 覆盖，后续课程应先补 Lesson 07: SFT baseline，再进入 DPO。Lesson 07 应优先使用“客服工单 -> 严格 JSON 路由”这类经典结构化输出任务，而不是通用知识解释任务；数据放在 `lessons/07-sft-baseline/data/`，保持课程自包含。
+注意：当前 Lesson 02-06 已经使用 SFT 形态的数据和 labels，但课程标题分别聚焦 tokenizer、batch、Trainer、LoRA 和 PEFT。Lesson 07 已经补成独立 SFT baseline：使用“客服工单 -> 严格 JSON 路由”这个经典结构化输出任务，固定 eval prompts，对比训练前后 JSON 合法率、字段完整性和 intent/department 是否正确。PEFT adapter 的保存、加载、重新加载对比已经在 Lesson 06/07 覆盖，后续再进入 DPO。
 
 ## 你可以从这里开始
+
+安装依赖：
+
+```bash
+.venv/bin/python -m pip install -r requirements.txt
+```
 
 先读：
 
@@ -60,6 +66,7 @@
 - [lessons/04-trainer/index.html](lessons/04-trainer/index.html)
 - [lessons/05-lora/index.html](lessons/05-lora/index.html)
 - [lessons/06-peft-lora/index.html](lessons/06-peft-lora/index.html)
+- [lessons/07-sft-baseline/index.html](lessons/07-sft-baseline/index.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md)
@@ -85,6 +92,7 @@ http://127.0.0.1:8765/visualizer/
 
 ```bash
 .venv/bin/python lessons/06-peft-lora/run.py --trace-delay 0.5
+.venv/bin/python lessons/07-sft-baseline/run.py --trace-delay 0.5
 ```
 
 `--trace-delay` 只用于演示时放慢步骤，方便观察页面变化；正常跑课可以不加。
@@ -97,6 +105,29 @@ http://127.0.0.1:8765/visualizer/
 - [lessons/04-trainer/report.md](lessons/04-trainer/report.md): `transformers.Trainer` 最小训练闭环和过拟合观察
 - [lessons/05-lora/report.md](lessons/05-lora/report.md): 冻结 base、训练 LoRA adapter、保存并重新加载 adapter
 - [lessons/06-peft-lora/report.md](lessons/06-peft-lora/report.md): 使用 `Qwen/Qwen2.5-0.5B-Instruct` 跑真实 PEFT LoRA
+- [lessons/07-sft-baseline/report.md](lessons/07-sft-baseline/report.md): 使用真实 Hugging Face Qwen + LoRA 做客服工单严格 JSON SFT baseline
+
+一次执行 01-07：
+
+```bash
+.venv/bin/python lessons/run_all.py
+```
+
+快速冒烟测试：
+
+```bash
+.venv/bin/python lessons/run_all.py --quick
+```
+
+## 模型选择原则
+
+课程里需要模型时，优先从 Hugging Face 下载真实模型，而不是本地随机生成模型：
+
+- Lesson 04: `sshleifer/tiny-gpt2`，用于快速学习 Trainer 训练闭环。
+- Lesson 06: `--model-name auto`，当前 32GB + MPS 本机会选择 `Qwen/Qwen2.5-0.5B-Instruct`，用于真实 PEFT LoRA。
+- Lesson 07: `--model-name auto`，当前 32GB + MPS 本机会选择 `Qwen/Qwen2.5-0.5B-Instruct`，用于中文严格 JSON SFT baseline。
+
+Lesson 05 保留手写 LoRA，是为了教学低秩矩阵 `A/B` 的作用，不属于真实模型训练课。
 
 ## 参考仓库
 

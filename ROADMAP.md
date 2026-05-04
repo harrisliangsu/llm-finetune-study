@@ -75,12 +75,14 @@
 - 拼接训练 prompt
 - mask prompt loss
 - 在小模型上跑 100 到 500 step
+- 对照执行 [lessons/07-sft-baseline](lessons/07-sft-baseline)，先用 40 条客服工单路由数据跑通严格 JSON SFT baseline
 
 验收：
 
 - 能解释 SFT 和普通 causal LM 的区别
 - 能解释训练模板和推理模板为什么要一致
 - 能让 20 条样本明显过拟合
+- 能比较训练前后固定 eval prompts 的 JSON 合法率、intent 和 department 命中率
 
 ## Week 5：LoRA / PEFT
 

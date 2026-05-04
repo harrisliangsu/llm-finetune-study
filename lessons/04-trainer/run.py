@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lesson 04: run a minimal local Trainer loop on SFT-shaped data."""
+"""Lesson 04: run a minimal Trainer loop with a real Hugging Face causal LM."""
 
 from __future__ import annotations
 
@@ -12,15 +12,16 @@ from textwrap import dedent
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
-LESSON_OUTPUTS = Path(__file__).resolve().parent / "outputs"
+
+LESSON_DIR = Path(__file__).resolve().parent
+LESSON_OUTPUTS = LESSON_DIR / "outputs"
 os.environ["HF_HOME"] = str(LESSON_OUTPUTS / "hf-cache")
 os.environ["HF_DATASETS_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "datasets")
 os.environ["HF_XET_CACHE"] = str(LESSON_OUTPUTS / "hf-cache" / "xet")
 
+from lessons.common.hf_model_policy import DEFAULT_TINY_CAUSAL_LM, detect_local_config
 from lessons.common.lesson_common import (
-    count_trainable_parameters,
     decode_learned_labels,
-    ensure_local_auto_tokenizer,
     load_sft_splits,
     make_sft_tokenize_fn,
     resolve_project_path,
@@ -28,18 +29,17 @@ from lessons.common.lesson_common import (
 from lessons.common.visual_trace import VisualTrace, make_trainer_trace_callback
 
 
-def require_torch_and_trainer():
+def require_training_stack():
     try:
         import torch
-        from torch import nn
-        from transformers import Trainer, TrainingArguments, default_data_collator, set_seed
+        from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, default_data_collator, set_seed
     except ImportError as exc:
         raise SystemExit(
-            "Lesson 04 requires PyTorch and Trainer dependencies. "
-            "Install them with: .venv/bin/python -m pip install torch accelerate"
+            "Lesson 04 requires torch, transformers, datasets, and accelerate. "
+            "Install them in .venv before running this lesson."
         ) from exc
 
-    return torch, nn, Trainer, TrainingArguments, default_data_collator, set_seed
+    return torch, AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, default_data_collator, set_seed
 
 
 def make_training_arguments(TrainingArguments, **kwargs):
@@ -51,50 +51,65 @@ def make_training_arguments(TrainingArguments, **kwargs):
     return TrainingArguments(**{key: value for key, value in kwargs.items() if key in parameters})
 
 
-def build_tiny_causal_lm(torch, nn, vocab_size: int, pad_token_id: int):
-    class TinyCausalLM(nn.Module):
-        def __init__(self) -> None:
-            super().__init__()
-            self.embedding = nn.Embedding(vocab_size, 64, padding_idx=pad_token_id)
-            self.rnn = nn.GRU(64, 96, batch_first=True)
-            self.lm_head = nn.Linear(96, vocab_size)
+def load_tokenizer(AutoTokenizer, model_name: str):
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    return tokenizer
 
-        def forward(self, input_ids, attention_mask=None, labels=None):
-            hidden = self.embedding(input_ids)
-            hidden, _ = self.rnn(hidden)
-            logits = self.lm_head(hidden)
-            loss = None
 
-            if labels is not None:
-                shift_logits = logits[:, :-1, :].contiguous()
-                shift_labels = labels[:, 1:].contiguous()
-                loss_fct = nn.CrossEntropyLoss(ignore_index=-100)
-                loss = loss_fct(shift_logits.view(-1, vocab_size), shift_labels.view(-1))
+def load_model(AutoModelForCausalLM, model_name: str):
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+    model.config.use_cache = False
+    return model
 
-            return {"loss": loss, "logits": logits}
 
-    return TinyCausalLM()
+def prepare_dataset(tokenizer, data_path: str, max_length: int):
+    splits = load_sft_splits(data_path)
+    tokenized = splits.map(
+        make_sft_tokenize_fn(tokenizer, max_length),
+        batched=True,
+        remove_columns=splits["train"].column_names,
+    )
+    trainer_dataset = tokenized.remove_columns(["prompt_length", "answer_length"]).with_format(
+        "torch", columns=["input_ids", "attention_mask", "labels"]
+    )
+    return tokenized, trainer_dataset
+
+
+def count_trainable_parameters(model) -> tuple[int, int]:
+    total = 0
+    trainable = 0
+    for parameter in model.parameters():
+        count = parameter.numel()
+        total += count
+        if parameter.requires_grad:
+            trainable += count
+    return trainable, total
 
 
 def greedy_generate(torch, model, tokenizer, prompt: str, max_new_tokens: int = 48) -> str:
     model.eval()
     device = next(model.parameters()).device
-    input_ids = tokenizer.encode(prompt, add_special_tokens=False)
-    ids = torch.tensor([input_ids], dtype=torch.long, device=device)
+    encoded = tokenizer(prompt, return_tensors="pt", add_special_tokens=False)
+    encoded = {key: value.to(device) for key, value in encoded.items()}
 
     with torch.no_grad():
-        for _ in range(max_new_tokens):
-            logits = model(input_ids=ids)["logits"]
-            next_id = int(torch.argmax(logits[:, -1, :], dim=-1).item())
-            ids = torch.cat([ids, torch.tensor([[next_id]], dtype=torch.long, device=device)], dim=1)
-            if next_id == tokenizer.eos_token_id:
-                break
+        generated = model.generate(
+            **encoded,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        )
 
-    return tokenizer.decode(ids[0].detach().cpu().tolist(), skip_special_tokens=False)
+    return tokenizer.decode(generated[0].detach().cpu().tolist(), skip_special_tokens=False)
 
 
 def write_report(
     report_path: Path,
+    model_name: str,
+    machine: dict,
     tokenizer,
     tokenized,
     trainable_params: int,
@@ -102,29 +117,37 @@ def write_report(
     eval_before: dict,
     train_metrics: dict,
     eval_after: dict,
-    generated_text: str,
+    generated_before: str,
+    generated_after: str,
     max_steps: int,
     max_length: int,
 ) -> None:
     sample_labels = tokenized["train"][0]["labels"]
-
     report = dedent(
         f"""
         # Lesson 04: Trainer 最小训练闭环
 
         ## 本课执行结果
 
+        - model: `{model_name}`
+        - system: {machine["system"]}
+        - machine: {machine["machine"]}
+        - memory: {machine["memory_gb"]} GB
+        - MPS available: {machine["mps_available"]}
         - train 样本数: {len(tokenized["train"])}
         - validation 样本数: {len(tokenized["validation"])}
         - max_length: {max_length}
         - max_steps: {max_steps}
         - tokenizer vocab size: {len(tokenizer)}
-        - tiny model trainable params: {trainable_params}
-        - tiny model total params: {total_params}
+        - trainable params: {trainable_params}
+        - total params: {total_params}
+        - trainable ratio: {trainable_params / total_params:.4%}
         - eval loss before training: {eval_before.get("eval_loss")}
         - train loss: {train_metrics.get("train_loss")}
         - eval loss after training: {eval_after.get("eval_loss")}
-        - 观察: train loss 下降但 eval loss 上升，这是 4 条训练样本上开始过拟合的信号。
+
+        本课不再手写 tiny model，而是从 Hugging Face 下载 `{model_name}`。
+        它很小，适合快速看懂 `Trainer` 怎么组织 model、dataset、collator、loss、eval 和 checkpoint。
 
         ## 第 1 条训练样本的 label 检查
 
@@ -134,36 +157,44 @@ def write_report(
         {decode_learned_labels(tokenizer, sample_labels)}
         ```
 
-        ## 训练后固定 prompt 生成
+        这一步确认只有 answer 部分参与 loss，prompt 区域是 `-100`。
+
+        ## 固定 prompt 训练前后生成
+
+        Base 输出：
 
         ```text
-        {generated_text}
+        {generated_before}
+        ```
+
+        训练后输出：
+
+        ```text
+        {generated_after}
         ```
 
         ## 每一步的作用、输入、输出
 
         | 步骤 | 作用 | 输入 | 输出 |
         |---|---|---|---|
-        | 构造 tokenizer | 本地加载真实 `AutoTokenizer` | `lessons/02-tokenizer/outputs/local-sft-tokenizer` | token/id 映射 |
-        | 构造 tokenized dataset | 复用 Lesson 02 的 SFT labels | JSONL + tokenizer | `input_ids/attention_mask/labels` |
-        | `with_format("torch")` | 让 Dataset 取样时返回 torch tensor | tokenized DatasetDict | Trainer 可消费的 split |
-        | tiny causal LM | 提供最小可训练模型 | vocab size | logits/loss |
+        | `AutoTokenizer.from_pretrained` | 从 HF 加载 tokenizer | `{model_name}` | token/id 映射 |
+        | `AutoModelForCausalLM.from_pretrained` | 从 HF 加载 causal LM | `{model_name}` | 可训练 base model |
+        | 构造 tokenized dataset | 把 SFT JSONL 变成训练字段 | JSONL + tokenizer | `input_ids/attention_mask/labels` |
+        | `with_format("torch")` | 让 Dataset 返回 tensor | tokenized DatasetDict | Trainer 可消费的 split |
         | `TrainingArguments` | 固定训练超参和输出目录 | batch、steps、lr、seed | 可复现实验设置 |
-        | `Trainer.train()` | 执行反向传播和参数更新 | model + train_dataset | train loss 和训练状态 |
-        | `Trainer.evaluate()` | 用 validation 观察训练效果 | eval_dataset | eval loss |
+        | `Trainer.evaluate()` | 训练前后在 validation 上测 loss | eval split | eval loss |
+        | `Trainer.train()` | 执行 forward、loss、backward、optimizer step | model + train split | train loss 和更新后的权重 |
 
         ## 你要理解的关键点
 
-        1. `Trainer` 不神秘，本质是把 model、dataset、collator、optimizer、评估循环组织起来。
+        1. `Trainer` 本质是训练循环封装，不替你决定数据是否正确。
         2. `labels` 仍然是核心，loss 只从非 `-100` 的位置来。
-        3. 本课的 tiny model 不是可用 LLM，只是为了把训练闭环在本地跑通。
-        4. `eval_loss` 是验证集上的下一个 token 预测损失，不等于回答质量。
-        5. 后面换成真实 Transformer/LoRA 时，数据字段和 Trainer 闭环仍然是同一套。
-        6. 训练后生成的英文混杂输出不是失败，而是在提醒你：tiny model + 5 条样本只能验证流程，不能期待语言能力。
+        3. 本课模型很小，目标是验证训练闭环，不追求中文回答质量。
+        4. 后面换成 Qwen + LoRA 时，数据字段和 Trainer 闭环仍是同一套。
 
         ## 下一步
 
-        下一课可以进入 LoRA：冻结 base model，只训练少量 adapter 参数，并学习 adapter 保存、加载和合并。
+        Lesson 05 继续手写 LoRA 机制；Lesson 06/07 使用真实 Hugging Face Qwen 模型执行 PEFT/SFT。
         """
     ).strip()
     report = "\n".join(line[8:] if line.startswith("        ") else line for line in report.splitlines())
@@ -172,19 +203,20 @@ def write_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model-name", default=DEFAULT_TINY_CAUSAL_LM)
     parser.add_argument("--data", default="examples/sample_sft.jsonl")
     parser.add_argument("--report", default="lessons/04-trainer/report.md")
-    parser.add_argument("--tokenizer-dir", default="lessons/02-tokenizer/outputs/local-sft-tokenizer")
     parser.add_argument("--output-dir", default="lessons/04-trainer/outputs/trainer")
     parser.add_argument("--max-length", type=int, default=96)
-    parser.add_argument("--max-steps", type=int, default=30)
-    parser.add_argument("--learning-rate", type=float, default=5e-3)
+    parser.add_argument("--max-steps", type=int, default=20)
+    parser.add_argument("--learning-rate", type=float, default=5e-4)
     parser.add_argument("--trace", default="visualizer/traces/live.json")
     parser.add_argument("--trace-delay", type=float, default=0.0)
     args = parser.parse_args()
 
-    torch, nn, Trainer, TrainingArguments, default_data_collator, set_seed = require_torch_and_trainer()
+    torch, AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, default_data_collator, set_seed = require_training_stack()
     set_seed(42)
+    machine = detect_local_config(torch)
 
     report_path = resolve_project_path(args.report)
     output_dir = resolve_project_path(args.output_dir)
@@ -192,43 +224,35 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     trace = VisualTrace("04-trainer", "Lesson 04 · Trainer Loop", args.trace, args.trace_delay)
 
-    tokenizer = ensure_local_auto_tokenizer(args.data, args.tokenizer_dir)
-    splits = load_sft_splits(args.data)
-    tokenized = splits.map(
-        make_sft_tokenize_fn(tokenizer, args.max_length),
-        batched=True,
-        remove_columns=splits["train"].column_names,
+    print("Step 0: load Hugging Face model")
+    print("machine:", machine)
+    print("model:", args.model_name)
+    tokenizer = load_tokenizer(AutoTokenizer, args.model_name)
+    model = load_model(AutoModelForCausalLM, args.model_name)
+    trainable_params, total_params = count_trainable_parameters(model)
+    trace.event(
+        "load HF causal LM",
+        "model",
+        "从 Hugging Face 加载 tiny causal LM。本课学习 Trainer 闭环，不再手写本地模型。",
+        inputs={"model_name": args.model_name, "machine": machine},
+        outputs={"tokenizer_vocab_size": len(tokenizer), "trainable_params": trainable_params, "total_params": total_params},
+        model={"base": args.model_name, "adapter": "none", "trainable_ratio": f"{trainable_params / total_params:.4%}"},
     )
-    trainer_dataset = tokenized.remove_columns(["prompt_length", "answer_length"]).with_format(
-        "torch", columns=["input_ids", "attention_mask", "labels"]
-    )
+
+    print("\nStep 1: build SFT tensors")
+    tokenized, trainer_dataset = prepare_dataset(tokenizer, args.data, args.max_length)
     trace.event(
         "prepare tokenized dataset",
         "data",
         "Trainer 需要的 train/eval Dataset 已准备好，每条样本都有 input_ids、attention_mask、labels。",
-        inputs={"data": args.data, "tokenizer_dir": args.tokenizer_dir, "max_length": args.max_length},
+        inputs={"data": args.data, "max_length": args.max_length},
         outputs={"train_rows": len(tokenized["train"]), "validation_rows": len(tokenized["validation"])},
         tensors=[
             {"name": "input_ids", "shape": [args.max_length]},
             {"name": "attention_mask", "shape": [args.max_length]},
             {"name": "labels", "shape": [args.max_length]},
         ],
-    )
-
-    model = build_tiny_causal_lm(torch, nn, len(tokenizer), tokenizer.pad_token_id)
-    trainable_params, total_params = count_trainable_parameters(model)
-    trace.event(
-        "build tiny causal LM",
-        "model",
-        "创建一个本地 tiny causal LM。Lesson 04 是全参数训练，所有可训练参数都会被 optimizer 更新。",
-        inputs={"vocab_size": len(tokenizer), "pad_token_id": tokenizer.pad_token_id},
-        outputs={"trainable_params": trainable_params, "total_params": total_params},
-        model={
-            "mode": "full tiny training",
-            "base": "trainable",
-            "adapter": "none",
-            "trainable_ratio": f"{trainable_params / total_params:.4%}",
-        },
+        sample={key: tokenized["train"][0][key] for key in ["prompt_length", "answer_length"]},
     )
 
     training_args = make_training_arguments(
@@ -256,10 +280,20 @@ def main() -> None:
         train_dataset=trainer_dataset["train"],
         eval_dataset=trainer_dataset["validation"],
         data_collator=default_data_collator,
-        callbacks=[make_trainer_trace_callback(trace, "Tiny Trainer")],
+        callbacks=[make_trainer_trace_callback(trace, "HF Trainer")],
     )
 
-    print("Step 1: evaluate before training")
+    prompt = "### Instruction:\n解释什么是梯度累积\n\n### Response:\n"
+    generated_before = greedy_generate(torch, model, tokenizer, prompt)
+    trace.event(
+        "generate before training",
+        "generation",
+        "训练前先固定 prompt 生成一次，作为行为基线。",
+        inputs={"prompt": prompt},
+        outputs={"generated_text": generated_before},
+    )
+
+    print("\nStep 2: evaluate before training")
     eval_before = trainer.evaluate()
     print(eval_before)
     trace.event(
@@ -271,20 +305,20 @@ def main() -> None:
         metrics=eval_before,
     )
 
-    print("\nStep 2: train tiny causal LM with Trainer")
+    print("\nStep 3: train Hugging Face causal LM with Trainer")
     train_output = trainer.train()
     print(train_output.metrics)
     trace.event(
-        "train tiny causal LM",
+        "train HF causal LM",
         "train",
-        "Trainer 完成 forward、loss、backward 和 optimizer step，tiny model 本体权重已经更新。",
+        "Trainer 完成 forward、loss、backward 和 optimizer step，HF 模型权重已经更新。",
         inputs={"max_steps": args.max_steps, "learning_rate": args.learning_rate},
         outputs={"train_loss": train_output.metrics.get("train_loss")},
         metrics=train_output.metrics,
-        model={"updated": "embedding/rnn/lm_head", "adapter": "none"},
+        model={"updated": "full model", "adapter": "none"},
     )
 
-    print("\nStep 3: evaluate after training")
+    print("\nStep 4: evaluate after training")
     eval_after = trainer.evaluate()
     print(eval_after)
     trace.event(
@@ -296,20 +330,21 @@ def main() -> None:
         metrics=eval_after,
     )
 
-    prompt = "### Instruction:\n解释什么是梯度累积\n\n### Response:\n"
-    generated_text = greedy_generate(torch, model, tokenizer, prompt)
-    print("\nStep 4: fixed prompt generation")
-    print(generated_text)
+    generated_after = greedy_generate(torch, model, tokenizer, prompt)
+    print("\nStep 5: fixed prompt generation")
+    print(generated_after)
     trace.event(
-        "fixed prompt generation",
+        "generate after training",
         "generation",
-        "用固定 prompt 看训练后的 tiny model 生成效果。这里重在验证流程，不追求回答质量。",
+        "用同一个固定 prompt 对比训练前后输出。",
         inputs={"prompt": prompt},
-        outputs={"generated_text": generated_text},
+        outputs={"before": generated_before, "after": generated_after},
     )
 
     write_report(
         report_path,
+        args.model_name,
+        machine,
         tokenizer,
         tokenized,
         trainable_params,
@@ -317,11 +352,12 @@ def main() -> None:
         eval_before,
         train_output.metrics,
         eval_after,
-        generated_text,
+        generated_before,
+        generated_after,
         args.max_steps,
         args.max_length,
     )
-    trace.finish("Lesson 04 完成：全参数 tiny model 训练闭环已经可视化。", metrics={"eval_loss_after": eval_after.get("eval_loss")})
+    trace.finish("Lesson 04 完成：真实 Hugging Face tiny causal LM 的 Trainer 闭环已经可视化。", metrics={"eval_loss_after": eval_after.get("eval_loss")})
     print(f"\nReport written: {report_path.relative_to(resolve_project_path('.'))}")
 
 

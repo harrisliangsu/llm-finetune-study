@@ -1,0 +1,6 @@
+{"id":"eval_refund","input":"我被扣了两次会员费，订单号 A123，请帮我退款。","expected_intent":"refund_request","expected_department":"billing"}
+{"id":"eval_login","input":"重置密码邮件一直收不到，现在账号进不去。","expected_intent":"password_reset_issue","expected_department":"account"}
+{"id":"eval_shipping","input":"物流显示已经签收，但我完全没有收到包裹。","expected_intent":"delivery_dispute","expected_department":"logistics"}
+{"id":"eval_bug","input":"上传 CSV 后中文都变成乱码，重新导入也一样。","expected_intent":"import_encoding_issue","expected_department":"engineering"}
+{"id":"eval_sales","input":"我们公司想采购 200 个账号，能安排演示和报价吗？","expected_intent":"enterprise_sales","expected_department":"sales"}
+{"id":"eval_support","input":"优惠券昨天刚过期，我还能恢复使用吗？","expected_intent":"coupon_issue","expected_department":"support"}

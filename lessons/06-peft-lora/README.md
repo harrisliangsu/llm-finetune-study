@@ -5,7 +5,7 @@
 需要。脚本会下载并缓存：
 
 ```text
-Qwen/Qwen2.5-0.5B-Instruct
+--model-name auto -> Qwen/Qwen2.5-0.5B-Instruct
 ```
 
 下载位置在仓库内：
@@ -45,11 +45,17 @@ AutoModelForCausalLM
 .venv/bin/python lessons/06-peft-lora/run.py
 ```
 
+如果只想做快速冒烟测试，可以强制使用更小模型：
+
+```bash
+.venv/bin/python lessons/06-peft-lora/run.py --model-name sshleifer/tiny-gpt2 --max-steps 1
+```
+
 ## 输入
 
 - `examples/sample_sft.jsonl`
-- Hugging Face model: `Qwen/Qwen2.5-0.5B-Instruct`
-- LoRA target modules: `q_proj`, `v_proj`
+- Hugging Face model: `--model-name auto`，当前机器解析为 `Qwen/Qwen2.5-0.5B-Instruct`
+- LoRA target modules: Qwen 使用 `q_proj`, `v_proj`；GPT-2 冒烟测试使用 `c_attn`
 
 ## 输出
 

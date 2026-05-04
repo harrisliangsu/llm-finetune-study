@@ -2,57 +2,77 @@
 
 ## 本课执行结果
 
+- model: `sshleifer/tiny-gpt2`
+- system: Darwin
+- machine: arm64
+- memory: 32 GB
+- MPS available: True
 - train 样本数: 4
 - validation 样本数: 1
 - max_length: 96
-- max_steps: 30
-- tokenizer vocab size: 256
-- tiny model trainable params: 87872
-- tiny model total params: 87872
-- eval loss before training: 5.551877498626709
-- train loss: 3.7272937138875326
-- eval loss after training: 5.935162544250488
-- 观察: train loss 下降但 eval loss 上升，这是 4 条训练样本上开始过拟合的信号。
+- max_steps: 20
+- tokenizer vocab size: 50257
+- trainable params: 102714
+- total params: 102714
+- trainable ratio: 100.0000%
+- eval loss before training: 10.826223373413086
+- train loss: 10.81447525024414
+- eval loss after training: 10.822507858276367
+
+本课不再手写 tiny model，而是从 Hugging Face 下载 `sshleifer/tiny-gpt2`。
+它很小，适合快速看懂 `Trainer` 怎么组织 model、dataset、collator、loss、eval 和 checkpoint。
 
 ## 第 1 条训练样本的 label 检查
 
 `decode(labels != -100)`:
 
 ```text
-梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一次参数更新的方法。<eos>
+梯度累积是在显存不足时，把多个 mini-batch 的梯度累加起来，再执行一
 ```
 
-## 训练后固定 prompt 生成
+这一步确认只有 answer 部分参与 loss，prompt 区域是 `-100`。
+
+## 固定 prompt 训练前后生成
+
+Base 输出：
 
 ```text
 ### Instruction:
 解释什么是梯度累积
 
 ### Response:
-I ame tning toe-tuning.<eos>
+ factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors
+```
+
+训练后输出：
+
+```text
+### Instruction:
+解释什么是梯度累积
+
+### Response:
+ factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors factors
 ```
 
 ## 每一步的作用、输入、输出
 
 | 步骤 | 作用 | 输入 | 输出 |
 |---|---|---|---|
-| 构造 tokenizer | 本地加载真实 `AutoTokenizer` | `lessons/02-tokenizer/outputs/local-sft-tokenizer` | token/id 映射 |
-| 构造 tokenized dataset | 复用 Lesson 02 的 SFT labels | JSONL + tokenizer | `input_ids/attention_mask/labels` |
-| `with_format("torch")` | 让 Dataset 取样时返回 torch tensor | tokenized DatasetDict | Trainer 可消费的 split |
-| tiny causal LM | 提供最小可训练模型 | vocab size | logits/loss |
+| `AutoTokenizer.from_pretrained` | 从 HF 加载 tokenizer | `sshleifer/tiny-gpt2` | token/id 映射 |
+| `AutoModelForCausalLM.from_pretrained` | 从 HF 加载 causal LM | `sshleifer/tiny-gpt2` | 可训练 base model |
+| 构造 tokenized dataset | 把 SFT JSONL 变成训练字段 | JSONL + tokenizer | `input_ids/attention_mask/labels` |
+| `with_format("torch")` | 让 Dataset 返回 tensor | tokenized DatasetDict | Trainer 可消费的 split |
 | `TrainingArguments` | 固定训练超参和输出目录 | batch、steps、lr、seed | 可复现实验设置 |
-| `Trainer.train()` | 执行反向传播和参数更新 | model + train_dataset | train loss 和训练状态 |
-| `Trainer.evaluate()` | 用 validation 观察训练效果 | eval_dataset | eval loss |
+| `Trainer.evaluate()` | 训练前后在 validation 上测 loss | eval split | eval loss |
+| `Trainer.train()` | 执行 forward、loss、backward、optimizer step | model + train split | train loss 和更新后的权重 |
 
 ## 你要理解的关键点
 
-1. `Trainer` 不神秘，本质是把 model、dataset、collator、optimizer、评估循环组织起来。
+1. `Trainer` 本质是训练循环封装，不替你决定数据是否正确。
 2. `labels` 仍然是核心，loss 只从非 `-100` 的位置来。
-3. 本课的 tiny model 不是可用 LLM，只是为了把训练闭环在本地跑通。
-4. `eval_loss` 是验证集上的下一个 token 预测损失，不等于回答质量。
-5. 后面换成真实 Transformer/LoRA 时，数据字段和 Trainer 闭环仍然是同一套。
-6. 训练后生成的英文混杂输出不是失败，而是在提醒你：tiny model + 5 条样本只能验证流程，不能期待语言能力。
+3. 本课模型很小，目标是验证训练闭环，不追求中文回答质量。
+4. 后面换成 Qwen + LoRA 时，数据字段和 Trainer 闭环仍是同一套。
 
 ## 下一步
 
-下一课可以进入 LoRA：冻结 base model，只训练少量 adapter 参数，并学习 adapter 保存、加载和合并。
+Lesson 05 继续手写 LoRA 机制；Lesson 06/07 使用真实 Hugging Face Qwen 模型执行 PEFT/SFT。
