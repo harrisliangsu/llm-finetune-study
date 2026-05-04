@@ -318,8 +318,8 @@ pre {
 
 .training-workbench {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
   margin-top: 16px;
   align-items: start;
 }
@@ -336,12 +336,12 @@ pre {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: start;
-  margin-bottom: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  margin-bottom: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: var(--surface);
-  padding: 18px;
-  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+  box-shadow: none;
 }
 
 .workbench-title {
@@ -375,36 +375,51 @@ pre {
 
 .training-grid {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+  gap: 0;
+  border: 1px solid var(--line-strong);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
 }
 
 .studio-card {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
   background: var(--surface);
-  padding: 14px;
-  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  box-shadow: none;
 }
 
 .training-grid > .studio-card:nth-child(1),
+.training-grid > .studio-card:nth-child(2) {
+  grid-column: auto;
+  border-top: 0;
+}
+
 .training-grid > .studio-card:nth-child(2),
-.training-grid > .studio-card:nth-child(3) {
-  grid-column: span 4;
+.training-grid > .studio-card:nth-child(5) {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.training-grid > .studio-card:nth-child(3),
+.training-grid > .studio-card:nth-child(4),
+.training-grid > .studio-card:nth-child(6) {
+  grid-column: 1 / -1;
 }
 
 .training-grid > .studio-card:nth-child(4) {
-  grid-column: span 7;
+  background: color-mix(in oklch, var(--surface-2) 58%, var(--surface));
 }
 
 .training-grid > .studio-card:nth-child(5) {
-  grid-column: span 5;
-}
-
-.training-grid > .studio-card:nth-child(6) {
-  grid-column: span 12;
+  grid-column: 2;
+  grid-row: 4;
+  background: color-mix(in oklch, var(--code) 4%, var(--surface));
 }
 
 .studio-card-title {
@@ -412,17 +427,27 @@ pre {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 820;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 
 .studio-card-title::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--accent);
+  content: "cfg";
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--accent-strong);
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .studio-stack,
@@ -454,7 +479,7 @@ pre {
 
 .params-grid,
 .advanced-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
 }
 
 .method-grid,
@@ -474,8 +499,8 @@ pre {
   max-width: 100%;
   min-width: 0;
   border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+  border-radius: 5px;
+  background: color-mix(in oklch, var(--surface) 72%, var(--surface-2));
   color: var(--ink);
   padding: 0 10px;
   font-size: 13px;
@@ -525,8 +550,8 @@ pre {
 .method-hint {
   min-width: 0;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface-2);
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--surface-2) 68%, var(--surface));
   padding: 10px;
 }
 
@@ -562,6 +587,7 @@ pre {
   display: flex;
   align-items: center;
   min-height: 36px;
+  grid-column: 1 / -1;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
@@ -601,8 +627,8 @@ pre {
 .advanced-panel {
   margin-top: 12px;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface-2);
+  border-radius: 6px;
+  background: var(--surface);
 }
 
 .advanced-panel summary {
@@ -622,6 +648,36 @@ pre {
 .command-preview {
   display: grid;
   gap: 7px;
+}
+
+.run-console {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.run-console .studio-card-title::before {
+  content: "run";
+}
+
+.studio-chat-card .studio-card-title::before {
+  content: "io";
+}
+
+.training-grid > .studio-card:nth-child(1) .studio-card-title::before {
+  content: "01";
+}
+
+.training-grid > .studio-card:nth-child(2) .studio-card-title::before {
+  content: "02";
+}
+
+.training-grid > .studio-card:nth-child(3) .studio-card-title::before {
+  content: "data";
+}
+
+.training-grid > .studio-card:nth-child(4) .studio-card-title::before {
+  content: "args";
 }
 
 .command-preview pre,
@@ -880,26 +936,43 @@ body[data-view="learn"] .topbar {
 }
 
 .flow-wrap {
-  overflow-x: auto;
-  padding: 2px 0 8px;
-  scrollbar-gutter: stable;
+  overflow: visible;
+  padding: 4px 0 2px;
 }
 
 .flow {
-  display: flex;
-  gap: 9px;
-  min-width: max-content;
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 0 0 34px;
+}
+
+.flow::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 13px;
+  width: 2px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 16%, var(--surface));
 }
 
 .flow:has(.empty) {
   display: block;
   width: 100%;
   min-width: 0;
+  padding-left: 0;
 }
 
 .flow-wrap:has(.empty) {
-  overflow-x: hidden;
+  overflow: hidden;
   padding-bottom: 0;
+}
+
+.flow:has(.empty)::before {
+  display: none;
 }
 
 .flow .empty {
@@ -908,30 +981,42 @@ body[data-view="learn"] .topbar {
 }
 
 .node {
-  width: 188px;
-  min-height: 142px;
-  flex: 0 0 188px;
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  flex: none;
   display: grid;
-  grid-template-rows: auto auto 1fr auto auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 12px;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface-2);
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--surface-2) 72%, var(--surface));
   color: var(--ink);
-  padding: 11px;
+  padding: 10px 11px;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
   transition: border-color .16s ease, background .16s ease, transform .16s ease;
 }
 
-.node::before,
 .node::after {
   display: none;
 }
 
+.node::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -27px;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: var(--faint);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
 .node:hover {
-  width: 188px;
-  min-height: 142px;
   background: var(--surface);
   transform: translateY(-1px);
 }
@@ -942,19 +1027,33 @@ body[data-view="learn"] .topbar {
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent) 22%, transparent);
 }
 
+.node.active::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--accent) 42%, var(--line));
+}
+
 .node.current:not(.active) {
   border-color: color-mix(in oklch, var(--blue) 42%, var(--line));
+}
+
+.node.current:not(.active)::before {
+  background: var(--blue);
 }
 
 .node.done {
   border-color: var(--line);
 }
 
+.node.done::before {
+  background: var(--success);
+}
+
 .node-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
+  min-width: 0;
 }
 
 .node-id,
@@ -967,6 +1066,7 @@ body[data-view="learn"] .topbar {
 }
 
 .node-name {
+  grid-column: 1;
   color: var(--ink);
   font-size: 13px;
   font-weight: 820;
@@ -975,13 +1075,26 @@ body[data-view="learn"] .topbar {
 }
 
 .node-summary {
+  grid-column: 1 / -1;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
   display: -webkit-box;
   overflow: hidden;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+.node .node-progress {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.node .kind {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-self: end;
 }
 
 .progress-block {
@@ -1722,13 +1835,14 @@ body[data-view="learn"] .topbar {
     position: static;
   }
 
-  .training-grid > .studio-card:nth-child(n) {
-    grid-column: span 6;
+  .training-grid {
+    grid-template-columns: minmax(260px, .78fr) minmax(0, 1.22fr);
   }
 
   .training-grid > .studio-card:nth-child(3),
+  .training-grid > .studio-card:nth-child(4),
   .training-grid > .studio-card:nth-child(6) {
-    grid-column: span 12;
+    grid-column: 1 / -1;
   }
 
   .topbar,
@@ -1776,6 +1890,8 @@ body[data-view="learn"] .topbar {
 
   .training-grid > .studio-card:nth-child(n) {
     grid-column: auto;
+    grid-row: auto;
+    box-shadow: none;
   }
 
   .params-grid,
@@ -1814,8 +1930,20 @@ body[data-view="learn"] .topbar {
 
   .node,
   .node:hover {
-    width: 164px;
-    flex-basis: 164px;
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .flow {
+    padding-left: 28px;
+  }
+
+  .flow::before {
+    left: 11px;
+  }
+
+  .node::before {
+    left: -23px;
   }
 }
 
@@ -1827,5 +1955,1828 @@ body[data-view="learn"] .topbar {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: .01ms !important;
+  }
+}
+
+/* Final product-workbench pass: keep Studio as a console and Learn flow as a trace rail. */
+.training-main.panel .workbench-head {
+  margin-bottom: 0;
+  border-color: var(--line-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: none;
+}
+
+.training-main.panel .training-grid {
+  grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+  gap: 0;
+  border: 1px solid var(--line-strong);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.training-main.panel .studio-card {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.training-main.panel .training-grid > .studio-card:nth-child(1),
+.training-main.panel .training-grid > .studio-card:nth-child(2) {
+  border-top: 0;
+}
+
+.training-main.panel .training-grid > .studio-card:nth-child(2),
+.training-main.panel .training-grid > .studio-card:nth-child(5) {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.training-main.panel .training-grid > .studio-card:nth-child(3),
+.training-main.panel .training-grid > .studio-card:nth-child(4),
+.training-main.panel .training-grid > .studio-card:nth-child(6) {
+  grid-column: 1 / -1;
+}
+
+.training-main.panel .training-grid > .studio-card:nth-child(5) {
+  grid-column: 2;
+  grid-row: 4;
+}
+
+.training-main.panel .studio-card-title {
+  margin-bottom: 12px;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.training-main.panel .studio-card-title::before {
+  display: inline-grid;
+}
+
+body[data-view="learn"] .flow-wrap {
+  max-height: 650px;
+  overflow: auto;
+  padding: 2px 2px 2px 0;
+  scrollbar-gutter: stable;
+}
+
+body[data-view="learn"] .flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 34px;
+}
+
+body[data-view="learn"] .flow::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 13px;
+  width: 2px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 16%, var(--surface));
+}
+
+body[data-view="learn"] .flow:has(.empty) {
+  padding-left: 0;
+}
+
+body[data-view="learn"] .flow:has(.empty)::before {
+  display: none;
+}
+
+body[data-view="learn"] .node,
+body[data-view="learn"] .node:hover {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  gap: 6px 12px;
+  overflow: visible;
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--surface-2) 72%, var(--surface));
+  padding: 10px 11px;
+  transform: none;
+}
+
+body[data-view="learn"] .node::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -27px;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: var(--faint);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+body[data-view="learn"] .node::after {
+  display: none;
+}
+
+body[data-view="learn"] .node.done::before {
+  background: var(--success);
+}
+
+body[data-view="learn"] .node.current:not(.active)::before {
+  background: var(--blue);
+}
+
+body[data-view="learn"] .node.active::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--accent) 42%, var(--line));
+}
+
+body[data-view="learn"] .node-top,
+body[data-view="learn"] .node-summary,
+body[data-view="learn"] .node-progress {
+  grid-column: 1 / -1;
+}
+
+body[data-view="learn"] .node .kind {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  justify-self: end;
+}
+
+@media (max-width: 920px) {
+  .training-main.panel .training-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .training-main.panel .training-grid > .studio-card:nth-child(n) {
+    grid-column: auto;
+    grid-row: auto;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 760px) {
+  body[data-view="learn"] .flow {
+    padding-left: 28px;
+  }
+
+  body[data-view="learn"] .flow::before {
+    left: 11px;
+  }
+
+  body[data-view="learn"] .node,
+  body[data-view="learn"] .node:hover {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-view="learn"] .node::before {
+    left: -23px;
+  }
+
+body[data-view="learn"] .node .kind {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+
+/* UI5 final layer: source of truth after parallel worker merges. */
+body[data-view="studio"] .training-main.panel .training-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  padding: 14px;
+}
+
+body[data-view="studio"] .training-main.panel .training-surface {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+body[data-view="studio"] .training-main.panel .training-surface-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 42ch);
+  gap: 16px;
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklch, var(--surface-2) 62%, var(--surface));
+  padding: 15px 18px 13px;
+}
+
+body[data-view="studio"] .training-main.panel .training-surface-kicker {
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body[data-view="studio"] .training-main.panel .training-surface-title {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 840;
+}
+
+body[data-view="studio"] .training-main.panel .training-surface-note {
+  margin: 0;
+  max-width: none;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+body[data-view="studio"] .training-main.panel .training-surface-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  min-width: 0;
+}
+
+body[data-view="studio"] .training-main.panel .run-surface .training-surface-body {
+  grid-template-columns: minmax(360px, .92fr) minmax(420px, 1.08fr);
+}
+
+body[data-view="studio"] .training-main.panel .training-surface .studio-card {
+  grid-column: auto;
+  grid-row: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 18px;
+  box-shadow: none;
+}
+
+body[data-view="studio"] .training-main.panel .training-surface .studio-card:nth-child(2n) {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+body[data-view="studio"] .training-main.panel .setup-surface .studio-card:nth-child(n + 3) {
+  box-shadow: inset 0 1px 0 var(--line);
+}
+
+body[data-view="studio"] .training-main.panel .setup-surface .studio-card:nth-child(4) {
+  box-shadow: inset 1px 0 0 var(--line), inset 0 1px 0 var(--line);
+}
+
+body[data-view="studio"] .training-main.panel .run-surface {
+  background: color-mix(in oklch, var(--surface-2) 30%, var(--surface));
+}
+
+body[data-view="studio"] .training-main.panel .run-surface .studio-card {
+  background: transparent;
+}
+
+body[data-view="studio"] .training-main.panel .run-console {
+  grid-column: auto;
+  grid-row: auto;
+  background: transparent;
+}
+
+body[data-view="studio"] .training-main.panel .studio-chat-card {
+  grid-column: auto;
+}
+
+@media (max-width: 1180px) {
+  body[data-view="studio"] .training-main.panel .training-surface-head,
+  body[data-view="studio"] .training-main.panel .training-surface-body,
+  body[data-view="studio"] .training-main.panel .run-surface .training-surface-body {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-view="studio"] .training-main.panel .training-surface-note {
+    text-align: left;
+  }
+
+  body[data-view="studio"] .training-main.panel .training-surface .studio-card:nth-child(n) {
+    box-shadow: inset 0 1px 0 var(--line);
+  }
+
+  body[data-view="studio"] .training-main.panel .training-surface .studio-card:first-child {
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  body[data-view="learn"] .topbar,
+  body[data-view="studio"] .topbar {
+    position: static;
+    top: auto;
+  }
+}
+
+/* UI8: course cleanup and in-page dataset preview */
+.dataset-drawer[hidden] {
+  display: none;
+}
+
+.dataset-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: end;
+}
+
+.dataset-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: color-mix(in oklch, var(--ink) 22%, transparent);
+  cursor: default;
+}
+
+.dataset-drawer-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 12px;
+  width: min(760px, calc(100vw - 28px));
+  height: calc(100vh - 28px);
+  margin: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 24px 70px color-mix(in oklch, var(--ink) 20%, transparent);
+  padding: 16px;
+}
+
+.dataset-drawer-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.dataset-drawer-kicker {
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.dataset-drawer h2 {
+  margin: 4px 0 4px;
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1.18;
+}
+
+.dataset-drawer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.dataset-drawer-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dataset-drawer-chip {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--surface-2) 62%, var(--surface));
+  padding: 10px;
+}
+
+.dataset-drawer-chip span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.dataset-drawer-chip strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.dataset-drawer-chip.error {
+  border-color: color-mix(in oklch, var(--danger) 34%, var(--line));
+  background: color-mix(in oklch, var(--danger) 8%, var(--surface));
+}
+
+.dataset-drawer-preview {
+  min-height: 0;
+  max-height: none;
+  border-color: color-mix(in oklch, var(--code) 24%, var(--line));
+  background: var(--code);
+}
+
+body.dataset-drawer-open {
+  overflow: hidden;
+}
+
+body[data-view="learn"] .layout {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px) !important;
+  grid-template-areas:
+    "workspace run"
+    "workspace lab";
+  gap: 12px;
+}
+
+body[data-view="learn"] .course-canvas {
+  grid-area: workspace;
+}
+
+body[data-view="learn"] .layout > aside.panel:first-child {
+  grid-area: run;
+}
+
+body[data-view="learn"] .layout > aside.panel:last-child {
+  grid-area: lab;
+}
+
+body[data-view="learn"] .layout > aside.panel:first-child,
+body[data-view="learn"] .layout > aside.panel:last-child {
+  min-width: 0;
+  padding: 14px;
+  overflow: hidden;
+}
+
+body[data-view="learn"] .course-canvas-grid {
+  grid-template-columns: minmax(230px, 286px) minmax(0, 1fr);
+}
+
+body[data-view="learn"] .scene3d {
+  overflow-x: auto;
+}
+
+body[data-view="learn"] .scene-grid {
+  grid-template-columns: repeat(5, minmax(118px, 1fr));
+}
+
+body[data-view="learn"] .stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-view="learn"] .course-meter-list {
+  max-height: 220px;
+}
+
+body[data-view="learn"] .layout > aside.panel:last-child .studio-row,
+body[data-view="learn"] .layout > aside.panel:last-child .model-grid,
+body[data-view="learn"] .layout > aside.panel:last-child .meta-grid,
+body[data-view="learn"] .layout > aside.panel:last-child .section-grid {
+  grid-template-columns: 1fr;
+}
+
+body[data-view="learn"] .layout > aside.panel:last-child .studio-textarea,
+body[data-view="learn"] .layout > aside.panel:last-child .studio-input,
+body[data-view="learn"] .layout > aside.panel:last-child .course-select {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 1280px) {
+  body[data-view="learn"] .layout {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "run"
+      "workspace"
+      "lab";
+  }
+}
+
+@media (max-width: 920px) {
+  .dataset-drawer {
+    justify-items: stretch;
+  }
+
+  .dataset-drawer-panel {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 20px);
+    margin: 10px;
+  }
+
+  .dataset-drawer-head,
+  .dataset-drawer-meta,
+  body[data-view="learn"] .course-canvas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* UI4: structural refactor, training bench + course trace rail */
+:root {
+  --bg: oklch(95.8% 0.009 202);
+  --surface: oklch(98.7% 0.006 202);
+  --surface-2: oklch(94.8% 0.012 202);
+  --surface-3: oklch(91.8% 0.015 202);
+  --ink: oklch(19% 0.026 224);
+  --ink-soft: oklch(35% 0.025 224);
+  --muted: oklch(48% 0.023 224);
+  --faint: oklch(62% 0.02 224);
+  --line: color-mix(in oklch, var(--ink) 12%, transparent);
+  --line-strong: color-mix(in oklch, var(--ink) 20%, transparent);
+  --accent: oklch(50% 0.12 190);
+  --accent-soft: oklch(91% 0.035 190);
+  --accent-strong: oklch(34% 0.105 190);
+  --blue: oklch(48% 0.105 250);
+  --green: oklch(52% 0.112 156);
+  --gold: oklch(66% 0.128 82);
+  --code: oklch(24% 0.028 232);
+  --code-2: oklch(29% 0.026 232);
+  --shadow-sm: 0 1px 2px color-mix(in oklch, var(--ink) 8%, transparent);
+  --shadow-md: 0 14px 30px color-mix(in oklch, var(--ink) 10%, transparent);
+}
+
+html,
+body {
+  background:
+    linear-gradient(180deg, oklch(94.4% 0.015 202), var(--bg) 280px),
+    var(--bg);
+}
+
+.shell {
+  width: min(1840px, calc(100vw - 28px));
+}
+
+.panel {
+  border-color: var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar {
+  min-height: 64px;
+  gap: 14px;
+  border-radius: 9px;
+  background: color-mix(in oklch, var(--surface) 97%, var(--surface-2));
+  box-shadow: 0 8px 22px color-mix(in oklch, var(--ink) 7%, transparent);
+}
+
+.brand {
+  font-size: 15px;
+}
+
+.brand span {
+  height: 28px;
+  min-width: 40px;
+  border-radius: 7px;
+}
+
+.app-tabs {
+  background: var(--surface-3);
+}
+
+.app-tab {
+  min-height: 36px;
+}
+
+.app-tab.active {
+  box-shadow: 0 1px 0 color-mix(in oklch, var(--ink) 10%, transparent), 0 8px 18px color-mix(in oklch, var(--ink) 6%, transparent);
+}
+
+.button {
+  min-height: 36px;
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.button.active {
+  background: var(--accent-strong);
+}
+
+.training-workbench {
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 14px;
+}
+
+.training-main.panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.workbench-head {
+  align-items: start;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--surface-2) 72%, var(--surface)), var(--surface));
+  padding: 22px 24px 18px;
+}
+
+.workbench-title {
+  margin-top: 4px;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.workbench-subtitle {
+  max-width: 76ch;
+}
+
+.workbench-status {
+  min-height: 36px;
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.training-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 0;
+}
+
+.studio-setup-surface,
+.studio-run-surface {
+  display: grid;
+  min-width: 0;
+}
+
+.studio-setup-surface {
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, .95fr);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.studio-run-surface {
+  grid-template-columns: minmax(360px, .9fr) minmax(420px, 1.1fr);
+  background: color-mix(in oklch, var(--surface-2) 46%, var(--surface));
+}
+
+.training-grid > .studio-card,
+.studio-setup-surface > .studio-card,
+.studio-run-surface > .studio-card {
+  grid-column: auto !important;
+  min-height: 0;
+}
+
+.studio-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 18px 20px;
+  box-shadow: none;
+}
+
+.studio-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.studio-card-title {
+  margin-bottom: 14px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 820;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.studio-card-title::before {
+  display: none;
+}
+
+.method-grid,
+.model-choice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.method-pill,
+.choice-note,
+.method-hint,
+.dataset-summary,
+.compare-meta,
+.job-card,
+.run-card,
+.course-dashboard,
+.course-meter-row,
+.stat {
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--surface-2) 62%, var(--surface));
+}
+
+.method-pill,
+.choice-note {
+  border-color: var(--line);
+}
+
+.params-grid,
+.advanced-grid {
+  gap: 10px;
+}
+
+.studio-input,
+.studio-textarea,
+.course-select {
+  border-radius: 7px;
+  background: color-mix(in oklch, var(--surface) 88%, var(--surface-2));
+}
+
+.studio-input:focus,
+.studio-textarea:focus,
+.course-select:focus,
+.button:focus-visible,
+.app-tab:focus-visible,
+.learning-link:focus-visible,
+.node:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.run-console {
+  background: color-mix(in oklch, var(--code) 4%, var(--surface));
+}
+
+.command-preview pre,
+pre#studioCommandPreview {
+  max-height: 230px;
+  border-color: color-mix(in oklch, var(--code) 28%, var(--line));
+  background: var(--code);
+}
+
+.studio-chat-card {
+  background: var(--surface);
+}
+
+.training-side.panel {
+  position: sticky;
+  top: 90px;
+  padding: 18px;
+}
+
+.training-map {
+  gap: 8px;
+}
+
+.map-step {
+  min-height: 78px;
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--surface-2) 72%, var(--surface));
+}
+
+.learning-link {
+  min-height: 78px;
+  border-radius: 8px;
+}
+
+body[data-view="learn"] .studio-bar {
+  grid-template-columns: 110px 128px 112px minmax(0, 1fr);
+  margin: 14px 0 12px;
+  background: color-mix(in oklch, var(--surface) 84%, var(--surface-2));
+}
+
+body[data-view="learn"] .layout {
+  grid-template-columns: 280px minmax(0, 1fr) 330px;
+  gap: 12px;
+  align-items: start;
+}
+
+body[data-view="learn"] .layout > aside.panel {
+  padding: 16px;
+}
+
+.course-canvas {
+  padding: 0;
+  overflow: hidden;
+}
+
+.course-canvas-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 38ch);
+  gap: 16px;
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklch, var(--surface-2) 58%, var(--surface));
+  padding: 18px 18px 15px;
+}
+
+.course-canvas-title {
+  margin: 3px 0 0;
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1.18;
+  font-weight: 850;
+}
+
+.course-canvas-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.course-canvas-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 288px) minmax(0, 1fr);
+  min-height: 720px;
+}
+
+.trace-rail-card {
+  min-width: 0;
+  background: color-mix(in oklch, var(--surface-2) 74%, var(--surface));
+  padding: 16px;
+}
+
+body[data-view="learn"] .flow-wrap {
+  max-height: 650px;
+  overflow: auto;
+  padding: 0;
+  scrollbar-gutter: stable;
+}
+
+body[data-view="learn"] .flow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  min-width: 0;
+}
+
+body[data-view="learn"] .node,
+body[data-view="learn"] .node:hover {
+  width: auto;
+  min-height: 82px;
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  gap: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 10px;
+  transform: none;
+}
+
+body[data-view="learn"] .node.active {
+  border-color: color-mix(in oklch, var(--accent) 58%, var(--line));
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--accent) 16%, transparent), 0 10px 18px color-mix(in oklch, var(--accent) 8%, transparent);
+}
+
+body[data-view="learn"] .node-top {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+}
+
+body[data-view="learn"] .node-name {
+  grid-column: 1;
+  font-size: 13px;
+}
+
+body[data-view="learn"] .node-summary {
+  grid-column: 1 / -1;
+  -webkit-line-clamp: 2;
+}
+
+body[data-view="learn"] .node-progress {
+  grid-column: 1 / -1;
+}
+
+body[data-view="learn"] .node .kind {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+}
+
+.stage-workspace {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  background: var(--surface);
+}
+
+.stage-block,
+.event-inspector {
+  min-width: 0;
+}
+
+.stage {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.stage-head {
+  gap: 14px;
+  background: color-mix(in oklch, var(--surface-2) 54%, var(--surface));
+}
+
+.stage-eyebrow {
+  color: var(--accent-strong);
+}
+
+.stage-title {
+  font-size: 22px;
+}
+
+.stage-progress-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 12px 18px;
+  background: color-mix(in oklch, var(--surface-2) 46%, var(--surface));
+}
+
+.scene3d {
+  min-height: 340px;
+  border-radius: 0 0 8px 8px;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--surface) 88%, var(--accent-soft)), var(--surface));
+}
+
+.scene-grid {
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.scene-node3d {
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--surface) 82%, var(--surface-2));
+  box-shadow: 0 8px 18px color-mix(in oklch, var(--ink) 6%, transparent);
+}
+
+.scene-node3d.active {
+  transform: translateY(-2px);
+}
+
+.event-inspector {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--surface-2) 36%, var(--surface));
+  padding: 14px;
+}
+
+.event-inspector #detail {
+  margin-top: 10px;
+}
+
+.detail-title {
+  font-size: 20px;
+}
+
+body[data-view="learn"] .chat-result {
+  background: color-mix(in oklch, var(--surface-2) 72%, var(--surface));
+}
+
+body[data-view="learn"] #sideDetail .side-card,
+body[data-view="learn"] .metric-viz,
+body[data-view="learn"] .model-chip,
+body[data-view="learn"] .artifact-card {
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--surface-2) 54%, var(--surface));
+}
+
+@media (max-width: 1500px) {
+  .training-workbench,
+  body[data-view="learn"] .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .training-side.panel {
+    position: static;
+  }
+
+  .course-canvas-grid {
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1120px) {
+  .studio-setup-surface,
+  .studio-run-surface,
+  .course-canvas-head,
+  .course-canvas-grid,
+  body[data-view="learn"] .studio-bar {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-view="learn"] .flow-wrap {
+    max-height: none;
+  }
+
+  body[data-view="studio"] .dataset-footer.plan-mode {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    width: min(100vw - 16px, 1840px);
+  }
+
+  .workbench-head,
+  .studio-card,
+  .trace-rail-card,
+  .stage-workspace,
+  .course-canvas-head {
+    padding: 14px;
+  }
+
+  .method-grid,
+  .model-choice-grid,
+  .params-grid,
+  .advanced-grid,
+  .stage-progress-grid,
+  .scene-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-run-surface {
+    background: var(--surface);
+  }
+
+  .button {
+    width: auto;
+  }
+
+  body[data-view="learn"] .node,
+  body[data-view="learn"] .node:hover {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-view="learn"] .node .kind {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* UI4.1: align worker-added training surfaces with the light product system */
+body[data-view="studio"] .training-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+  padding: 14px;
+}
+
+body[data-view="studio"] .training-surface {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+body[data-view="studio"] .training-surface-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 42ch);
+  gap: 16px;
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklch, var(--surface-2) 62%, var(--surface));
+  padding: 15px 18px 13px;
+}
+
+body[data-view="studio"] .training-surface-kicker {
+  color: var(--accent-strong);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body[data-view="studio"] .training-surface-title {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 840;
+}
+
+body[data-view="studio"] .training-surface-note {
+  margin: 0;
+  max-width: none;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: right;
+}
+
+body[data-view="studio"] .training-surface-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  min-width: 0;
+}
+
+body[data-view="studio"] .run-surface .training-surface-body {
+  grid-template-columns: minmax(360px, .92fr) minmax(420px, 1.08fr);
+}
+
+body[data-view="studio"] .training-surface .studio-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 18px;
+}
+
+body[data-view="studio"] .training-surface .studio-card:nth-child(2n) {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+body[data-view="studio"] .setup-surface .studio-card:nth-child(n + 3) {
+  box-shadow: inset 0 1px 0 var(--line);
+}
+
+body[data-view="studio"] .setup-surface .studio-card:nth-child(4) {
+  box-shadow: inset 1px 0 0 var(--line), inset 0 1px 0 var(--line);
+}
+
+body[data-view="studio"] .run-surface {
+  background: color-mix(in oklch, var(--surface-2) 30%, var(--surface));
+}
+
+body[data-view="studio"] .run-surface .studio-card {
+  background: transparent;
+}
+
+body[data-view="studio"] .method-grid,
+body[data-view="studio"] .model-choice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-view="studio"] .method-pill,
+body[data-view="studio"] .choice-note {
+  min-height: 72px;
+}
+
+body[data-view="studio"] .dataset-editor {
+  min-height: 210px;
+}
+
+body[data-view="studio"] .run-console .job-card {
+  min-height: 120px;
+}
+
+body[data-view="studio"] .studio-chat-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1180px) {
+  body[data-view="studio"] .training-surface-body,
+  body[data-view="studio"] .run-surface .training-surface-body,
+  body[data-view="studio"] .training-surface-head {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-view="studio"] .training-surface-note {
+    text-align: left;
+  }
+
+  body[data-view="studio"] .training-surface .studio-card:nth-child(n) {
+    box-shadow: inset 0 1px 0 var(--line);
+  }
+
+  body[data-view="studio"] .training-surface .studio-card:first-child {
+    box-shadow: none;
+  }
+}
+
+/* End-of-file guard against earlier refactor layers. */
+.training-main.panel .training-grid {
+  grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+  gap: 0;
+  border: 1px solid var(--line-strong);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.training-main.panel .studio-card {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.training-main.panel .training-grid > .studio-card:nth-child(3),
+.training-main.panel .training-grid > .studio-card:nth-child(4),
+.training-main.panel .training-grid > .studio-card:nth-child(6) {
+  grid-column: 1 / -1;
+}
+
+.training-main.panel .training-grid > .studio-card:nth-child(5) {
+  grid-column: 2;
+  grid-row: 4;
+  background: color-mix(in oklch, var(--code) 4%, var(--surface));
+}
+
+.training-main.panel .studio-card-title::before {
+  display: inline-grid;
+}
+
+body[data-view="learn"] .flow-wrap {
+  max-height: 650px;
+  overflow: auto;
+  padding: 2px 2px 2px 0;
+  scrollbar-gutter: stable;
+}
+
+body[data-view="learn"] .flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 34px;
+}
+
+body[data-view="learn"] .flow::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 13px;
+  width: 2px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 16%, var(--surface));
+}
+
+body[data-view="learn"] .flow:has(.empty) {
+  padding-left: 0;
+}
+
+body[data-view="learn"] .flow:has(.empty)::before {
+  display: none;
+}
+
+body[data-view="learn"] .node,
+body[data-view="learn"] .node:hover {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  gap: 6px 12px;
+  overflow: visible;
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--surface-2) 72%, var(--surface));
+  padding: 10px 11px;
+  transform: none;
+}
+
+body[data-view="learn"] .node::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -27px;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: var(--faint);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+body[data-view="learn"] .node::after {
+  display: none;
+}
+
+body[data-view="learn"] .node.done::before {
+  background: var(--success);
+}
+
+body[data-view="learn"] .node.current:not(.active)::before {
+  background: var(--blue);
+}
+
+body[data-view="learn"] .node.active::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--accent) 42%, var(--line));
+}
+
+body[data-view="learn"] .node-top,
+body[data-view="learn"] .node-summary,
+body[data-view="learn"] .node-progress {
+  grid-column: 1 / -1;
+}
+
+body[data-view="learn"] .node .kind {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  justify-self: end;
+}
+
+@media (max-width: 920px) {
+  .training-main.panel .training-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .training-main.panel .training-grid > .studio-card:nth-child(n) {
+    grid-column: auto;
+    grid-row: auto;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 760px) {
+  body[data-view="learn"] .flow {
+    padding-left: 28px;
+  }
+
+  body[data-view="learn"] .flow::before {
+    left: 11px;
+  }
+
+  body[data-view="learn"] .node,
+  body[data-view="learn"] .node:hover {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-view="learn"] .node::before {
+    left: -23px;
+  }
+
+  body[data-view="learn"] .node .kind {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+/* UI12 true final guard: keep this as the last style layer. */
+:root {
+  --bg: oklch(96.5% 0.008 215);
+  --surface: oklch(98.8% 0.005 215);
+  --surface-2: oklch(94.7% 0.009 215);
+  --surface-3: oklch(91.9% 0.011 215);
+  --field-bg: oklch(97.4% 0.006 215);
+  --field-disabled: oklch(93.6% 0.007 215);
+  --ink: oklch(19% 0.024 222);
+  --ink-soft: oklch(33% 0.023 222);
+  --muted: oklch(46% 0.021 222);
+  --faint: oklch(60% 0.018 222);
+  --line: color-mix(in oklch, var(--ink) 10%, transparent);
+  --line-strong: color-mix(in oklch, var(--ink) 18%, transparent);
+  --accent: oklch(47% 0.092 184);
+  --accent-soft: oklch(91.5% 0.026 184);
+  --accent-strong: oklch(33% 0.086 184);
+  --blue: oklch(48% 0.092 248);
+  --green: oklch(51% 0.105 154);
+  --gold: oklch(64% 0.115 78);
+  --code: oklch(24% 0.026 232);
+  --code-ink: oklch(91% 0.015 214);
+  --shadow-panel: 0 1px 1px color-mix(in oklch, var(--ink) 5%, transparent), 0 12px 30px color-mix(in oklch, var(--ink) 7%, transparent);
+}
+
+html,
+body {
+  background:
+    linear-gradient(180deg, oklch(94.8% 0.012 215), var(--bg) 260px),
+    var(--bg) !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.panel,
+.topbar {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+
+.panel-title {
+  margin-bottom: 10px;
+  color: var(--muted) !important;
+  font-size: 12px;
+  font-weight: 820;
+  letter-spacing: .08em;
+}
+
+.studio-input,
+.studio-textarea,
+.course-select {
+  border: 1px solid color-mix(in oklch, var(--ink) 16%, transparent) !important;
+  border-radius: 7px !important;
+  background: var(--field-bg) !important;
+  color: var(--ink) !important;
+  box-shadow: inset 0 1px 1px color-mix(in oklch, var(--ink) 5%, transparent) !important;
+  opacity: 1 !important;
+}
+
+.studio-input:disabled,
+.studio-textarea:disabled,
+.course-select:disabled {
+  background: var(--field-disabled) !important;
+  color: var(--muted) !important;
+  -webkit-text-fill-color: var(--muted);
+  opacity: 1 !important;
+}
+
+body[data-view="studio"] #studioDatasetText,
+body[data-view="studio"] .dataset-editor,
+.extra-args-editor {
+  border-color: color-mix(in oklch, var(--code) 28%, var(--line)) !important;
+  background: var(--code) !important;
+  color: var(--code-ink) !important;
+  -webkit-text-fill-color: var(--code-ink);
+  opacity: 1 !important;
+}
+
+body[data-view="studio"] #studioDatasetText.dataset-editor-disabled {
+  border-color: color-mix(in oklch, var(--ink) 14%, transparent) !important;
+  background: var(--field-disabled) !important;
+  color: var(--muted) !important;
+  -webkit-text-fill-color: var(--muted);
+}
+
+body[data-view="studio"] .training-main.panel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="studio"] .training-workbench {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 318px !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+body[data-view="studio"] .training-side.panel {
+  position: sticky !important;
+  top: 92px !important;
+}
+
+body[data-view="studio"] .training-main.panel .training-grid,
+body[data-view="studio"] .training-grid {
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+body[data-view="studio"] .workbench-head,
+body[data-view="studio"] .training-surface {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: color-mix(in oklch, var(--surface) 92%, var(--surface-2)) !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+
+body[data-view="studio"] .training-surface-head {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body[data-view="studio"] .training-surface-body,
+body[data-view="studio"] .run-surface .training-surface-body {
+  gap: 14px !important;
+  padding: 16px !important;
+}
+
+body[data-view="studio"] .training-surface .studio-card,
+body[data-view="studio"] .training-surface .studio-card:nth-child(n),
+body[data-view="studio"] .training-main.panel .training-surface .studio-card {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  padding: 16px !important;
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--ink) 7%, transparent) !important;
+}
+
+body[data-view="studio"] .params-grid,
+body[data-view="studio"] .advanced-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+}
+
+body[data-view="studio"] .studio-card-title::before {
+  display: none !important;
+}
+
+body[data-view="studio"] .method-pill,
+body[data-view="studio"] .choice-note,
+body[data-view="studio"] .method-hint,
+body[data-view="studio"] .dataset-summary,
+body[data-view="studio"] .job-card,
+body[data-view="studio"] .run-card,
+body[data-view="studio"] .compare-meta-item,
+body[data-view="studio"] .map-step,
+body[data-view="studio"] .learning-link {
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: color-mix(in oklch, var(--surface-2) 56%, var(--surface)) !important;
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--surface) 76%, transparent) !important;
+}
+
+body[data-view="studio"] .dataset-footer.plan-mode {
+  grid-template-columns: minmax(128px, 160px) minmax(0, 1fr) !important;
+}
+
+body[data-view="studio"] .dataset-footer.plan-mode .dataset-summary {
+  align-content: center;
+  min-height: 44px;
+}
+
+body[data-view="studio"] .studio-chat-card.plan-mode {
+  background: color-mix(in oklch, var(--surface-2) 44%, var(--surface)) !important;
+}
+
+body[data-view="studio"] .studio-chat-card.plan-mode .chat-result {
+  color: var(--muted) !important;
+}
+
+.dataset-drawer {
+  z-index: 220 !important;
+}
+
+body[data-view="learn"] .layout {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 330px) !important;
+  grid-template-areas:
+    "workspace run"
+    "workspace lab" !important;
+  gap: 14px !important;
+}
+
+body[data-view="learn"] .course-canvas {
+  grid-area: workspace !important;
+}
+
+body[data-view="learn"] .layout > aside.panel:first-child {
+  grid-area: run !important;
+}
+
+body[data-view="learn"] .layout > aside.panel:last-child {
+  grid-area: lab !important;
+}
+
+body[data-view="learn"] .course-canvas,
+body[data-view="learn"] .stage,
+body[data-view="learn"] .event-inspector {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+
+body[data-view="learn"] .course-canvas-head,
+body[data-view="learn"] .stage-head {
+  border: 0 !important;
+  background: color-mix(in oklch, var(--surface) 72%, var(--surface-2)) !important;
+}
+
+body[data-view="learn"] .course-canvas-grid {
+  grid-template-columns: minmax(260px, 310px) minmax(0, 1fr) !important;
+}
+
+body[data-view="learn"] .trace-rail-card {
+  border: 0 !important;
+  background: color-mix(in oklch, var(--surface-2) 68%, var(--surface)) !important;
+  box-shadow: none !important;
+}
+
+body[data-view="learn"] .flow-wrap,
+body[data-view="learn"] .trace-rail-card .flow-wrap {
+  max-height: calc(100vh - 276px);
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-view="learn"] .flow,
+body[data-view="learn"] .trace-rail-card .flow {
+  gap: 10px !important;
+  padding-left: 24px !important;
+  background: transparent !important;
+}
+
+body[data-view="learn"] .flow::before {
+  left: 8px !important;
+  width: 1px !important;
+  background: color-mix(in oklch, var(--accent) 28%, transparent) !important;
+}
+
+body[data-view="learn"] .node,
+body[data-view="learn"] .node:hover {
+  min-height: 88px;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--surface) !important;
+  padding: 12px !important;
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--ink) 9%, transparent) !important;
+  transform: none !important;
+}
+
+body[data-view="learn"] .node::before {
+  top: 20px !important;
+  left: -21px !important;
+  width: 10px !important;
+  height: 10px !important;
+  border: 2px solid color-mix(in oklch, var(--surface-2) 78%, var(--surface)) !important;
+  background: color-mix(in oklch, var(--faint) 72%, var(--surface)) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--surface-2) 78%, var(--surface)) !important;
+}
+
+body[data-view="learn"] .node.done::before {
+  background: var(--green) !important;
+}
+
+body[data-view="learn"] .node.current:not(.active)::before {
+  background: var(--blue) !important;
+}
+
+body[data-view="learn"] .node.active {
+  background: color-mix(in oklch, var(--accent-soft) 66%, var(--surface)) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--accent) 32%, transparent),
+    0 10px 22px color-mix(in oklch, var(--accent) 10%, transparent) !important;
+}
+
+body[data-view="learn"] .stage-head {
+  grid-template-columns: 1fr !important;
+}
+
+body[data-view="learn"] .stage-title {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 7px 9px;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body[data-view="learn"] .stage-title span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--surface-2) 70%, var(--surface));
+  color: var(--muted);
+  padding: 2px 8px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+body[data-view="learn"] .stage-title strong {
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1.15;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+body[data-view="learn"] .stage-chips {
+  justify-content: flex-start !important;
+}
+
+body[data-view="learn"] .stage-progress-grid,
+body[data-view="learn"] .chat-result,
+body[data-view="learn"] #sideDetail .side-card,
+body[data-view="learn"] .metric-viz,
+body[data-view="learn"] .model-chip,
+body[data-view="learn"] .artifact-card,
+body[data-view="learn"] .course-dashboard,
+body[data-view="learn"] .course-meter-row,
+body[data-view="learn"] .stat,
+body[data-view="learn"] .run-card,
+body[data-view="learn"] .job-card {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: color-mix(in oklch, var(--surface-2) 54%, var(--surface)) !important;
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--surface) 70%, transparent) !important;
+}
+
+@media (max-width: 1280px) {
+  body[data-view="learn"] .layout {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "workspace"
+      "run"
+      "lab" !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  body[data-view="studio"] .training-workbench {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-view="studio"] .training-side.panel {
+    position: static !important;
+  }
+}
+
+@media (max-width: 920px) {
+  body[data-view="learn"] .course-canvas-grid,
+  body[data-view="studio"] .training-workbench,
+  body[data-view="studio"] .training-surface-body,
+  body[data-view="studio"] .run-surface .training-surface-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-view="learn"] .flow-wrap {
+    max-height: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  body[data-view="studio"] .workbench-head,
+  body[data-view="learn"] .course-canvas-head,
+  body[data-view="studio"] .training-surface-head {
+    padding: 16px !important;
+  }
+
+  body[data-view="studio"] .workbench-title,
+  body[data-view="learn"] .course-canvas-title {
+    font-size: 30px !important;
+    line-height: 1.12 !important;
+  }
+
+  body[data-view="studio"] .workbench-head p,
+  body[data-view="learn"] .course-canvas-note,
+  body[data-view="studio"] .training-surface-note {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+  }
+
+  body[data-view="studio"] .training-surface-title {
+    font-size: 23px !important;
+  }
+
+  body[data-view="studio"] .method-pill,
+  body[data-view="studio"] .choice-note {
+    min-height: 0 !important;
+  }
+
+  body[data-view="learn"] .stage-title strong {
+    flex-basis: 100%;
+    font-size: 22px;
+  }
+
+  body[data-view="learn"] .flow {
+    padding-left: 22px !important;
+  }
+
+  body[data-view="learn"] .flow::before {
+    left: 7px !important;
+  }
+
+  body[data-view="learn"] .node::before {
+    left: -19px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-view="learn"] .scene3d *,
+  body[data-view="learn"] .scene3d *::before,
+  body[data-view="learn"] .scene3d *::after,
+  body[data-view="learn"] .progress-track::after,
+  body[data-view="learn"] .flow-line::after {
+    animation: none !important;
   }
 }

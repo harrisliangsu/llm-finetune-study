@@ -36,7 +36,7 @@
     .topbar {
       min-height:64px; display:grid; grid-template-columns:auto minmax(220px,1fr) minmax(260px,360px) auto; align-items:center; gap:14px;
       border:1px solid var(--line-strong); border-radius:12px; background:rgba(17,22,32,.86);
-      backdrop-filter:blur(18px); padding:12px 18px; position:sticky; top:12px; z-index:10;
+      backdrop-filter:none; padding:12px 18px; position:sticky; top:12px; z-index:10;
       box-shadow:0 20px 60px rgba(0,0,0,.24);
     }
     .brand { font-size:15px; font-weight:900; letter-spacing:0; white-space:nowrap; }
@@ -1649,9 +1649,55 @@
     }
     .training-grid {
       display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
       gap:14px;
       margin-top:16px;
+    }
+    .training-surface {
+      display:grid;
+      gap:14px;
+      min-width:0;
+      border:1px solid rgba(56,189,248,.13);
+      border-radius:10px;
+      background:rgba(8,13,20,.48);
+      padding:14px;
+    }
+    .training-surface-head {
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      padding-bottom:12px;
+      border-bottom:1px solid rgba(148,163,184,.1);
+    }
+    .training-surface-kicker {
+      color:#7dd3fc;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+    }
+    .training-surface-title {
+      margin-top:4px;
+      color:#eef3ff;
+      font-size:17px;
+      line-height:1.2;
+      font-weight:950;
+    }
+    .training-surface-note {
+      max-width:520px;
+      color:#94a3b8;
+      font-size:12px;
+      line-height:1.5;
+      text-align:right;
+    }
+    .training-surface-body {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+      min-width:0;
+    }
+    .run-surface .training-surface-body {
+      grid-template-columns:1fr;
     }
     .studio-card {
       min-width:0;
@@ -1950,11 +1996,107 @@
       font-size:12px;
       line-height:1.45;
     }
+    .course-workspace,
+    .course-canvas-grid {
+      display:grid;
+      grid-template-columns:minmax(220px,280px) minmax(0,1fr);
+      gap:0;
+    }
+    .course-workspace {
+      padding:0;
+    }
+    .course-canvas {
+      padding:0;
+    }
+    .course-canvas-head {
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:18px;
+      padding:18px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      background:rgba(8,13,20,.36);
+    }
+    .course-canvas-title {
+      margin:0;
+      color:#eef3ff;
+      font-size:22px;
+      line-height:1.15;
+      font-weight:950;
+    }
+    .course-canvas-note {
+      max-width:520px;
+      color:#94a3b8;
+      font-size:12px;
+      line-height:1.5;
+      text-align:right;
+    }
+    .trace-rail,
+    .trace-rail-card,
+    .stage-workspace {
+      min-width:0;
+      padding:18px;
+    }
+    .trace-rail,
+    .trace-rail-card {
+      border-right:1px solid rgba(148,163,184,.12);
+      background:linear-gradient(180deg,rgba(56,189,248,.055),rgba(8,13,20,.22));
+    }
+    .stage-workspace {
+      background:rgba(17,22,32,.58);
+    }
+    .workspace-head {
+      margin-bottom:14px;
+      padding-bottom:12px;
+      border-bottom:1px solid rgba(148,163,184,.1);
+    }
+    .workspace-kicker {
+      color:#7dd3fc;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+    }
+    .workspace-title {
+      margin-top:4px;
+      color:#eef3ff;
+      font-size:17px;
+      line-height:1.2;
+      font-weight:950;
+    }
+    .trace-rail .flow-wrap,
+    .trace-rail-card .flow-wrap {
+      max-height:680px;
+      overflow:auto;
+      padding:0 4px 0 0;
+    }
+    .trace-rail .flow,
+    .trace-rail-card .flow {
+      min-width:0;
+      flex-direction:column;
+    }
+    .trace-rail .node,
+    .trace-rail .node:hover,
+    .trace-rail-card .node,
+    .trace-rail-card .node:hover {
+      width:100%;
+      min-height:104px;
+    }
+    .trace-rail .node::after,
+    .trace-rail-card .node::after {
+      top:auto;
+      right:auto;
+      left:22px;
+      bottom:-10px;
+      width:1px;
+      height:10px;
+      background:linear-gradient(180deg,var(--cyan),transparent);
+    }
     @media (max-width:1500px) and (min-width:1151px) {
       .layout { grid-template-columns:minmax(250px,288px) minmax(0,1fr); }
       .layout > aside.panel:last-child { grid-column:2; }
       .studio-bar { grid-template-columns:88px 108px auto minmax(420px,1fr); }
-      .training-grid { grid-template-columns:1fr; }
+      .training-surface-body { grid-template-columns:1fr; }
       .params-grid,
       .advanced-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
     }
@@ -1964,9 +2106,13 @@
       .status { justify-content:flex-start; white-space:normal; }
       .layout { grid-template-columns:1fr; }
       .training-workbench,
-      .training-grid {
+      .training-surface-body,
+      .course-workspace,
+      .course-canvas-grid {
         grid-template-columns:1fr;
       }
+      .trace-rail,
+      .trace-rail-card { border-right:0; border-bottom:1px solid rgba(148,163,184,.12); }
       .studio-bar {
         grid-template-columns:1fr 1fr;
         position:static;
@@ -1996,6 +2142,8 @@
       }
       .app-tabs,
       .workbench-head,
+      .training-surface-head,
+      .course-canvas-head,
       .studio-row,
       .dataset-footer,
       .model-choice-grid,
@@ -2009,6 +2157,10 @@
       .studio-row,
       .studio-actions,
       .studio-actions.compact { grid-template-columns:1fr; }
+      .training-surface-head,
+      .course-canvas-head { display:grid; }
+      .training-surface-note { text-align:left; }
+      .course-canvas-note { text-align:left; }
       .workbench-title { font-size:28px; }
       .button { width:100%; }
       .node,
@@ -2026,7 +2178,7 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="studio-ui.css?v=20260504-ui3" />
+  <link rel="stylesheet" href="studio-ui.css?v=20260504-ui12" />
 </head>
 <body data-view="studio">
   <a class="skip-link" href="#mainContent">跳到主内容</a>
@@ -2068,6 +2220,15 @@
             </div>
 
             <div class="training-grid">
+              <section class="training-surface setup-surface" aria-label="训练设置区">
+                <div class="training-surface-head">
+                  <div>
+                    <div class="training-surface-kicker">Setup Surface</div>
+                    <div class="training-surface-title">准备训练输入、模型和参数</div>
+                  </div>
+                  <p class="training-surface-note">这里负责生成一次 Studio run 的配置，启动前不触碰课程运行 API。</p>
+                </div>
+                <div class="training-surface-body">
               <section class="studio-card">
                 <div class="studio-card-title">1 · 训练方法</div>
                 <label class="studio-field">
@@ -2133,11 +2294,11 @@
                   <input class="studio-input" id="studioDatasetFile" type="file" accept=".jsonl,.json,.txt,application/json,text/plain" />
                 </label>
                 <div class="method-hint" id="studioSchemaHint"></div>
-                <label class="studio-field">
+                <label class="studio-field" id="studioDatasetTextField">
                   <span class="studio-label">Custom JSONL</span>
                   <textarea class="studio-textarea dataset-editor" id="studioDatasetText" spellcheck="false"></textarea>
                 </label>
-                <div class="dataset-footer">
+                <div class="dataset-footer" id="studioDatasetFooter">
                   <button class="button" id="validateDatasetButton" type="button">校验数据</button>
                   <button class="button" id="previewDatasetButton" type="button">查看数据</button>
                   <div class="dataset-summary" id="studioDatasetSummary">等待数据校验。</div>
@@ -2271,6 +2432,18 @@
                 </details>
               </section>
 
+                </div>
+              </section>
+
+              <section class="training-surface run-surface" aria-label="训练运行区">
+                <div class="training-surface-head">
+                  <div>
+                    <div class="training-surface-kicker">Run Surface</div>
+                    <div class="training-surface-title">启动训练、观察 trace、验证 adapter</div>
+                  </div>
+                  <p class="training-surface-note">这里展示一次 run 的命令、状态和训练后对比结果。</p>
+                </div>
+                <div class="training-surface-body">
               <section class="studio-card run-console">
                 <div class="studio-card-title">5 · 执行过程</div>
                 <div class="command-preview">
@@ -2284,7 +2457,7 @@
                 <div class="job-card" id="studioJobCard"></div>
               </section>
 
-              <section class="studio-card studio-chat-card">
+              <section class="studio-card studio-chat-card" id="studioChatCard">
                 <div class="compare-controls">
                   <div class="studio-card-title">6 · Chat 对比</div>
                   <label class="studio-field">
@@ -2323,6 +2496,8 @@
                 </div>
                 <div class="chat-result" id="studioChatResult">
                   <div class="chat-meta">这里会按左侧填写的 model 和 adapter 路径执行对比。</div>
+                </div>
+              </section>
                 </div>
               </section>
             </div>
@@ -2407,15 +2582,30 @@
         <div class="course-meter-list" id="courseProgressList"></div>
       </aside>
 
-      <section class="panel">
-        <div class="panel-title">Execution Flow</div>
-        <div class="flow-wrap"><div class="flow" id="flow"></div></div>
-        <div class="section-spacer"></div>
-        <div class="panel-title">Training Scene</div>
-        <div id="visualStage"></div>
-        <div class="section-spacer"></div>
-        <div class="panel-title">Selected Event</div>
-        <div id="detail"></div>
+      <section class="panel course-canvas">
+        <div class="course-canvas-head">
+          <div>
+            <div class="panel-title">课程学习台</div>
+            <h2 class="course-canvas-title">Trace 驱动学习台</h2>
+          </div>
+          <p class="course-canvas-note">左侧选择事件，右侧同步显示训练场景、字段详情和模型状态。</p>
+        </div>
+        <div class="course-canvas-grid">
+          <section class="trace-rail-card" aria-labelledby="traceFlowTitle">
+            <div class="panel-title" id="traceFlowTitle">执行步骤</div>
+            <div class="flow-wrap"><div class="flow" id="flow"></div></div>
+          </section>
+          <section class="stage-workspace" aria-label="训练过程与事件详情">
+            <div class="stage-block">
+              <div class="panel-title">训练场景</div>
+              <div id="visualStage"></div>
+            </div>
+            <div class="event-inspector">
+              <div class="panel-title">事件详情</div>
+              <div id="detail"></div>
+            </div>
+          </section>
+        </div>
       </section>
 
       <aside class="panel">
@@ -2451,6 +2641,22 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <div class="dataset-drawer" id="datasetDrawer" role="dialog" aria-modal="true" aria-labelledby="datasetDrawerTitle" hidden>
+    <button class="dataset-drawer-backdrop" type="button" data-dataset-close aria-label="关闭数据预览"></button>
+    <section class="dataset-drawer-panel" aria-label="数据预览">
+      <header class="dataset-drawer-head">
+        <div>
+          <div class="dataset-drawer-kicker">Dataset Preview</div>
+          <h2 id="datasetDrawerTitle">训练数据</h2>
+          <p id="datasetDrawerSource">等待读取数据。</p>
+        </div>
+        <button class="button" id="datasetDrawerClose" type="button" data-dataset-close>关闭</button>
+      </header>
+      <div class="dataset-drawer-meta" id="datasetDrawerMeta"></div>
+      <pre class="dataset-drawer-preview" id="datasetDrawerPreview">(empty)</pre>
+    </section>
   </div>
 
   <script>
@@ -2533,6 +2739,7 @@
     let studioState = null;
     let pendingRun = null;
     let studioChatSourceApplied = false;
+    let courseStatesLastRefreshed = 0;
     let activeView = params.get("view") || ((requestedTracePath || requestedEventId) ? "learn" : "studio");
     const defaultStudioDataset = [
       {
@@ -2574,6 +2781,12 @@
         criteria: "chosen 保留审核边界。"
       }
     ].map((row) => JSON.stringify(row)).join("\n");
+    const pasteDatasetTextBySchema = {
+      sft: defaultStudioDataset,
+      dpo: defaultDpoDataset,
+    };
+    let datasetTextSchema = "sft";
+    let datasetDrawerReturnTarget = null;
     const methodProfiles = {
       "sft-lora": {
         lesson: "studio-sft-lora",
@@ -2626,17 +2839,27 @@
     $("studioDatasetText").value = defaultStudioDataset;
     $("studioChatModel").value = "auto";
     $("studioMethod").addEventListener("change", () => {
+      rememberPastedDataset();
       updateStudioMethodUi();
       renderStudioCommandPreview();
       renderStudioCompareMeta();
     });
     $("studioDatasetMode").addEventListener("change", () => {
+      rememberPastedDataset();
       updateDatasetPathForMode();
       renderStudioCommandPreview();
     });
     $("studioDatasetFile").addEventListener("change", () => void readStudioDatasetFile());
-    $("studioDatasetPath").addEventListener("click", () => void openStudioDatasetWindow());
-    $("previewDatasetButton").addEventListener("click", () => void openStudioDatasetWindow());
+    $("studioDatasetPath").addEventListener("click", (event) => void openStudioDatasetWindow(event.currentTarget));
+    $("previewDatasetButton").addEventListener("click", (event) => void openStudioDatasetWindow(event.currentTarget));
+    document.querySelectorAll("[data-dataset-close]").forEach((button) => {
+      button.addEventListener("click", () => closeDatasetDrawer());
+    });
+    document.addEventListener("keydown", (event) => {
+      if ($("datasetDrawer").hidden) return;
+      if (event.key === "Escape") closeDatasetDrawer();
+      if (event.key === "Tab") trapDatasetDrawerFocus(event);
+    });
     [
       "studioMethod",
       "studioModelPreset",
@@ -2671,6 +2894,7 @@
       $(id).addEventListener("input", () => renderStudioCommandPreview());
       $(id).addEventListener("change", () => renderStudioCommandPreview());
     });
+    $("studioDatasetText").addEventListener("input", () => rememberPastedDataset());
     ["studioModelPreset", "studioCustomModel"].forEach((id) => {
       $(id).addEventListener("input", () => {
         syncStudioChatModel();
@@ -2763,8 +2987,12 @@
       document.querySelectorAll(".app-tab").forEach((tab) => {
         tab.classList.toggle("active", tab.dataset.viewTarget === activeView);
       });
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       if (activeView === "learn" && lastTrace) {
-        render(lastTrace, { forceScroll: true });
+        requestAnimationFrame(() => render(lastTrace, { forceScroll: false }));
+      }
+      if (activeView === "learn") {
+        void refreshLearningView({ forceScroll: !lastTrace, refreshStates: courseStates.length === 0 });
       }
       const url = new URL(window.location.href);
       url.searchParams.set("view", activeView);
@@ -2781,6 +3009,16 @@
       return methodProfiles[$("studioMethod").value] || methodProfiles["sft-lora"];
     }
 
+    function defaultDatasetForSchema(schema) {
+      return schema === "dpo" ? defaultDpoDataset : defaultStudioDataset;
+    }
+
+    function rememberPastedDataset() {
+      if ($("studioDatasetMode").value !== "paste") return;
+      if (datasetTextSchema === "none") return;
+      pasteDatasetTextBySchema[datasetTextSchema] = $("studioDatasetText").value;
+    }
+
     function updateStudioMethodUi() {
       const profile = currentMethodProfile();
       $("studioMethodHint").textContent = profile.hint;
@@ -2790,15 +3028,20 @@
       $("studioDatasetFile").disabled = noData || $("studioDatasetMode").value !== "upload";
       $("studioDatasetText").disabled = noData || $("studioDatasetMode").value === "studioExample";
       $("validateDatasetButton").disabled = noData;
+      $("validateDatasetButton").hidden = noData;
+      $("previewDatasetButton").textContent = noData ? "查看说明" : "查看数据";
+      $("studioDatasetTextField").hidden = noData;
+      $("studioDatasetFooter").classList.toggle("plan-mode", noData);
       if (noData) {
         $("studioDatasetSummary").className = "dataset-summary ok";
-        $("studioDatasetSummary").textContent = "QLoRA 规划不需要训练 JSONL。";
+        $("studioDatasetSummary").textContent = "QLoRA 规划不需要训练 JSONL，只做本机训练预算估算。";
       } else {
         $("studioDatasetSummary").className = "dataset-summary";
         $("studioDatasetSummary").textContent = "等待数据校验。";
       }
       updateAdvancedParamAvailability(profile);
       updateDatasetPathForMode();
+      updateStudioChatAvailability(profile);
       updateTrainingMap(profile);
     }
 
@@ -2846,16 +3089,29 @@
     function updateDatasetPathForMode() {
       const mode = $("studioDatasetMode").value;
       const profile = currentMethodProfile();
+      const noData = profile.schema === "none";
       syncDatasetDisplayPath();
-      $("studioDatasetFile").disabled = profile.schema === "none" || mode !== "upload";
-      $("studioDatasetText").disabled = profile.schema === "none" || mode === "studioExample";
-      $("studioUploadField").style.display = mode === "upload" ? "grid" : "none";
-      $("studioDatasetText").style.opacity = mode === "studioExample" ? ".72" : "1";
+      $("studioDatasetFile").disabled = noData || mode !== "upload";
+      $("studioDatasetText").disabled = noData || mode === "studioExample";
+      $("studioUploadField").hidden = noData || mode !== "upload";
+      $("studioDatasetTextField").hidden = noData;
+      $("studioDatasetText").classList.toggle("dataset-editor-disabled", noData || mode === "studioExample");
+      if (noData) {
+        datasetTextSchema = "none";
+        $("studioDatasetText").value = "";
+        return;
+      }
       if (mode === "paste") {
-        $("studioDatasetText").value = profile.schema === "dpo" ? defaultDpoDataset : defaultStudioDataset;
+        if (datasetTextSchema !== profile.schema || !$("studioDatasetText").value.trim()) {
+          $("studioDatasetText").value = pasteDatasetTextBySchema[profile.schema] || defaultDatasetForSchema(profile.schema);
+        }
+        datasetTextSchema = profile.schema;
       }
       if (mode === "studioExample") {
+        datasetTextSchema = profile.schema;
         void loadStudioExampleDataset(profile.defaultData);
+      } else if (mode === "upload") {
+        datasetTextSchema = profile.schema;
       }
     }
 
@@ -2949,63 +3205,69 @@
       };
     }
 
-    function datasetViewerHtml(title, source, text, meta) {
-      return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(title)}</title>
-  <style>
-    :root { color-scheme:dark; --bg:#070b12; --panel:#0d131d; --line:rgba(148,163,184,.18); --ink:#e5edf9; --muted:#93a4ba; --accent:#38bdf8; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; }
-    header { position:sticky; top:0; z-index:2; padding:16px 18px; border-bottom:1px solid var(--line); background:rgba(7,11,18,.94); backdrop-filter:blur(12px); }
-    h1 { margin:0 0 8px; font-size:18px; line-height:1.25; overflow-wrap:anywhere; }
-    .meta { color:var(--muted); font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
-    .meta strong { color:#dbeafe; }
-    main { padding:18px; }
-    pre { margin:0; min-height:calc(100vh - 118px); padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:#dbeafe; font:12px/1.65 "Fira Code","SF Mono",Menlo,Consolas,monospace; white-space:pre-wrap; overflow:auto; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>${escapeHtml(title)}</h1>
-    <div class="meta"><strong>${escapeHtml(source)}</strong> · ${escapeHtml(meta.rows)} rows · fields ${escapeHtml(meta.fields.join(", ") || "-")}${meta.parseError ? ` · parse warning ${escapeHtml(meta.parseError)}` : ""}</div>
-  </header>
-  <main><pre>${escapeHtml(text || "(empty)")}</pre></main>
-</body>
-</html>`;
+    function focusableDatasetDrawerNodes() {
+      return [...$("datasetDrawer").querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
+        .filter((node) => !node.disabled && node.offsetParent !== null);
     }
 
-    async function openStudioDatasetWindow() {
+    function trapDatasetDrawerFocus(event) {
+      const focusable = focusableDatasetDrawerNodes();
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function openDatasetDrawer(title, source, text, meta, returnTarget = document.activeElement) {
+      $("datasetDrawerTitle").textContent = title || "训练数据";
+      $("datasetDrawerSource").textContent = source || "当前输入";
+      $("datasetDrawerMeta").innerHTML = [
+        ["rows", meta.rows],
+        ["fields", meta.fields.join(", ") || "-"],
+        ["status", meta.parseError ? `parse warning: ${meta.parseError}` : "valid JSONL"],
+      ].map(([key, value]) => `
+        <div class="dataset-drawer-chip ${key === "status" && meta.parseError ? "error" : ""}">
+          <span>${escapeHtml(key)}</span>
+          <strong>${escapeHtml(String(value))}</strong>
+        </div>
+      `).join("");
+      $("datasetDrawerPreview").textContent = text || "(empty)";
+      datasetDrawerReturnTarget = returnTarget && typeof returnTarget.focus === "function" ? returnTarget : document.activeElement;
+      $("datasetDrawer").hidden = false;
+      document.body.classList.add("dataset-drawer-open");
+      $("datasetDrawerClose").focus();
+    }
+
+    function closeDatasetDrawer() {
+      $("datasetDrawer").hidden = true;
+      document.body.classList.remove("dataset-drawer-open");
+      const target = datasetDrawerReturnTarget && datasetDrawerReturnTarget.isConnected
+        ? datasetDrawerReturnTarget
+        : $("previewDatasetButton");
+      datasetDrawerReturnTarget = null;
+      if (target && typeof target.focus === "function" && !target.disabled) target.focus();
+    }
+
+    async function openStudioDatasetWindow(returnTarget = document.activeElement) {
       const descriptor = currentDatasetDescriptor();
       const profile = currentMethodProfile();
-      const viewer = window.open("about:blank", "_blank");
-      if (!viewer) {
-        $("studioDatasetSummary").className = "dataset-summary error";
-        $("studioDatasetSummary").textContent = "浏览器阻止了数据查看窗口。";
-        return;
-      }
-      viewer.opener = null;
-      viewer.document.write("<!DOCTYPE html><title>Loading dataset...</title><body style='background:#070b12;color:#e5edf9;font-family:sans-serif;padding:18px'>Loading dataset...</body>");
       if (profile.schema === "none") {
         const text = "QLoRA 规划只使用模型和训练参数做预算估算，不读取训练 JSONL。";
-        viewer.document.open();
-        viewer.document.write(datasetViewerHtml(descriptor.value, descriptor.source, text, { rows: 0, fields: [], parseError: "" }));
-        viewer.document.close();
+        openDatasetDrawer(descriptor.value, descriptor.source, text, { rows: 0, fields: [], parseError: "" }, returnTarget);
         return;
       }
       try {
         const text = await currentDatasetPreviewText();
         const meta = datasetTextMeta(text);
-        viewer.document.open();
-        viewer.document.write(datasetViewerHtml(descriptor.value, descriptor.source, text, meta));
-        viewer.document.close();
+        openDatasetDrawer(descriptor.value, descriptor.source, text, meta, returnTarget);
       } catch (error) {
-        viewer.document.open();
-        viewer.document.write(datasetViewerHtml(descriptor.value, "error", error.message, { rows: 0, fields: [], parseError: error.message }));
-        viewer.document.close();
+        openDatasetDrawer(descriptor.value, "error", error.message, { rows: 0, fields: [], parseError: error.message }, returnTarget);
       }
     }
 
@@ -3026,17 +3288,48 @@
       }
     }
 
+    function updateStudioChatAvailability(profile = currentMethodProfile()) {
+      const noAdapterProfile = profile.schema === "none";
+      $("studioChatCard").classList.toggle("plan-mode", noAdapterProfile);
+      $("useStudioLatestAdapterButton").disabled = noAdapterProfile;
+      $("studioChatRunButton").disabled = noAdapterProfile;
+      $("studioChatAdapterDir").disabled = noAdapterProfile;
+      $("studioChatAdapterDir").placeholder = noAdapterProfile
+        ? "QLoRA 规划不会生成 adapter"
+        : "visualizer/runtime/studio-runs/<run-id>/adapter";
+      if (noAdapterProfile) {
+        $("studioChatAdapterDir").value = "";
+        $("studioChatResult").innerHTML = `<div class="chat-meta">QLoRA 规划不会生成 adapter；这里保留为训练完成后的对比入口。</div>`;
+      }
+    }
+
     function applyStudioProfileToChat(profile) {
       const data = profile || {};
       $("studioChatModel").value = data.model_name || studioModelName() || "auto";
       if (data.adapter_expected && data.adapter_dir) {
         $("studioChatAdapterDir").value = data.adapter_dir;
+      } else if (data.adapter_expected === false || currentMethodProfile().schema === "none") {
+        $("studioChatAdapterDir").value = "";
       }
-      studioChatSourceApplied = Boolean(data.adapter_dir);
+      studioChatSourceApplied = Boolean(data.adapter_expected && data.adapter_dir);
+      updateStudioChatAvailability(currentMethodProfile());
       renderStudioCompareMeta(data);
     }
 
     function renderStudioCompareMeta(profile = latestStudioProfile()) {
+      if (currentMethodProfile().schema === "none") {
+        $("studioCompareMeta").innerHTML = [
+          ["model", studioModelName() || "auto"],
+          ["adapter", "无需 adapter"],
+          ["source", "QLoRA plan · no chat comparison"],
+        ].map(([label, value]) => `
+          <div class="compare-meta-item">
+            <span>${escapeHtml(label)}</span>
+            <strong title="${escapeAttr(value)}">${escapeHtml(value)}</strong>
+          </div>
+        `).join("");
+        return;
+      }
       const model = $("studioChatModel").value.trim() || studioModelName() || profile.model_name || "auto";
       const adapter = $("studioChatAdapterDir").value.trim() || profile.adapter_dir || "";
       const profileMatches = profile && profile.adapter_dir && profile.adapter_dir === adapter;
@@ -3325,6 +3618,23 @@
         selectedTracePath = liveTracePath;
       }
       renderCourseControls();
+      courseStatesLastRefreshed = Date.now();
+    }
+
+    async function maybeRefreshCourseStates(force = false) {
+      const staleAfterMs = Math.max(15000, pollIntervalMs * 3);
+      if (force || !courseStates.length || Date.now() - courseStatesLastRefreshed > staleAfterMs) {
+        await refreshCourseStates();
+      }
+    }
+
+    async function refreshLearningView(options = {}) {
+      try {
+        await maybeRefreshCourseStates(Boolean(options.refreshStates));
+        render(await loadTrace(), { forceScroll: Boolean(options.forceScroll) });
+      } catch (error) {
+        $("statusText").textContent = `读取课程 trace 失败: ${error.message}`;
+      }
     }
 
     async function fetchTraceSummary(path, fallbackTitle) {
@@ -3602,10 +3912,10 @@
     function renderStudioError(message) {
       $("studioRunState").textContent = "error";
       const html = `
-        <div class="job-line"><span class="job-state" style="color:#fecaca;">error</span></div>
+        <div class="job-line"><span class="job-state" style="color:#b42318;">error</span></div>
         <div class="job-meta">${escapeHtml(message)}</div>
       `;
-      setJobCardHtml(html);
+      setStudioJobCardHtml(html);
     }
 
     function setJobCardHtml(html) {
@@ -3614,6 +3924,12 @@
         if (node) node.innerHTML = html;
       });
       scrollJobLogsToBottom("jobCard", "studioJobCard");
+    }
+
+    function setStudioJobCardHtml(html) {
+      const node = $("studioJobCard");
+      if (node) node.innerHTML = html;
+      scrollJobLogsToBottom("studioJobCard");
     }
 
     function setCourseJobCardHtml(html) {
@@ -3658,7 +3974,9 @@
       $("resumeJobButton").disabled = !courseRunning || control.mode === "running";
       $("stopJobButton").disabled = !courseRunning;
       $("startStudioTrainingButton").disabled = Boolean(running);
-      $("studioRunState").textContent = job ? `${job.lesson_id || "-"} · ${job.status || "-"}` : "idle";
+      $("studioRunState").textContent = isStudioJob
+        ? `${job.lesson_id || "-"} · ${job.status || "-"}`
+        : job ? "idle · course process active" : "idle";
       if (!job) {
         setJobCardHtml(`
           <div class="job-line"><span class="job-state">idle</span><span class="job-meta">${escapeHtml(control.mode || "running")}</span></div>
@@ -3675,7 +3993,11 @@
         `);
         return;
       }
-      setJobCardHtml(jobCardHtml(job, control));
+      setCourseJobCardHtml(jobCardHtml(job, control));
+      setStudioJobCardHtml(`
+        <div class="job-line"><span class="job-state">idle</span><span class="job-meta">${escapeHtml(control.mode || "running")}</span></div>
+        <div class="job-meta">Course process is active. Studio run surface is idle.</div>
+      `);
     }
 
     async function runChatCompare() {
@@ -3702,6 +4024,10 @@
     }
 
     async function runStudioChatCompare() {
+      if (currentMethodProfile().schema === "none") {
+        $("studioChatResult").innerHTML = `<div class="chat-meta">QLoRA 规划不会生成 adapter，不能执行训练前后对比。</div>`;
+        return;
+      }
       const input = $("studioChatInput").value.trim();
       if (!input) {
         $("studioChatResult").innerHTML = `<div class="chat-meta">Input is required.</div>`;
@@ -3728,7 +4054,7 @@
       } catch (error) {
         $("studioChatResult").innerHTML = `<div class="chat-answer error"><div class="chat-answer-title">error</div><div class="chat-meta">${escapeHtml(error.message)}</div></div>`;
       } finally {
-        $("studioChatRunButton").disabled = false;
+        $("studioChatRunButton").disabled = currentMethodProfile().schema === "none";
       }
     }
 
@@ -3964,10 +4290,7 @@
         });
       });
       if (options.forceScroll || followCurrent || previousActiveId !== activeEventId || !renderedOnce) {
-        requestAnimationFrame(() => {
-          scrollActiveNodeIntoView();
-          setTimeout(scrollActiveNodeIntoView, 80);
-        });
+        requestAnimationFrame(scrollActiveNodeIntoView);
       }
       renderedOnce = true;
 
@@ -3980,6 +4303,11 @@
       const scroller = document.querySelector(".flow-wrap");
       const active = document.querySelector(".node.active");
       if (!scroller || !active) return;
+      if (document.querySelector(".trace-rail-card") && document.querySelector(".trace-rail-card").contains(scroller)) {
+        const target = active.offsetTop - (scroller.clientHeight / 2) + (active.clientHeight / 2);
+        scroller.scrollTop = Math.max(0, target);
+        return;
+      }
       const nodes = Array.from(document.querySelectorAll(".node"));
       const activeIndex = nodes.indexOf(active);
       const anchor = nodes[Math.max(0, activeIndex - 3)] || active;
@@ -4003,8 +4331,12 @@
         <div class="stage stage-3d">
           <div class="stage-head">
             <div>
-              <div class="stage-eyebrow effect">3D training scene</div>
-              <div class="stage-title">${escapeHtml(trace.lesson_id || "-")} · STEP ${escapeHtml(event.id)} · ${escapeHtml(event.name)}</div>
+              <div class="stage-eyebrow effect">训练场景</div>
+              <div class="stage-title">
+                <span>${escapeHtml(trace.lesson_id || "-")}</span>
+                <span>STEP ${escapeHtml(event.id)}</span>
+                <strong>${escapeHtml(event.name)}</strong>
+              </div>
             </div>
             <div class="stage-chips">
               <span class="stage-chip hot">${escapeHtml(event.kind || "event")}</span>
@@ -4037,7 +4369,7 @@
       const nodes = sceneNodes(event, trace, events);
       const footer = sceneFooter(event, events);
       return `
-        <div class="scene3d" aria-label="3D style training process">
+        <div class="scene3d" aria-label="Training process visualization">
           <div class="scene-grid">
             ${nodes.map((node, index) => renderSceneNode(node, index)).join("")}
           </div>
@@ -5694,12 +6026,7 @@
     async function tick() {
       await refreshStudioState();
       if (live && activeView === "learn") {
-        try {
-          await refreshCourseStates();
-          render(await loadTrace());
-        } catch (error) {
-          $("statusText").textContent = `读取 trace 失败: ${error.message}`;
-        }
+        await refreshLearningView();
       }
       setTimeout(tick, pollIntervalMs);
     }
