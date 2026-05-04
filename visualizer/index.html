@@ -2178,7 +2178,7 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="studio-ui.css?v=20260505-ui14" />
+  <link rel="stylesheet" href="studio-ui.css?v=20260505-ui16" />
 </head>
 <body data-view="studio">
   <a class="skip-link" href="#mainContent">跳到主内容</a>
@@ -2556,30 +2556,37 @@
         </section>
 
         <div class="layout">
-      <aside class="panel">
-        <div class="panel-title">Current Run</div>
-        <h1 class="lesson-title" id="lessonTitle">读取中</h1>
-        <p class="subtle" id="lessonMeta">页面会自动读取 visualizer/traces/live.json。</p>
-        <div class="stat-grid">
-          <div class="stat"><div class="stat-value" id="eventCount">0</div><div class="stat-label">events</div></div>
-          <div class="stat"><div class="stat-value" id="runStatus">-</div><div class="stat-label">status</div></div>
-          <div class="stat"><div class="stat-value" id="pollSeconds">5s</div><div class="stat-label">poll interval</div></div>
-          <div class="stat"><div class="stat-value" id="followState">auto</div><div class="stat-label">flow mode</div></div>
-        </div>
-        <div class="run-card">
-          <div class="panel-title">Trace Source</div>
-          <div class="mono" id="traceSource">visualizer/traces/live.json</div>
-          <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
-        </div>
-        <div style="height:18px"></div>
-        <div class="panel-title">Job Status</div>
-        <div class="job-card" id="jobCard"></div>
-        <div style="height:18px"></div>
-        <div class="panel-title">Course Status</div>
-        <div class="course-dashboard" id="courseDashboard"></div>
-        <div style="height:18px"></div>
-        <div class="panel-title">Course Progress</div>
-        <div class="course-meter-list" id="courseProgressList"></div>
+      <aside class="panel course-overview-panel">
+        <section class="course-overview-hero" aria-labelledby="lessonTitle">
+          <div class="panel-title">Current Run</div>
+          <h1 class="lesson-title" id="lessonTitle">读取中</h1>
+          <p class="subtle" id="lessonMeta">页面会自动读取 visualizer/traces/live.json。</p>
+          <div class="stat-grid">
+            <div class="stat"><div class="stat-value" id="eventCount">0</div><div class="stat-label">events</div></div>
+            <div class="stat"><div class="stat-value" id="runStatus">-</div><div class="stat-label">status</div></div>
+            <div class="stat"><div class="stat-value" id="pollSeconds">5s</div><div class="stat-label">poll interval</div></div>
+            <div class="stat"><div class="stat-value" id="followState">auto</div><div class="stat-label">flow mode</div></div>
+          </div>
+        </section>
+        <section class="course-overview-status" aria-label="运行与课程状态">
+          <div class="run-card">
+            <div class="panel-title">Trace Source</div>
+            <div class="mono" id="traceSource">visualizer/traces/live.json</div>
+            <p class="subtle" style="margin-top:8px;">运行课程脚本时，这里会从 demo 自动切到 live。</p>
+          </div>
+          <div>
+            <div class="panel-title">Job Status</div>
+            <div class="job-card" id="jobCard"></div>
+          </div>
+          <div>
+            <div class="panel-title">Course Status</div>
+            <div class="course-dashboard" id="courseDashboard"></div>
+          </div>
+        </section>
+        <section class="course-overview-progress" aria-label="课程进度">
+          <div class="panel-title">Course Progress</div>
+          <div class="course-meter-list" id="courseProgressList"></div>
+        </section>
       </aside>
 
       <section class="panel course-canvas">
@@ -2608,7 +2615,7 @@
         </div>
       </section>
 
-      <aside class="panel">
+      <aside class="panel course-lab-panel">
         <div class="panel-title">Chat Lab</div>
         <div class="studio-stack">
           <label class="studio-field">

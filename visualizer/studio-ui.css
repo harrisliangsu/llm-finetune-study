@@ -4182,3 +4182,214 @@ body[data-view="learn"] .scene3d {
     scrollbar-gutter: stable;
   }
 }
+
+/* UI15 Course redesign: top overview band + equal-height work columns. */
+body[data-view="learn"] .course-overview-panel {
+  grid-area: run !important;
+}
+
+body[data-view="learn"] .course-lab-panel {
+  grid-area: lab !important;
+}
+
+body[data-view="learn"] .course-overview-hero,
+body[data-view="learn"] .course-overview-status,
+body[data-view="learn"] .course-overview-progress {
+  min-width: 0;
+}
+
+@media (min-width: 1281px) {
+  body[data-view="learn"] {
+    --course-board-height: clamp(620px, calc(100dvh - 450px), 760px);
+  }
+
+  body[data-view="learn"] .layout {
+    grid-template-columns: minmax(0, 1fr) clamp(352px, 25vw, 388px) !important;
+    grid-template-areas:
+      "run run"
+      "workspace lab" !important;
+    align-items: start !important;
+    gap: 16px !important;
+  }
+
+  body[data-view="learn"] .course-overview-panel {
+    display: grid !important;
+    grid-template-columns: minmax(280px, .92fr) minmax(360px, 1.1fr) minmax(320px, .98fr) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+    padding: 14px !important;
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body[data-view="learn"] .course-overview-hero,
+  body[data-view="learn"] .course-overview-status,
+  body[data-view="learn"] .course-overview-progress {
+    border: 1px solid color-mix(in oklch, var(--ink) 6%, transparent);
+    border-radius: 8px;
+    background: color-mix(in oklch, var(--surface-2) 42%, var(--surface));
+    padding: 12px;
+  }
+
+  body[data-view="learn"] .course-overview-hero {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    gap: 6px;
+    align-content: start;
+  }
+
+  body[data-view="learn"] .course-overview-hero .lesson-title {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.16;
+  }
+
+  body[data-view="learn"] .course-overview-hero .subtle {
+    margin: 0;
+    max-width: 68ch;
+  }
+
+  body[data-view="learn"] .course-overview-hero .stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    align-self: start;
+    margin-top: 10px;
+  }
+
+  body[data-view="learn"] .course-overview-hero .stat {
+    min-height: 68px;
+    padding: 10px;
+  }
+
+  body[data-view="learn"] .course-overview-status {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px !important;
+    align-content: start;
+  }
+
+  body[data-view="learn"] .course-overview-status > div {
+    min-width: 0;
+  }
+
+  body[data-view="learn"] .course-overview-status > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  body[data-view="learn"] .course-overview-status .run-card,
+  body[data-view="learn"] .course-overview-status .job-card,
+  body[data-view="learn"] .course-overview-status .course-dashboard {
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    overflow: visible;
+  }
+
+  body[data-view="learn"] .course-overview-status .run-card,
+  body[data-view="learn"] .course-overview-status .job-card {
+    min-height: 88px;
+  }
+
+  body[data-view="learn"] .course-overview-status .course-dashboard {
+    min-height: 120px;
+  }
+
+  body[data-view="learn"] .course-overview-progress {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  body[data-view="learn"] .course-overview-progress .course-meter-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  body[data-view="learn"] .course-overview-progress .course-meter-row {
+    padding: 6px 8px;
+  }
+
+  body[data-view="learn"] .course-overview-progress .progress-track {
+    height: 3px;
+  }
+
+  body[data-view="learn"] .course-overview-progress .course-meter-name {
+    font-size: 11px;
+  }
+
+  body[data-view="learn"] .course-overview-progress .course-meter-state {
+    font-size: 10px;
+  }
+
+  body[data-view="learn"] .course-canvas {
+    grid-area: workspace !important;
+    display: grid !important;
+    grid-template-rows: auto var(--course-board-height) !important;
+    min-height: 0 !important;
+  }
+
+  body[data-view="learn"] .course-canvas-grid {
+    height: var(--course-board-height) !important;
+    grid-template-columns: clamp(304px, 31%, 338px) minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    align-items: stretch !important;
+  }
+
+  body[data-view="learn"] .trace-rail-card,
+  body[data-view="learn"] .stage-workspace,
+  body[data-view="learn"] .course-lab-panel {
+    height: var(--course-board-height) !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    scrollbar-gutter: stable;
+  }
+
+  body[data-view="learn"] .flow-wrap,
+  body[data-view="learn"] .trace-rail-card .flow-wrap {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body[data-view="learn"] .stage-workspace {
+    grid-template-rows: auto minmax(280px, 1fr) !important;
+  }
+
+  body[data-view="learn"] .course-lab-panel {
+    position: static !important;
+    align-self: start !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  body[data-view="learn"] .layout {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "run"
+      "workspace"
+      "lab" !important;
+  }
+
+  body[data-view="learn"] .course-overview-panel {
+    display: grid !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 920px) {
+  body[data-view="learn"] .course-overview-panel {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-view="learn"] .course-overview-status {
+    display: grid;
+    gap: 10px;
+  }
+
+  body[data-view="learn"] .course-overview-hero .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
