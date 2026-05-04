@@ -13,6 +13,7 @@
 
 - 阅读 [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - 阅读 [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
+- 阅读 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 的第 0-1 节，先建立方法选型框架
 - 跑一个小型分类任务
 - 记录第一次实验
 
@@ -132,5 +133,4 @@
 - 多模态微调
 - diffusion 微调
 
-这些主题不是第一阶段的目标。先把小模型 SFT + LoRA 跑扎实。
-
+这些主题不是第一阶段的目标。先把小模型 SFT + LoRA 跑扎实。进入进阶前，先用 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 判断你是在解决数据格式、参数更新、偏好优化、显存约束，还是部署压缩问题。

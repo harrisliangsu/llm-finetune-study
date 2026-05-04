@@ -2,6 +2,8 @@
 
 SFT 和 LoRA 是学习 LLM 微调的核心组合。
 
+这篇文档聚焦 SFT + LoRA。更完整的训练方法选型，包括 continued pretraining、DPO、RLHF、reward model、distillation，见 [07. 开发者训练方法指南](07-training-methods-guide.md)。
+
 ## SFT 到底训练什么
 
 SFT 的目标不是让模型“记住问题”，而是让模型在给定上下文下生成目标回答。
@@ -148,3 +150,5 @@ Lesson 05 已经进入 LoRA，但用的是本地 tiny model，不下载真实 LL
 3. 能解释 train loss 下降但 eval loss 上升为什么通常是过拟合信号。
 4. 能解释 LoRA 为什么只训练 `lora_A/lora_B`，以及 adapter 为什么能单独保存。
 5. 能解释 `LoraConfig`、`get_peft_model`、`PeftModel.from_pretrained` 分别负责什么。
+
+完成 Lesson 06 后，建议继续阅读 [07. 开发者训练方法指南](07-training-methods-guide.md)，再决定下一课是做 adapter 评估、DPO，还是 reward/RLHF 概念实验。

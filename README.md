@@ -35,6 +35,7 @@
 | 4. SFT + LoRA | 进入指令微调和 PEFT | [docs/04-sft-lora.md](docs/04-sft-lora.md) |
 | 5. 中文仓库阅读 | 对照开源中文 LLM 微调项目 | [docs/05-reference-repos.md](docs/05-reference-repos.md) |
 | 6. 评估和排错 | 看 loss、样例、指标、过拟合和数据问题 | [docs/06-evaluation-debugging.md](docs/06-evaluation-debugging.md) |
+| 7. 训练方法指南 | 从开发者视角选择 SFT、PEFT/LoRA、DPO、RLHF、蒸馏等训练路线 | [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) |
 
 ## 建议顺序
 
@@ -58,6 +59,7 @@
 - [lessons/06-peft-lora/index.html](lessons/06-peft-lora/index.html)
 - [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
+- [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md)
 - [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
 
 然后照着 [examples/README.md](examples/README.md) 里的练习顺序做小实验。

@@ -57,3 +57,7 @@ http://127.0.0.1:8765/visualizer/
 ```
 
 如果你只想学习页面，直接打开每课目录里的 `index.html`。
+
+## 训练方法总览
+
+课程 01-06 主要覆盖本地 SFT + LoRA 主线。想从开发者视角理解什么时候选 SFT、PEFT/LoRA、QLoRA、DPO、RLHF、蒸馏，以及每种方法需要什么数据、输出什么 artifact，见 [docs/07-training-methods-guide.md](../docs/07-training-methods-guide.md)。
