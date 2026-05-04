@@ -20,6 +20,7 @@
 | 04 | Trainer 闭环 | [04-trainer](04-trainer) | model + dataset + loss + optimizer |
 | 05 | LoRA Adapter | [05-lora](05-lora) | frozen base + trainable adapter |
 | 06 | PEFT LoRA | [06-peft-lora](06-peft-lora) | real HF model + PEFT adapter |
+| 07 | SFT Baseline | [07-sft-baseline](07-sft-baseline) | ticket text -> strict JSON |
 
 ## 运行顺序
 
@@ -73,6 +74,6 @@ http://127.0.0.1:8765/visualizer/
 
 PEFT adapter 的保存、加载、重新加载对比已经是 Lesson 06 的一部分，不再单独拆成 Adapter Evaluation 章节。以后如果要做多 adapter 路由、多个 checkpoint 管理，那应该作为 PEFT 进阶补充，而不是 DPO 前的必修课。
 
-Lesson 06 的效果对比不明显是设计问题：5 条样本只够验证链路，通用概念解释也不是经典 SFT 展示场景。Lesson 07 应使用 40-80 条同分布样本，先从 [examples/sft_ticket_router_train.jsonl](../examples/sft_ticket_router_train.jsonl) 这种结构化输出任务开始，因为训练前后可以直接看 JSON 格式、字段选择、intent 分类是否变稳定。
+Lesson 06 的效果对比不明显是设计问题：5 条样本只够验证链路，通用概念解释也不是经典 SFT 展示场景。Lesson 07 应使用 40-80 条同分布样本，先从 [07-sft-baseline/data/train.jsonl](07-sft-baseline/data/train.jsonl) 这种结构化输出任务开始，因为训练前后可以直接看 JSON 格式、字段选择、intent 分类是否变稳定。
 
 想从开发者视角理解什么时候选 SFT、PEFT/LoRA、QLoRA、DPO、RLHF、蒸馏，以及每种方法需要什么数据、输出什么 artifact，见 [docs/07-training-methods-guide.md](../docs/07-training-methods-guide.md)。

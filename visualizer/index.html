@@ -97,11 +97,16 @@
       background:linear-gradient(90deg,var(--cyan),transparent);
     }
     .node:last-child::after { display:none; }
-    .node.active { border-color:rgba(6,182,212,.7); box-shadow:0 0 0 1px rgba(6,182,212,.22), 0 18px 42px rgba(0,0,0,.28); transform:translateY(-2px); }
-    .node.current:not(.active) { border-color:rgba(234,179,8,.58); box-shadow:0 0 0 1px rgba(234,179,8,.16); }
     .node.done { border-color:rgba(34,197,94,.24); }
+    .node.current:not(.active) { border-color:rgba(6,182,212,.42); box-shadow:0 0 0 1px rgba(6,182,212,.12); }
+    .node.current:not(.active)::before {
+      content:"LATEST"; position:absolute; top:10px; right:10px; color:#67e8f9; border:1px solid rgba(6,182,212,.28);
+      border-radius:999px; padding:2px 6px; background:rgba(6,182,212,.08); font-size:9px; font-weight:950; letter-spacing:.08em;
+    }
+    .node.active { border-color:rgba(234,179,8,.72); box-shadow:0 0 0 1px rgba(234,179,8,.22), 0 18px 42px rgba(0,0,0,.28); transform:translateY(-2px); }
     .node-id { color:var(--faint); font-size:11px; font-weight:900; margin-bottom:7px; }
-    .node.current .node-id { color:var(--gold); }
+    .node.current:not(.active) .node-id { color:var(--cyan); }
+    .node.active .node-id { color:var(--gold); }
     .node-name { font-size:14px; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
     .node-summary { color:var(--muted); font-size:12px; margin-top:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     .node-progress { margin-top:10px; }
@@ -525,6 +530,7 @@
       const currentId = getCurrentEventId(lastTrace);
       if (currentId) activeEventId = currentId;
       selectedField = null;
+      syncLocationEvent(activeEventId);
       if (lastTrace) render(lastTrace, { forceScroll: true });
       updateControls();
     });
@@ -678,6 +684,7 @@
       followCurrent = true;
       activeEventId = null;
       selectedField = null;
+      syncLocationEvent(null);
       renderCourseControls();
       try {
         render(await loadTrace(), { forceScroll: true });
@@ -874,6 +881,7 @@
           followCurrent = false;
           activeEventId = node.dataset.eventId;
           selectedField = null;
+          syncLocationEvent(activeEventId);
           render(lastTrace, { forceScroll: true });
         });
       });
@@ -2159,6 +2167,14 @@
       $("followCurrent").classList.toggle("active", followCurrent);
       $("followCurrent").textContent = followCurrent ? "正在跟随当前步骤" : "回到当前步骤";
       $("followState").textContent = followLatestCourse ? "latest" : (followCurrent ? "course" : "manual");
+    }
+
+    function syncLocationEvent(eventId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("trace", selectedTracePath);
+      if (eventId) url.searchParams.set("event", eventId);
+      else url.searchParams.delete("event");
+      window.history.replaceState(null, "", url);
     }
 
     function valueType(value) {
