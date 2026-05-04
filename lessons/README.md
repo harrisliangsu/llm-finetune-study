@@ -67,8 +67,10 @@ http://127.0.0.1:8765/visualizer/
 | 课程 | 主题 | 重点 |
 |---|---|---|
 | 07 | SFT Baseline | 不加 LoRA 概念干扰，明确 prompt、answer、loss mask、训练前后输出对比 |
-| 08 | Adapter Evaluation | 比较 base、trained adapter、reloaded adapter，确认 LoRA 是否真的改变回答 |
-| 09 | DPO Preference Optimization | 用 `prompt/chosen/rejected` 做小样本偏好优化 |
-| 10 | Reward / RLHF Concept | 理解 reward model、reference model、KL、PPO，不做大规模本地训练 |
+| 08 | DPO Preference Optimization | 用 `prompt/chosen/rejected` 做小样本偏好优化 |
+| 09 | Reward / RLHF Concept | 理解 reward model、reference model、KL、PPO，不做大规模本地训练 |
+| 10 | QLoRA / Training Engineering | 理解量化、显存、CUDA/DeepSpeed 边界，不作为本地 Mac 主线 |
+
+PEFT adapter 的保存、加载、重新加载对比已经是 Lesson 06 的一部分，不再单独拆成 Adapter Evaluation 章节。以后如果要做多 adapter 路由、多个 checkpoint 管理，那应该作为 PEFT 进阶补充，而不是 DPO 前的必修课。
 
 想从开发者视角理解什么时候选 SFT、PEFT/LoRA、QLoRA、DPO、RLHF、蒸馏，以及每种方法需要什么数据、输出什么 artifact，见 [docs/07-training-methods-guide.md](../docs/07-training-methods-guide.md)。

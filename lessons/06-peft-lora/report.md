@@ -114,4 +114,4 @@ PEFT 不是单一算法，而是一组参数高效微调方法。当前课程只
 
 ## 下一步
 
-下一课可以做真实 adapter 管理：比较多个 adapter、加载不同 checkpoint、固定 eval prompts 做训练前后对比。
+本课已经覆盖 adapter 保存、加载和重新加载后的输出对比，不需要再单独拆一个 Adapter Evaluation 必修课。下一课应补独立 SFT baseline：在没有 LoRA/PEFT 概念干扰的情况下，固定 eval prompts，比较 SFT 训练前后的回答变化。

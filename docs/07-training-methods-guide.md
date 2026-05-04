@@ -509,19 +509,18 @@ trainer.save_model("outputs/adapter")
 | batch、collator、effective batch | Lesson 03 |
 | Trainer 最小闭环 | Lesson 04 |
 | 手写 LoRA 机制 | Lesson 05 |
-| PEFT + 真实 Qwen LoRA | Lesson 06 |
+| PEFT + 真实 Qwen LoRA、adapter 保存/加载/输出对比 | Lesson 06 |
 | 独立 SFT baseline 和训练前后输出对比 | 后续 Lesson 07 |
-| adapter 效果评估 | 后续 Lesson 08 |
-| DPO / preference optimization | 后续课程 |
+| DPO / preference optimization | 后续 Lesson 08 |
 | RLHF / reward model / PPO | 后续课程 |
 
 下一步建议不是马上做 DPO/RLHF，而是先把 SFT 独立成课：
 
 ```text
 Lesson 07: SFT baseline，固定 eval prompts，比较训练前后输出
-Lesson 08: Adapter evaluation，比较 base、trained adapter、reloaded adapter
-Lesson 09: DPO 小样本偏好优化
-Lesson 10: Reward model / RLHF 概念实验
+Lesson 08: DPO 小样本偏好优化
+Lesson 09: Reward model / RLHF 概念实验
+Lesson 10: QLoRA / Training Engineering，理解量化和大模型训练工程边界
 ```
 
 ## 参考资料
