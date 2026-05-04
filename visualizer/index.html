@@ -702,16 +702,19 @@
     }
     .flow-wrap {
       margin:0;
-      padding:14px 14px 118px;
-      margin-bottom:-104px;
+      padding:14px 14px 18px;
+      margin-bottom:22px;
       border:1px solid rgba(148,163,184,.12);
       border-radius:8px;
       background:
         linear-gradient(180deg,rgba(15,23,42,.56),rgba(8,13,21,.78)),
         #0b111a;
       overflow-x:auto;
-      overflow-y:visible;
+      overflow-y:hidden;
+      scrollbar-gutter:stable;
+      isolation:isolate;
     }
+    .flow-wrap + .panel-title { margin-top:0; }
     .flow {
       gap:8px;
       align-items:stretch;
@@ -728,7 +731,7 @@
       display:grid;
       grid-template-rows:auto auto 1fr auto auto;
       gap:6px;
-      overflow:visible;
+      overflow:hidden;
       box-shadow:none;
       transition:border-color .14s ease,background .14s ease,box-shadow .14s ease,transform .14s ease;
     }
