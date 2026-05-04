@@ -4188,8 +4188,19 @@ body[data-view="learn"] .course-overview-panel {
   grid-area: run !important;
 }
 
+body[data-view="learn"] .layout > aside.course-overview-panel.panel:first-child {
+  position: static !important;
+  top: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 body[data-view="learn"] .course-lab-panel {
   grid-area: lab !important;
+}
+
+body[data-view="learn"] .layout > aside.course-lab-panel.panel:last-child {
+  position: static !important;
 }
 
 body[data-view="learn"] .course-overview-hero,
@@ -4218,9 +4229,6 @@ body[data-view="learn"] .course-overview-progress {
     gap: 12px !important;
     align-items: stretch !important;
     padding: 14px !important;
-    position: static !important;
-    max-height: none !important;
-    overflow: visible !important;
   }
 
   body[data-view="learn"] .course-overview-hero,
