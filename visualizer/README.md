@@ -6,6 +6,8 @@
 JSONL -> Dataset -> tokenizer -> batch -> model forward -> loss -> backward -> update/save/load
 ```
 
+如果你是第一次使用训练工作室，先读 [../docs/08-training-studio.md](../docs/08-training-studio.md)。本文档主要记录 `visualizer/` 页面、服务端 API 和 trace 展示约定。
+
 ## 启动页面
 
 在仓库根目录运行：
@@ -30,6 +32,19 @@ http://127.0.0.1:8765/visualizer/
 - 参数：max steps、max length、max new tokens、learning rate、LoRA rank/alpha/dropout、trace delay，以及按训练方法启用的高级参数；`Extra Engine Args JSON` 用于传入 selected engine 支持的额外配置，不能覆盖页面已经管理的参数。
 - Chat 对比：训练页内可以输入一条工单，并显式指定 compare model、adapter dir 和 instruction；也可以使用最新 Studio 训练产物。点击一次会固定输出 base、adapter、reloaded adapter 三个结果，不需要手动选 Target。
 
+页面职责：
+
+- 负责收集 method/model/data/params。
+- 负责 JSONL 预览和 schema 校验。
+- 负责启动 `POST /api/studio/run`。
+- 负责显示最近 Studio profile、run 状态、report、adapter 路径和 Chat 对比。
+
+不负责：
+
+- 不直接调用课程脚本。
+- 不写课程 report。
+- 不更新课程学习页的 `visualizer/traces/live.json`。
+
 SFT / PEFT 粘贴数据至少 4 行，一行一个 JSON object，至少包含：
 
 ```json
@@ -49,6 +64,14 @@ visualizer/runtime/studio-runs/<run-id>/
 ```
 
 课程目录里的 `report.md`、课程归档产物和 `visualizer/traces/live.json` 不会被 Studio 训练覆盖；课程学习页不会自动读到 Studio 的运行结果。
+
+最近一次 Studio run 的摘要会写入：
+
+```text
+visualizer/runtime/studio-profile.json
+```
+
+训练页的 Chat 对比会优先使用这个 profile 里的 model 和 adapter 信息。
 
 ## 课程学习页面
 

@@ -14,6 +14,7 @@
 - 阅读 [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
 - 阅读 [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
 - 阅读 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 的第 0-1 节，先建立方法选型框架
+- 阅读 [docs/08-training-studio.md](docs/08-training-studio.md) 的“设计边界”和“推荐 workflow”，先明确 Studio run 和课程 trace 的区别
 - 跑一个小型分类任务
 - 记录第一次实验
 
@@ -75,6 +76,7 @@
 - 拼接训练 prompt
 - mask prompt loss
 - 在小模型上跑 100 到 500 step
+- 用 Training Studio 的 `SFT + LoRA` 页面校验同一批 JSONL，并跑一次 quick run
 - 对照执行 [lessons/07-sft-baseline](lessons/07-sft-baseline)，先用 40 条客服工单路由数据跑通严格 JSON SFT baseline
 
 验收：
@@ -97,12 +99,14 @@
 - 用小模型做 LoRA 实验
 - 保存 adapter
 - 加载 adapter 推理
+- 在 Training Studio 里用 `PEFT LoRA` 或 `SFT + LoRA` 再跑一次，检查 `visualizer/runtime/studio-runs/<run-id>/adapter/` 和 Chat 对比
 
 验收：
 
 - 能解释 LoRA 的 `r`、`alpha`、`target_modules`
 - 能区分 base model、adapter、merged model
 - 能查看 trainable parameters
+- 能说明 Studio adapter 和课程 adapter 分别写在哪里
 
 ## Week 6：中文微调仓库和评估
 
@@ -132,4 +136,4 @@
 - [lessons/09-rlhf-reward](lessons/09-rlhf-reward): Reward / RLHF 概念，理解 reward model、reference model、KL 和 PPO 信号。
 - [lessons/10-qlora-engineering](lessons/10-qlora-engineering): QLoRA / Training Engineering，理解量化、显存、CUDA/bitsandbytes 和 Mac/MPS 边界。
 
-DeepSpeed、多模态微调、diffusion 微调暂时不作为本地第一阶段主线。先把小模型 SFT + LoRA + DPO 跑扎实。进入更大训练前，先用 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 判断你是在解决数据格式、参数更新、偏好优化、显存约束，还是部署压缩问题。
+DeepSpeed、多模态微调、diffusion 微调暂时不作为本地第一阶段主线。先把小模型 SFT + LoRA + DPO 跑扎实。进入更大训练前，先用 [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md) 判断你是在解决数据格式、参数更新、偏好优化、显存约束，还是部署压缩问题；再用 [docs/08-training-studio.md](docs/08-training-studio.md) 把一次实验配置、产物目录、adapter 路径和 Chat 对比记录下来。
