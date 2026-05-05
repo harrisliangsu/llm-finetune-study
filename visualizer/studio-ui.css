@@ -4230,6 +4230,7 @@ body[data-view="learn"] .course-overview-progress {
 @media (min-width: 1281px) {
   body[data-view="learn"] {
     --course-board-height: clamp(620px, calc(100dvh - 450px), 760px);
+    --course-canvas-head-height: 87px;
   }
 
   body[data-view="learn"] .layout {
@@ -4355,6 +4356,8 @@ body[data-view="learn"] .course-overview-progress {
     grid-area: workspace !important;
     display: grid !important;
     grid-template-rows: auto var(--course-board-height) !important;
+    align-self: start !important;
+    height: auto !important;
     min-height: 0 !important;
   }
 
@@ -4374,11 +4377,11 @@ body[data-view="learn"] .course-overview-progress {
   }
 
   body[data-view="learn"] .course-lab-panel {
-    height: auto !important;
+    height: calc(var(--course-board-height) + var(--course-canvas-head-height)) !important;
     min-height: 0 !important;
-    max-height: none !important;
-    overflow: visible !important;
-    scrollbar-gutter: auto;
+    max-height: calc(var(--course-board-height) + var(--course-canvas-head-height)) !important;
+    overflow: auto !important;
+    scrollbar-gutter: stable;
   }
 
   body[data-view="learn"] .flow-wrap,
