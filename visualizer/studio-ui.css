@@ -4203,6 +4203,24 @@ body[data-view="learn"] .layout > aside.course-lab-panel.panel:last-child {
   position: static !important;
 }
 
+body[data-view="learn"] .topbar {
+  isolation: isolate;
+  z-index: 260 !important;
+}
+
+body[data-view="learn"] .topbar::before {
+  content: "";
+  position: absolute;
+  inset: -18px -24px -12px;
+  z-index: -1;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--bg), color-mix(in oklch, var(--bg) 84%, transparent));
+}
+
+body[data-view="learn"] .course-canvas-head::before {
+  display: none !important;
+}
+
 body[data-view="learn"] .course-overview-hero,
 body[data-view="learn"] .course-overview-status,
 body[data-view="learn"] .course-overview-progress {
@@ -4348,12 +4366,19 @@ body[data-view="learn"] .course-overview-progress {
   }
 
   body[data-view="learn"] .trace-rail-card,
-  body[data-view="learn"] .stage-workspace,
-  body[data-view="learn"] .course-lab-panel {
+  body[data-view="learn"] .stage-workspace {
     height: var(--course-board-height) !important;
     min-height: 0 !important;
     overflow: auto !important;
     scrollbar-gutter: stable;
+  }
+
+  body[data-view="learn"] .course-lab-panel {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    scrollbar-gutter: auto;
   }
 
   body[data-view="learn"] .flow-wrap,
