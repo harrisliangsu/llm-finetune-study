@@ -1,0 +1,6 @@
+# 训练依赖：真正跑模型 forward / backward / Trainer / PEFT 才需要。
+# 在 Apple Silicon 上 torch 装 CPU 版即可（默认会装 MPS 支持版本）。
+torch
+transformers
+accelerate
+peft

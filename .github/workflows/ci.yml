@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Lint shell scripts
+        run: |
+          bash -n bootstrap.sh
+          bash -n install.sh 2>/dev/null || true
+
+      - name: Compile Python (syntax + bytecode, no heavy deps)
+        run: python -m compileall lessons training visualizer

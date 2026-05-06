@@ -1,7 +1,4 @@
-torch
-transformers
-datasets
-accelerate
-peft
-tokenizers
-huggingface_hub
+# 一次装齐 = core + train。
+# 如果你只想先看数据 / tokenizer 不跑训练，用 requirements-core.txt 即可。
+-r requirements-core.txt
+-r requirements-train.txt

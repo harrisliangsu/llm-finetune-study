@@ -6,7 +6,7 @@
 [![Lessons: 10](https://img.shields.io/badge/lessons-10-brightgreen.svg)](lessons/README.md)
 
 > 面向本地电脑的 LLM 微调学习路线。
-> [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
+> [English](README.en.md) · [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
 
 这个仓库不是追求一上来训练 7B/13B，而是把微调拆成可以在本地逐步掌握的能力：
 
@@ -57,11 +57,20 @@
 
 ## 你可以从这里开始
 
-安装依赖：
+30 秒上手：
 
 ```bash
-.venv/bin/python -m pip install -r requirements.txt
+./bootstrap.sh install      # 建 venv + 装全部依赖（含 torch，~3GB）
+./bootstrap.sh studio       # 启动 studio，打开 http://127.0.0.1:8765/visualizer/
 ```
+
+只想先看 dataset / tokenizer 不跑训练：
+
+```bash
+./bootstrap.sh core         # 只装 datasets + tokenizers（~100MB）
+```
+
+`Makefile` 快捷命令：`make studio` / `make test` / `make lesson01` … `make lesson10`。
 
 先读：
 

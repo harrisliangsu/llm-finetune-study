@@ -1,0 +1,5 @@
+# 核心依赖：处理 dataset / tokenizer / 启动 web studio 用，不需要 GPU。
+# 适合先看 lessons/01-datasets 和 02-tokenizer，不跑训练。
+datasets
+tokenizers
+huggingface_hub
