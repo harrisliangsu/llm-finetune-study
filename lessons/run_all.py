@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Run the lesson scripts in order."""
+# https://github.com/harrisliangsu/llm-finetune-study
+# version: 0.1.0
 
 from __future__ import annotations
 

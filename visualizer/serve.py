@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Serve the local LLM study studio and its control API."""
+# https://github.com/harrisliangsu/llm-finetune-study
+# version: 0.1.0
 
 from __future__ import annotations
 

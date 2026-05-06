@@ -1,6 +1,12 @@
 # LLM Finetune Study
 
-面向本地电脑的 LLM 微调学习路线。
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-yellow.svg)](requirements.txt)
+[![Platform: macOS | Linux](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](docs/00-local-first-principles.md)
+[![Lessons: 10](https://img.shields.io/badge/lessons-10-brightgreen.svg)](lessons/README.md)
+
+> 面向本地电脑的 LLM 微调学习路线。
+> [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
 
 这个仓库不是追求一上来训练 7B/13B，而是把微调拆成可以在本地逐步掌握的能力：
 
