@@ -9,6 +9,8 @@
 > A local, Chinese-first LLM fine-tuning course: ten runnable lessons from data, tokenizers, and Trainer through SFT, LoRA / PEFT, DPO, and QLoRA planning.
 > [中文](README.md) · [Read online](https://harrisliangsu.github.io/llm-finetune-study/) · [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
 
+Sponsor: [Afdian](https://afdian.com/a/sharkchiligaga)
+
 This repo is not a plan to full fine-tune 7B/13B on day one. The browser studio shows loss, tensors, and adapters, and it has to run on your machine. GitHub Pages cannot train.
 
 ## Contents

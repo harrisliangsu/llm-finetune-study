@@ -9,6 +9,8 @@
 > 在本地电脑上把 LLM 微调走通：10 节可执行课程，从数据、tokenizer、Trainer 到 SFT、LoRA / PEFT、DPO 和 QLoRA 规划。
 > [English](README.en.md) · [在线阅读](https://harrisliangsu.github.io/llm-finetune-study/) · [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
 
+支持：[爱发电](https://afdian.com/a/sharkchiligaga)
+
 这个仓库不是追求一上来训练 7B/13B。训练工作室用来看 loss、张量和 adapter，必须在本机启动，GitHub Pages 上不能训练。
 
 ## 目录
