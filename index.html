@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM Finetune Study · 本地 LLM 微调实战课</title>
+  <meta name="description" content="面向本地电脑的中文 LLM 微调课：10 节可执行课程（数据、Tokenizer、Trainer、SFT、LoRA、PEFT、DPO、QLoRA）。训练工作室需要在本机启动。" />
+  <link rel="canonical" href="https://harrisliangsu.github.io/llm-finetune-study/" />
+  <meta property="og:title" content="LLM Finetune Study · 本地 LLM 微调实战课" />
+  <meta property="og:description" content="10 节本地微调课的 HTML 阅读入口。训练工作室仍需在本机运行 ./bootstrap.sh studio。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://harrisliangsu.github.io/llm-finetune-study/" />
+  <meta property="og:image" content="https://harrisliangsu.github.io/llm-finetune-study/assets/social-preview.png" />
+  <meta property="og:image:width" content="1280" />
+  <meta property="og:image:height" content="640" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="LLM Finetune Study · 本地 LLM 微调实战课" />
+  <meta name="twitter:description" content="Read the 10 lesson pages online. The training studio still runs locally." />
+  <meta name="twitter:image" content="https://harrisliangsu.github.io/llm-finetune-study/assets/social-preview.png" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --elev: #fffdf8;
+      --text: #1c1917;
+      --strong: #0c0a09;
+      --muted: #57534e;
+      --subtle: #a8a29e;
+      --border: #e7e0d4;
+      --accent: #c2410c;
+      --accent-deep: #9a3412;
+      --accent-soft: #ffedd5;
+      --link: #0d6cad;
+      --shadow: 0 1px 2px rgba(60, 40, 20, 0.04), 0 8px 24px rgba(60, 40, 20, 0.05);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+        "Source Han Sans SC", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: var(--accent-deep); }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+    .kicker {
+      margin: 0 0 12px;
+      color: var(--accent-deep);
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--strong);
+      font-weight: 700;
+    }
+    .lead { margin: 0; font-size: 18px; max-width: 42em; }
+    .en { margin: 14px 0 0; color: var(--muted); max-width: 46em; }
+    .meta { margin: 18px 0 0; color: var(--subtle); font-size: 14px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--elev);
+      color: var(--strong);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn:hover { border-color: var(--accent); color: var(--accent-deep); }
+    .btn.primary:hover { color: #fff; filter: brightness(1.05); }
+    h2 { margin: 48px 0 8px; font-size: 22px; color: var(--strong); }
+    .section-note { margin: 0 0 16px; color: var(--muted); }
+    .callout {
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: var(--accent-soft);
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .callout strong { color: var(--accent-deep); }
+    .callout code {
+      font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .grid.docs { grid-template-columns: 1fr; }
+    .card {
+      display: block;
+      background: var(--elev);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 16px 14px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow);
+      border-top: 4px solid var(--accent);
+    }
+    .card:hover { border-color: #d6cbb8; color: inherit; }
+    .card .no { font-size: 12px; letter-spacing: 0.08em; color: var(--accent); }
+    .card h3 { margin: 8px 0 6px; font-size: 18px; color: var(--strong); }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .path {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+      margin: 8px 0 0; color: var(--muted); font-size: 14px;
+    }
+    .path span {
+      background: var(--accent-soft); color: var(--accent-deep);
+      border-radius: 999px; padding: 2px 10px;
+    }
+    footer {
+      margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--border);
+      color: var(--subtle); font-size: 14px;
+    }
+    footer nav { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 8px; }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="kicker">Course · 中文为主</p>
+    <h1>本地 LLM 微调实战课</h1>
+    <p class="lead">在自己的电脑上把微调走通：数据、tokenizer、Trainer、SFT、LoRA / PEFT、DPO，以及 QLoRA 的工程边界。这一页只负责阅读课程 HTML。</p>
+    <p class="en">A Chinese-first local fine-tuning course. These pages are the static lesson notes. The training studio is a local process and does not run on GitHub Pages.</p>
+    <p class="meta"><a href="https://github.com/harrisliangsu/llm-finetune-study">GitHub</a> · MIT · <a href="README.en.md">English</a></p>
+    <div class="row">
+      <a class="btn primary" href="lessons/01-datasets/index.html">从第 01 课读起</a>
+      <a class="btn" href="lessons/07-sft-baseline/index.html">SFT baseline</a>
+      <a class="btn" href="https://github.com/harrisliangsu/llm-finetune-study/blob/main/ROADMAP.md">6 周计划</a>
+      <a class="btn" href="README.en.md">English</a>
+    </div>
+    <p class="path" aria-label="课程顺序"><span>数据</span>→<span>Tokenizer</span>→<span>Trainer</span>→<span>SFT</span>→<span>LoRA</span>→<span>DPO</span></p>
+
+    <div class="callout">
+      <strong>Pages 能看课，不能训练。</strong>
+      这里发布的是各课 <code>lessons/*/index.html</code>。训练工作室要在仓库根目录执行 <code>./bootstrap.sh studio</code>，然后打开 <code>http://127.0.0.1:8765/visualizer/</code>。
+      <code>visualizer/index.html</code> 会请求本机 API，在 GitHub Pages 上打不开训练、trace 和 Chat 对比。
+      课程页里指向 <code>outputs/</code> 的链接是本地运行产物，仓库不提交这些文件。
+    </div>
+
+    <h2>十节课</h2>
+    <p class="section-note">HTML 可直接阅读。要跑 <code>run.py</code>、生成 <code>report.md</code> 的新结果，或保存 adapter，请 clone 后在本地执行。</p>
+    <div class="grid">
+      <a class="card" href="lessons/01-datasets/index.html">
+        <div class="no">01 · DATA</div>
+        <h3>Datasets 管线</h3>
+        <p>JSONL → Dataset → 切分、过滤、map。</p>
+      </a>
+      <a class="card" href="lessons/02-tokenizer/index.html">
+        <div class="no">02 · TOKENS</div>
+        <h3>AutoTokenizer</h3>
+        <p>input_ids、attention_mask，以及哪些 token 进入 loss。</p>
+      </a>
+      <a class="card" href="lessons/03-batching/index.html">
+        <div class="no">03 · BATCH</div>
+        <h3>Batch 与 Collator</h3>
+        <p>padding 和 effective batch size。</p>
+      </a>
+      <a class="card" href="lessons/04-trainer/index.html">
+        <div class="no">04 · TRAINER</div>
+        <h3>Trainer 闭环</h3>
+        <p>用 tiny-gpt2 看最小训练循环和过拟合。</p>
+      </a>
+      <a class="card" href="lessons/05-lora/index.html">
+        <div class="no">05 · LORA</div>
+        <h3>手写 LoRA</h3>
+        <p>冻结 base，看低秩矩阵 A/B 如何改变输出。</p>
+      </a>
+      <a class="card" href="lessons/06-peft-lora/index.html">
+        <div class="no">06 · PEFT</div>
+        <h3>PEFT LoRA</h3>
+        <p>真实 Hugging Face 模型上的 PEFT adapter。</p>
+      </a>
+      <a class="card" href="lessons/07-sft-baseline/index.html">
+        <div class="no">07 · SFT</div>
+        <h3>SFT baseline</h3>
+        <p>客服工单 → 严格 JSON，对比训练前后。</p>
+      </a>
+      <a class="card" href="lessons/08-dpo-preference/index.html">
+        <div class="no">08 · DPO</div>
+        <h3>偏好优化</h3>
+        <p>prompt / chosen / rejected 上的 preference loss。</p>
+      </a>
+      <a class="card" href="lessons/09-rlhf-reward/index.html">
+        <div class="no">09 · RLHF</div>
+        <h3>Reward 概念</h3>
+        <p>reward、reference、KL 和 PPO 信号。不是完整 RLHF 训练。</p>
+      </a>
+      <a class="card" href="lessons/10-qlora-engineering/index.html">
+        <div class="no">10 · QLORA</div>
+        <h3>QLoRA 工程边界</h3>
+        <p>量化、显存，以及 CUDA / bitsandbytes 与 Mac / MPS 的差别。</p>
+      </a>
+    </div>
+
+    <h2>文档在 GitHub 上</h2>
+    <p class="section-note">Markdown 不在这个站点里排版。下面的链接打开仓库里的原文。</p>
+    <div class="grid docs">
+      <a class="card" href="https://github.com/harrisliangsu/llm-finetune-study/blob/main/docs/00-local-first-principles.md">
+        <div class="no">DOCS</div>
+        <h3>本地优先原则 → 训练方法 → Studio 说明</h3>
+        <p>docs/00 到 docs/08：机器能跑什么、微调地图、数据与 labels、Trainer、SFT/LoRA、参考仓库、评估、方法选型和训练工作室。</p>
+      </a>
+      <a class="card" href="https://github.com/harrisliangsu/llm-finetune-study/blob/main/docs/08-training-studio.md">
+        <div class="no">STUDIO · LOCAL ONLY</div>
+        <h3>训练工作室说明</h3>
+        <p>配置一次独立 run、校验 JSONL、查看 adapter。启动命令在文档里，页面本身不在 Pages 上工作。</p>
+      </a>
+    </div>
+
+    <footer>
+      <nav>
+        <a href="https://github.com/harrisliangsu/llm-finetune-study">仓库</a>
+        <a href="README.md">中文 README</a>
+        <a href="README.en.md">English</a>
+        <a href="CONTRIBUTING.md">贡献</a>
+        <a href="https://github.com/harrisliangsu/llm-finetune-study/discussions/1">欢迎讨论</a>
+        <a href="LICENSE">MIT</a>
+      </nav>
+      <div>关键词：微调、SFT、LoRA、PEFT、DPO、QLoRA、Hugging Face、Apple Silicon、中文。</div>
+    </footer>
+  </div>
+</body>
+</html>

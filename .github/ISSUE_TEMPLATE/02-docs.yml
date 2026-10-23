@@ -1,0 +1,43 @@
+name: 文档纠错
+description: 课程说明、docs 或 README 有错、过时，或链接打不开
+title: "[文档] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请指向具体文件。开放式的「这一课怎么理解」请改到 [Discussions 的 Q&A](https://github.com/harrisliangsu/llm-finetune-study/discussions/categories/q-a)。
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 类型
+      options:
+        - 事实错误或过时
+        - 步骤或命令对不上
+        - 断链
+        - 课程 HTML 与 README 不一致
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: 位置
+      description: 文件路径，加上章节标题或课号
+      placeholder: docs/04-sft-lora.md · LoRA
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 现在的问题
+      description: 引用原文一小段，说明哪里不对
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 建议改成什么
+      description: 没有把握就写「不确定」，把问题讲清楚即可
+    validations:
+      required: true

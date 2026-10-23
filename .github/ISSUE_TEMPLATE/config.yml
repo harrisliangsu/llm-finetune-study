@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 学习问题（Q&A）
+    url: https://github.com/harrisliangsu/llm-finetune-study/discussions/categories/q-a
+    about: 怎么学、概念卡住、用法问题，请用 Discussions 的 Q&A，不要开 Issue。
+  - name: 想法还没落到文件（Ideas）
+    url: https://github.com/harrisliangsu/llm-finetune-study/discussions/categories/ideas
+    about: 还没有成稿的课程或功能想法，可以先放在 Ideas。
+  - name: 欢迎：自我介绍 / 学习进度 / 纠错建议
+    url: https://github.com/harrisliangsu/llm-finetune-study/discussions/1
+    about: General 欢迎帖。进度同步和开放讨论从这里开始。
+  - name: Show and tell
+    url: https://github.com/harrisliangsu/llm-finetune-study/discussions/categories/show-and-tell
+    about: 展示你自己的小实验、笔记或跑通的结果。

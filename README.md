@@ -1,21 +1,62 @@
 # LLM Finetune Study
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-yellow.svg)](requirements.txt)
-[![Platform: macOS | Linux](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](docs/00-local-first-principles.md)
-[![Lessons: 10](https://img.shields.io/badge/lessons-10-brightgreen.svg)](lessons/README.md)
+[![Stars](https://img.shields.io/github/stars/harrisliangsu/llm-finetune-study?style=flat-square)](https://github.com/harrisliangsu/llm-finetune-study/stargazers)
+[![Forks](https://img.shields.io/github/forks/harrisliangsu/llm-finetune-study?style=flat-square)](https://github.com/harrisliangsu/llm-finetune-study/forks)
+[![License: MIT](https://img.shields.io/github/license/harrisliangsu/llm-finetune-study?style=flat-square)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/harrisliangsu/llm-finetune-study?style=flat-square)](https://github.com/harrisliangsu/llm-finetune-study/commits/main)
+[![Read online](https://img.shields.io/badge/read-GitHub%20Pages-c2410c?style=flat-square)](https://harrisliangsu.github.io/llm-finetune-study/)
 
-> 面向本地电脑的 LLM 微调学习路线。
-> [English](README.en.md) · [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
+> 在本地电脑上把 LLM 微调走通：10 节可执行课程，从数据、tokenizer、Trainer 到 SFT、LoRA / PEFT、DPO 和 QLoRA 规划。
+> [English](README.en.md) · [在线阅读](https://harrisliangsu.github.io/llm-finetune-study/) · [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions) · [Issues](https://github.com/harrisliangsu/llm-finetune-study/issues)
 
-这个仓库不是追求一上来训练 7B/13B，而是把微调拆成可以在本地逐步掌握的能力：
+这个仓库不是追求一上来训练 7B/13B。训练工作室用来看 loss、张量和 adapter，必须在本机启动，GitHub Pages 上不能训练。
 
-- 数据集构造、清洗、切分和 tokenization
-- Hugging Face `datasets` / `transformers` 训练闭环
-- 分类微调、生成式微调、指令微调 SFT
-- LoRA / QLoRA / PEFT 的核心思想和实践路径
-- 中文指令数据、评估、checkpoint 和 adapter 管理
-- 从单机小实验过渡到 DeepSpeed、RLHF、多模态等进阶主题
+## 目录
+
+- [在线阅读](#在线阅读)
+- [适合谁](#适合谁)
+- [30 秒上手](#30-秒上手)
+- [学习路线](#学习路线总览)
+- [建议顺序](#建议顺序)
+- [训练工作室](#llm-study-studio)
+- [十节课](#十节课)
+- [模型选择](#模型选择原则)
+- [参考仓库](#参考仓库)
+- [社区](#社区)
+
+## 在线阅读
+
+不用 clone，用浏览器读课程 HTML：
+
+**https://harrisliangsu.github.io/llm-finetune-study/**
+
+门户是仓库根目录的 `index.html`。站点从 `main` 的 `/ (root)` 发布。`.nojekyll` 让这些手写 HTML 原样提供，不经 Jekyll。
+
+Pages 只包含课程页面。Markdown 文档仍在 GitHub 上阅读。`visualizer/index.html` 依赖本机 API，**不要把它当成在线工作室**。
+
+| 课 | 主题 | 在线 HTML | 仓库 |
+|---|---|---|---|
+| 01 | Datasets 管线 | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/01-datasets/index.html) | [01-datasets](lessons/01-datasets) |
+| 02 | AutoTokenizer | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/02-tokenizer/index.html) | [02-tokenizer](lessons/02-tokenizer) |
+| 03 | Batch / Collator | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/03-batching/index.html) | [03-batching](lessons/03-batching) |
+| 04 | Trainer 闭环 | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/04-trainer/index.html) | [04-trainer](lessons/04-trainer) |
+| 05 | 手写 LoRA | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/05-lora/index.html) | [05-lora](lessons/05-lora) |
+| 06 | PEFT LoRA | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/06-peft-lora/index.html) | [06-peft-lora](lessons/06-peft-lora) |
+| 07 | SFT baseline | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/07-sft-baseline/index.html) | [07-sft-baseline](lessons/07-sft-baseline) |
+| 08 | DPO | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/08-dpo-preference/index.html) | [08-dpo-preference](lessons/08-dpo-preference) |
+| 09 | Reward / RLHF 概念 | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/09-rlhf-reward/index.html) | [09-rlhf-reward](lessons/09-rlhf-reward) |
+| 10 | QLoRA 工程边界 | [阅读](https://harrisliangsu.github.io/llm-finetune-study/lessons/10-qlora-engineering/index.html) | [10-qlora-engineering](lessons/10-qlora-engineering) |
+
+先读的文档（GitHub Markdown，不在 Pages 上排版）：
+
+- [ROADMAP.md](ROADMAP.md)
+- [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
+- [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
+- [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md)
+- [docs/08-training-studio.md](docs/08-training-studio.md)
+- [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
+
+然后照着 [examples/README.md](examples/README.md) 里的练习顺序做小实验。
 
 ## 适合谁
 
@@ -24,11 +65,29 @@
 - 想理解中文大模型微调仓库的训练脚本、数据格式和工程结构
 - 想为后续学习 Agent、RAG、模型应用打好微调基础
 
-## 不适合什么
+不适合作为大规模预训练指南，也不建议直接在本地 full fine-tune 7B/13B。刷榜和堆参数不是这里的第一目标。
 
-- 不建议把本仓库作为大规模预训练指南
-- 不建议直接本地 full fine-tune 7B/13B
-- 不把刷榜、炼丹参数堆叠作为第一目标
+## 30 秒上手
+
+```bash
+./bootstrap.sh install      # 建 venv + 装全部依赖（含 torch，约 3GB）
+./bootstrap.sh studio       # 启动 studio，打开 http://127.0.0.1:8765/visualizer/
+```
+
+只想先看 dataset / tokenizer，不跑训练：
+
+```bash
+./bootstrap.sh core         # 只装 datasets + tokenizers（约 100MB）
+```
+
+`Makefile` 快捷命令：`make studio` / `make test` / `make lesson01` … `make lesson10`。
+
+本地预览课程 HTML（仍然不是工作室）：
+
+```bash
+python3 -m http.server 8000
+# http://127.0.0.1:8000
+```
 
 ## 学习路线总览
 
@@ -55,60 +114,15 @@
 
 注意：当前 Lesson 02-06 已经使用 SFT 形态的数据和 labels，但课程标题分别聚焦 tokenizer、batch、Trainer、LoRA 和 PEFT。Lesson 07 已经补成独立 SFT baseline：使用“客服工单 -> 严格 JSON 路由”这个经典结构化输出任务，固定 eval prompts，对比训练前后 JSON 合法率、字段完整性和 intent/department 是否正确。PEFT adapter 的保存、加载、重新加载对比已经在 Lesson 06/07 覆盖，后续再进入 DPO。
 
-## 你可以从这里开始
-
-30 秒上手：
-
-```bash
-./bootstrap.sh install      # 建 venv + 装全部依赖（含 torch，~3GB）
-./bootstrap.sh studio       # 启动 studio，打开 http://127.0.0.1:8765/visualizer/
-```
-
-只想先看 dataset / tokenizer 不跑训练：
-
-```bash
-./bootstrap.sh core         # 只装 datasets + tokenizers（~100MB）
-```
-
-`Makefile` 快捷命令：`make studio` / `make test` / `make lesson01` … `make lesson10`。
-
-先读：
-
-- [ROADMAP.md](ROADMAP.md)
-- [lessons/README.md](lessons/README.md)
-- [lessons/01-datasets/index.html](lessons/01-datasets/index.html)
-- [lessons/02-tokenizer/index.html](lessons/02-tokenizer/index.html)
-- [lessons/03-batching/index.html](lessons/03-batching/index.html)
-- [lessons/04-trainer/index.html](lessons/04-trainer/index.html)
-- [lessons/05-lora/index.html](lessons/05-lora/index.html)
-- [lessons/06-peft-lora/index.html](lessons/06-peft-lora/index.html)
-- [lessons/07-sft-baseline/index.html](lessons/07-sft-baseline/index.html)
-- [lessons/08-dpo-preference/index.html](lessons/08-dpo-preference/index.html)
-- [lessons/09-rlhf-reward/index.html](lessons/09-rlhf-reward/index.html)
-- [lessons/10-qlora-engineering/index.html](lessons/10-qlora-engineering/index.html)
-- [docs/00-local-first-principles.md](docs/00-local-first-principles.md)
-- [docs/01-finetuning-map.md](docs/01-finetuning-map.md)
-- [docs/07-training-methods-guide.md](docs/07-training-methods-guide.md)
-- [docs/08-training-studio.md](docs/08-training-studio.md)
-- [checklists/local-finetuning-checklist.md](checklists/local-finetuning-checklist.md)
-
-然后照着 [examples/README.md](examples/README.md) 里的练习顺序做小实验。
-
 ## LLM Study Studio
 
-本仓库带一个本地网页工作室，用来把“配置训练”和“阅读课程 trace”放在同一个界面里。启动服务：
+本仓库带一个本地网页工作室，用来把“配置训练”和“阅读课程 trace”放在同一个界面里。它不是 GitHub Pages 的一部分。
 
 ```bash
-.venv/bin/python visualizer/serve.py
+./bootstrap.sh studio
+# 或：.venv/bin/python visualizer/serve.py
+# 打开 http://127.0.0.1:8765/visualizer/
 ```
-
-打开：
-
-```text
-http://127.0.0.1:8765/visualizer/
-```
-
-网页端分成两个子页面：
 
 | 页面 | 用途 | 主要产物 |
 |---|---|---|
@@ -147,18 +161,22 @@ http://127.0.0.1:8765/visualizer/
 
 课程页右侧 `Chat Lab` 默认连接 Lesson 07 SFT baseline；训练页内的 `Chat 对比` 可以改 model、adapter dir 和 instruction，也可以一键使用最新 Studio 训练产物。这样对比时能直接看到 base model 和 adapter 分别来自哪里。
 
-## 已执行课程
+## 十节课
 
-- [lessons/01-datasets/report.md](lessons/01-datasets/report.md): Hugging Face Datasets 微调数据管线执行结果
-- [lessons/02-tokenizer/report.md](lessons/02-tokenizer/report.md): 本地 `AutoTokenizer`、`input_ids`、`attention_mask`、SFT `labels` 检查
-- [lessons/03-batching/report.md](lessons/03-batching/report.md): batch、collator、padding 和 effective batch size
-- [lessons/04-trainer/report.md](lessons/04-trainer/report.md): `transformers.Trainer` 最小训练闭环和过拟合观察
-- [lessons/05-lora/report.md](lessons/05-lora/report.md): 冻结 base、训练 LoRA adapter、保存并重新加载 adapter
-- [lessons/06-peft-lora/report.md](lessons/06-peft-lora/report.md): 使用 `Qwen/Qwen2.5-0.5B-Instruct` 跑真实 PEFT LoRA
-- [lessons/07-sft-baseline/report.md](lessons/07-sft-baseline/report.md): 使用真实 Hugging Face Qwen + LoRA 做客服工单严格 JSON SFT baseline
-- [lessons/08-dpo-preference/report.md](lessons/08-dpo-preference/report.md): 用 `prompt/chosen/rejected` 学习 DPO 偏好优化
-- [lessons/09-rlhf-reward/report.md](lessons/09-rlhf-reward/report.md): 本地理解 reward model、reference model、KL 和 PPO/RLHF 信号
-- [lessons/10-qlora-engineering/report.md](lessons/10-qlora-engineering/report.md): 评估 QLoRA、量化、显存和 Mac/CUDA 工程边界
+| 课 | 主题 | 执行记录 |
+|---|---|---|
+| 01 | Datasets 管线 | [report](lessons/01-datasets/report.md) |
+| 02 | AutoTokenizer 与 SFT labels | [report](lessons/02-tokenizer/report.md) |
+| 03 | batch、collator、padding | [report](lessons/03-batching/report.md) |
+| 04 | `transformers.Trainer` 最小闭环 | [report](lessons/04-trainer/report.md) |
+| 05 | 冻结 base、训练并重新加载手写 LoRA | [report](lessons/05-lora/report.md) |
+| 06 | `Qwen/Qwen2.5-0.5B-Instruct` 上的真实 PEFT LoRA | [report](lessons/06-peft-lora/report.md) |
+| 07 | 客服工单严格 JSON SFT baseline | [report](lessons/07-sft-baseline/report.md) |
+| 08 | `prompt/chosen/rejected` 的 DPO | [report](lessons/08-dpo-preference/report.md) |
+| 09 | reward model、reference、KL 和 PPO/RLHF 信号 | [report](lessons/09-rlhf-reward/report.md) |
+| 10 | QLoRA、量化、显存和 Mac/CUDA 边界 | [report](lessons/10-qlora-engineering/report.md) |
+
+顺序和验收点见 [lessons/README.md](lessons/README.md)。
 
 一次执行 01-10：
 
@@ -211,3 +229,24 @@ Lesson 05 保留手写 LoRA，是为了教学低秩矩阵 `A/B` 的作用，不�
 - 能复现一个最小 SFT + LoRA 流程
 
 把小模型训练明白，比盲目启动一个跑不动的大模型更有价值。
+
+## 社区
+
+怎么参与，见 [CONTRIBUTING.md](CONTRIBUTING.md)。行为准则见 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+
+| 你想做的事 | 去哪里 |
+|---|---|
+| 脚本跑失败，能附上命令和 traceback | [Issue · 环境复现](https://github.com/harrisliangsu/llm-finetune-study/issues/new/choose) |
+| 文档、课程说明或链接写错了 | Issue · 文档纠错 |
+| 提议新的一课或 Studio 能力 | Issue · 课程或想法，或 Discussions 的 **Ideas** |
+| 怎么学、卡在概念上 | Discussions 的 **Q&A** |
+| 自我介绍、学习进度、闲聊 | Discussions 的 **General** |
+| 展示自己的小实验 | Discussions 的 **Show and tell** |
+
+欢迎帖：[欢迎：自我介绍 / 学习进度 / 纠错建议](https://github.com/harrisliangsu/llm-finetune-study/discussions/1)。需要改文件的纠错请开 Issue 或 PR；开放式讨论留在 Discussions。
+
+仓库 Topics（已设置，此处只作索引）：`apple-silicon` · `chinese` · `chinese-llm` · `dpo` · `fine-tuning` · `finetuning` · `huggingface` · `llm` · `lora` · `machine-learning` · `peft` · `qlora` · `sft` · `study-notes` · `transformers` · `tutorial`
+
+## License
+
+[MIT](LICENSE)。
