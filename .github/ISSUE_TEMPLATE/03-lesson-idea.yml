@@ -1,0 +1,45 @@
+name: 课程或想法
+description: 提议新的一课、练习、示例，或 Studio 上还没写完的能力
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        还没落到具体文件的讨论，也可以先发到 [Discussions 的 Ideas](https://github.com/harrisliangsu/llm-finetune-study/discussions/categories/ideas)。这个模板适合你已经能说清「加在哪、给谁用」。
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 类型
+      options:
+        - 新的一课或练习
+        - 现有课程的补充
+        - Studio / 可视化
+        - 示例数据或清单
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决的问题
+      description: 现在被什么卡住，现有的 01–10 课或 Studio 为什么不够
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提议
+      description: 放在哪一课、数据格式、命令或页面行为。不确定方案也可以，把学习者场景写清楚
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: 本地约束
+      description: 是否要求 Apple Silicon / 普通 Linux 能跑、是否引入新依赖、是否需要大显存
+  - type: input
+    id: who
+    attributes:
+      label: 谁会用到
+      placeholder: 本地 Mac 用户 / 想做 DPO 的人

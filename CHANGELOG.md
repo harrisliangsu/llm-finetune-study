@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `.github/` 模板：bug / feature / question issue templates、PR template
+- GitHub Pages 门户：根目录 `index.html`、`404.html`、`.nojekyll`。在线阅读的是课程 HTML；训练工作室仍需 `./bootstrap.sh studio`
+- Issue forms：环境复现、文档纠错、课程或想法；`config.yml` 把开放讨论指到 Discussions（含欢迎帖）
+- `assets/social-preview.png`：课程标题社交预览图（1280×640）
+
+### Changed
+
+- README / README.en.md：一句话价值主张、stars / forks / license / last-commit / Pages badges、在线阅读表、社区入口
+- CONTRIBUTING.md：Issue 与 Discussions（Q&A / Ideas / General / Show and tell）的分工
+- PR 模板补上改动类型，并写明纯文档改动不必假装跑过训练
+- Issue 模板由 Markdown（bug / feature / question）改为上面的三份 issue forms
+
+### Added
+
 - `.github/workflows/ci.yml`：最小冒烟 CI（compileall + bash -n），跑在 ubuntu + macos
 - `bootstrap.sh`：一行命令建 venv、装依赖、启动 studio
 - `Makefile`：`make install / studio / test / lesson01..10`

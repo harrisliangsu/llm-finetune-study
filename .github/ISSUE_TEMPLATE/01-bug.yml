@@ -1,0 +1,65 @@
+name: 环境复现
+description: 课程脚本或 Studio 在本地跑失败，能附上命令和输出
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        概念问题、学习进度和开放讨论请改到 [Discussions](https://github.com/harrisliangsu/llm-finetune-study/discussions)。欢迎帖：[自我介绍 / 学习进度 / 纠错建议](https://github.com/harrisliangsu/llm-finetune-study/discussions/1)。
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象
+      description: 发生了什么，以及你期望发生什么
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现命令
+      description: 完整命令，可以直接 copy-paste
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: 实际输出
+      description: 完整输出或 traceback
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统 + 芯片
+      placeholder: macOS 15.4 / Apple M3
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python 版本
+      description: "`python --version` 的输出"
+    validations:
+      required: true
+  - type: textarea
+    id: deps
+    attributes:
+      label: 关键依赖
+      description: "`pip list | grep -E 'torch|transformers|peft|trl|datasets'`"
+      render: shell
+  - type: input
+    id: commit
+    attributes:
+      label: 项目 commit / 版本
+      placeholder: git rev-parse --short HEAD
+  - type: checkboxes
+    id: tried
+    attributes:
+      label: 已经尝试过的
+      options:
+        - label: 重新装了依赖（`./bootstrap.sh install`）
+        - label: 看过 README、CONTRIBUTING.md 和对应课程的 README
+        - label: 搜过现有 issue 和 Discussions
